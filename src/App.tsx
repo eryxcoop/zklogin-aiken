@@ -69,32 +69,47 @@ export type PartialZkLoginSignature = Omit<
 const suiClient = new SuiClient({ url: FULLNODE_URL });
 
 function App() {
+  // Others
   const { t, i18n } = useTranslation();
   const [showResetDialog, setShowResetDialog] = useState(false);
-  const [currentEpoch, setCurrentEpoch] = useState("");
-  const [nonce, setNonce] = useState("");
-  const [oauthParams, setOauthParams] =
-    useState<queryString.ParsedQuery<string>>();
-  const [zkLoginUserAddress, setZkLoginUserAddress] = useState("");
-  const [decodedJwt, setDecodedJwt] = useState<JwtPayload>();
-  const [jwtString, setJwtString] = useState("");
-  const [ephemeralKeyPair, setEphemeralKeyPair] = useState<Ed25519Keypair>();
-  const [userSalt, setUserSalt] = useState<string>();
-  const [zkProof, setZkProof] = useState<PartialZkLoginSignature>();
-  const [extendedEphemeralPublicKey, setExtendedEphemeralPublicKey] =
-    useState("");
-  const [maxEpoch, setMaxEpoch] = useState(0);
-  const [randomness, setRandomness] = useState("");
   const [activeStep, setActiveStep] = useState(0);
-  const [fetchingZKProof, setFetchingZKProof] = useState(false);
-  const [executingTxn, setExecutingTxn] = useState(false);
-  const [executeDigest, setExecuteDigest] = useState("");
   const [lang, setLang] = useState<"zh" | "en">("en");
-
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Change lng
+  // Ephemeral Key Pair
+  const [ephemeralKeyPair, setEphemeralKeyPair] = useState<Ed25519Keypair>();
+
+  // Fetch JWT
+  const [currentEpoch, setCurrentEpoch] = useState("");
+  const [maxEpoch, setMaxEpoch] = useState(0);
+  const [randomness, setRandomness] = useState("");
+  const [nonce, setNonce] = useState("");
+
+  const [oauthParams, setOauthParams] =
+      useState<queryString.ParsedQuery<string>>();
+
+  // Decode JWT
+  const [decodedJwt, setDecodedJwt] = useState<JwtPayload>();
+  const [jwtString, setJwtString] = useState("");
+
+  // Generate User Salt
+  const [userSalt, setUserSalt] = useState<string>();
+
+  //Generate User's Sui Address
+  const [zkLoginUserAddress, setZkLoginUserAddress] = useState("");
+
+  //Fetch ZK Proof (Groth16)
+  const [extendedEphemeralPublicKey, setExtendedEphemeralPublicKey] =
+      useState("");
+  const [zkProof, setZkProof] = useState<PartialZkLoginSignature>();
+  const [fetchingZKProof, setFetchingZKProof] = useState(false);
+
+  //Assemble zkLogin signature and submit the transaction
+  const [executingTxn, setExecutingTxn] = useState(false);
+  const [executeDigest, setExecuteDigest] = useState("");
+
+  // Change language
   useEffect(() => {
     i18n.changeLanguage(lang);
   }, [i18n, lang]);
