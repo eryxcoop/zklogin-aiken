@@ -373,26 +373,6 @@ function App() {
             </DialogActions>
           </Dialog>
         </Stack>
-        <Stack direction="row" alignItems="center" spacing={4}>
-          <Typography>
-            <a
-              href="https://github.com/jovicheng/sui-zklogin-demo"
-              target="_blank"
-            >
-              @ Github Repo
-            </a>
-          </Typography>
-          <Typography
-            sx={{
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <a href="https://github.com/jovicheng" target="_blank">
-              @ Jovi
-            </a>
-          </Typography>
-        </Stack>
       </Box>
       {/* devnet unavailable Alert   */}
       {/* <Alert
@@ -963,25 +943,6 @@ ${JSON.stringify(decodedJwt, null, 2)}`}
                 Request Test SUI Token
               </LoadingButton>
             </Typography>
-            {zkLoginUserAddress && (
-              <Alert severity="success">
-                Congratulations! At this stage, your Sui zkLogin address has
-                been successfully generated.
-                <br />
-                You can click the button on the right of the address to claim a
-                test SUI Coin.
-                <br />
-                If there's an error with the service, you can use the{" "}
-                <b>devnet faucet</b>{" "}
-                <a
-                  href="https://discord.com/channels/916379725201563759/971488439931392130"
-                  target="_blank"
-                >
-                  (#Sui official discord)
-                </a>{" "}
-                to claim test Sui Token in order to proceed to the next step.
-              </Alert>
-            )}
           </Stack>
         )}
         {/* Step 6 */}
