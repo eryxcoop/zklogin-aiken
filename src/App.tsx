@@ -12,7 +12,7 @@ import {
   Stack,
   Step,
   StepLabel,
-  Stepper,
+  Stepper, TextField,
   Typography,
 } from "@mui/material";
 import { fromB64 } from "@mysten/bcs";
@@ -95,6 +95,7 @@ function App() {
 
   // Generate User Salt
   const [userSalt, setUserSalt] = useState<string>();
+  const [textSalt, setTextSalt] = useState<string>();
 
   //Generate User's Sui Address
   const [zkLoginUserAddress, setZkLoginUserAddress] = useState("");
@@ -148,6 +149,7 @@ function App() {
     const userSalt = window.localStorage.getItem(USER_SALT_LOCAL_STORAGE_KEY);
     if (userSalt) {
       setUserSalt(userSalt);
+      setTextSalt(userSalt);
     }
 
     const maxEpoch = window.localStorage.getItem(MAX_EPOCH_LOCAL_STORAGE_KEY);
@@ -208,6 +210,7 @@ function App() {
     setJwtString("");
     setEphemeralKeyPair(undefined);
     setUserSalt(undefined);
+    setTextSalt(undefined);
     setZkProof(undefined);
     setExtendedEphemeralPublicKey("");
     setMaxEpoch(0);
@@ -834,32 +837,48 @@ ${JSON.stringify(decodedJwt, null, 2)}`}
             >
               <Button
                 variant="contained"
-                disabled={Boolean(userSalt)}
+                disabled={false}
                 onClick={() => {
                   const salt = generateRandomness();
-                  window.localStorage.setItem(
-                    USER_SALT_LOCAL_STORAGE_KEY,
-                    salt
-                  );
-                  setUserSalt(salt);
+                  setTextSalt(salt);
                 }}
               >
-                Generate User Salt
+                Randomize User Salt
               </Button>
               <Button
                 variant="contained"
                 disabled={!userSalt}
                 color="error"
                 onClick={() => {
-                  const salt = generateRandomness();
-                  setUserSalt(salt);
                   window.localStorage.removeItem(USER_SALT_LOCAL_STORAGE_KEY);
-                  setUserSalt(undefined);
+                  setUserSalt("");
+                  setTextSalt("");
                 }}
               >
                 Delete User Salt
               </Button>
+              <Button
+                  variant="contained"
+                  disabled={false}
+                  color="success"
+                  onClick={() => {
+                    setUserSalt(textSalt)
+                    window.localStorage.setItem(
+                        USER_SALT_LOCAL_STORAGE_KEY,
+                        textSalt
+                    );
+                  }}
+              >
+                Set User Salt
+              </Button>
             </Stack>
+            <TextField
+                label="Enter salt"
+                value={textSalt}
+                onChange={(e)=>setTextSalt(e.target.value)}
+                // variant="outlined"
+                sx={{ width: "500px" }}
+            />
             <Typography>
               User Salt: {userSalt && <code>{userSalt}</code>}
             </Typography>

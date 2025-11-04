@@ -38,7 +38,7 @@ export const resources = {
       '5bbacff6': 'Issued Time',
       '3caf36d5': 'Expiration Time',
       '64ab7f15': 'JWT ID',
-      b7c54098: "Step 4: Generate User's Salt",
+      b7c54098: "Step 4: Create or obtain User's Salt",
       ec71ef53: 'User Salt is used to eliminate the one-to-one correspondence between the OAuth identifier (sub) and the on-chain Sui address, avoiding linking Web2 credentials with Web3 credentials.',
       cb63dedd: "Therefore, it is essential to safeguard the Salt. If lost, users won't be able to recover the address generated with the current Salt.",
       c4a666f0: "<1>Where to Save:</1><2>1. Ask the user to remember (send to user's email)</2><3>2. Store on the client side (browser)</3><3>3. Save in the APP Backend database, corresponding one-to-one with UID</3>",
