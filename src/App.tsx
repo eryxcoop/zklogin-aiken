@@ -240,9 +240,10 @@ function App() {
   };
 
   const [requestingFaucet, setRequestingFaucet] = useState(false);
-
   const requestFaucet = async () => {
-    if (!zkLoginUserAddress) {
+    console.log("Comunicación con Cardano: https://docs.cardano.org/cardano-testnets/tools/faucet")
+    setRequestingFaucet(true);
+    /*if (!zkLoginUserAddress) {
       return;
     }
     try {
@@ -261,7 +262,7 @@ function App() {
       });
     } finally {
       setRequestingFaucet(false);
-    }
+    }*/
   };
 
   return (
@@ -853,7 +854,6 @@ ${JSON.stringify(decodedJwt, null, 2)}`}
               </Button>
             </Stack>
             <TextField
-                label="Enter salt"
                 value={textSalt}
                 onChange={(e)=>setTextSalt(e.target.value)}
                 // variant="outlined"
@@ -914,6 +914,7 @@ ${JSON.stringify(decodedJwt, null, 2)}`}
               sx={{
                 display: "flex",
                 alignItems: "center",
+                gap: "20px",
               }}
             >
               User Sui Address:{" "}
@@ -940,9 +941,20 @@ ${JSON.stringify(decodedJwt, null, 2)}`}
                 disabled={!zkLoginUserAddress}
                 onClick={requestFaucet}
               >
-                Request Test SUI Token
+                Request Test ADA
               </LoadingButton>
+              {requestingFaucet && <Typography>Not implemented yet</Typography>}
             </Typography>
+            <SyntaxHighlighter
+                wrapLongLines
+                language="typescript"
+                style={oneDark}
+            >
+              {`// aiken_validator
+zkLoginID = ${zkLoginUserAddress} //(gonna be used as input for the zk proof)
+address = H(aiken_validator)
+              `}
+            </SyntaxHighlighter>
           </Stack>
         )}
         {/* Step 6 */}
