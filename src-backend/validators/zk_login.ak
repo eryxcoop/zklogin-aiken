@@ -6,7 +6,7 @@ pub type Redeemer {
   ephemeral_key_hash: VerificationKeyHash,
 }
 
-validator hello_world {
+validator zkLogin {
   spend(
     _datum: Option<Data>,
     redeemer: Redeemer,
@@ -19,9 +19,9 @@ validator hello_world {
 }
 
 test verifies_ephemeral_key_hash() {
-    let redeemer = Redeemer{ephemeral_key_hash: "1234"}
-    let placeholder_utxo = OutputReference{transaction_id: "", output_index: 0}
-    hello_world.spend(
+    let redeemer = Redeemer{ephemeral_key_hash: #"1234"}
+    let placeholder_utxo = OutputReference{transaction_id: #"", output_index: 0}
+    zkLogin.spend(
         None,
         redeemer,
         placeholder_utxo,
