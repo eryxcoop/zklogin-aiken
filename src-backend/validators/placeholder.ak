@@ -1,41 +1,30 @@
-use cardano/address.{Credential}
-use cardano/assets.{PolicyId}
-use cardano/certificate.{Certificate}
-use cardano/governance.{ProposalProcedure, Voter}
-use cardano/transaction.{Transaction, OutputReference}
+use aiken/collection/list
+use aiken/crypto.{VerificationKeyHash}
+use cardano/transaction.{OutputReference, Transaction}
 
-validator placeholder {
-  mint(_redeemer: Data, _policy_id: PolicyId, _self: Transaction) {
-    todo @"mint logic goes here"
+pub type Redeemer {
+  ephemeral_key_hash: VerificationKeyHash,
+}
+
+validator hello_world {
+  spend(
+    _datum: Option<Data>,
+    redeemer: Redeemer,
+    _own_ref: OutputReference,
+    self: Transaction,
+  ) {
+    let must_be_signed = list.has(self.extra_signatories, redeemer.ephemeral_key_hash)
+    must_be_signed
   }
+}
 
-  spend(_datum: Option<Data>, _redeemer: Data, _utxo: OutputReference, _self: Transaction) {
-    todo @"spend logic goes here"
-  }
-
-  withdraw(_redeemer: Data, _account: Credential, _self: Transaction) {
-    todo @"withdraw logic goes here"
-  }
-
-  publish(_redeemer: Data, _certificate: Certificate, _self: Transaction) {
-    todo @"publish logic goes here"
-  }
-
-  vote(_redeemer: Data, _voter: Voter, _self: Transaction) {
-    todo @"vote logic goes here"
-  }
-
-  propose(_redeemer: Data, _proposal: ProposalProcedure, _self: Transaction) {
-    todo @"propose logic goes here"
-  }
-
-  // // If needs be, remove any of unneeded handlers above, and use:
-  //
-  // else(_ctx: ScriptContext) {
-  //   todo @"fallback logic if none of the other purposes match"
-  // }
-  //
-  // // You will also need an additional import:
-  // //
-  // // use cardano/script_context.{ScriptContext}
+test verifies_ephemeral_key_hash() {
+    let redeemer = Redeemer{ephemeral_key_hash: "1234"}
+    let placeholder_utxo = OutputReference{transaction_id: "", output_index: 0}
+    hello_world.spend(
+        None,
+        redeemer,
+        placeholder_utxo,
+        Transaction{..transaction.placeholder, extra_signatories: [redeemer.ephemeral_key_hash]},
+    )
 }
