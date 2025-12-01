@@ -1,13 +1,13 @@
-name = "aiken-lang/src-backend"
+name = "eryxcoop/src-backend"
 version = "0.0.0"
 compiler = "v1.1.19"
 plutus = "v3"
 license = "Apache-2.0"
-description = "Aiken contracts for project 'aiken-lang/src-backend'"
+description = "Aiken contracts for project 'eryxcoop/src-backend'"
 
 [repository]
-user = "aiken-lang"
-project = "src-backend"
+user = "eryxcoop"
+project = "zklogin-aiken"
 platform = "github"
 
 [[dependencies]]
