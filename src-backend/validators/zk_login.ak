@@ -2,7 +2,7 @@ use cardano/transaction.{OutputReference, Transaction}
 use src_backend/types.{ZkLoginRedeemer}
 use src_backend/ephemeral_auth.{verify_ephemeral_signature}
 
-validator zkLogin {
+validator zk_login {
   spend(
     _datum: Option<Data>,
     redeemer: ZkLoginRedeemer,
@@ -16,7 +16,7 @@ validator zkLogin {
 test verifies_ephemeral_key_hash() {
     let redeemer = ZkLoginRedeemer{ephemeral_key_hash: #"1234"}
     let placeholder_utxo = OutputReference{transaction_id: #"", output_index: 0}
-    zkLogin.spend(
+    zk_login.spend(
         None,
         redeemer,
         placeholder_utxo,
