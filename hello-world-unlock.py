@@ -12,6 +12,7 @@ from pycardano import (
     TransactionBuilder,
     TransactionOutput,
     UTxO,
+    PlutusData,
 )
 from pycardano.hash import (
     VerificationKeyHash,
@@ -81,6 +82,7 @@ def get_utxo_from_str(context, tx_id: str, contract_address: Address) -> UTxO:
 class HelloWorldRedeemer(PlutusData):
     CONSTR_ID = 0
     msg: bytes
+    ephemeral_key_hash: bytes
 
 context = BlockFrostChainContext(
     project_id=os.environ["BLOCKFROST_PROJECT_ID"],
@@ -88,6 +90,9 @@ context = BlockFrostChainContext(
 )
 
 signing_key = PaymentSigningKey.load("me.sk")
+payment_verification_key = PaymentVerificationKey.from_signing_key(signing_key).hash()
+print(type(payment_verification_key))
+print(payment_verification_key)
 
 validator = read_validator()
 
@@ -98,7 +103,7 @@ utxo = get_utxo_from_str(context, sys.argv[1], Address(
 ))
 
 # build redeemer
-redeemer = Redeemer(data=HelloWorldRedeemer(msg=b"Hello, World!"))
+redeemer = Redeemer(data=HelloWorldRedeemer(msg=b"Hello, World!", ephemeral_key_hash=bytes(payment_verification_key)))
 
 # execute transaction
 tx_hash = unlock(
