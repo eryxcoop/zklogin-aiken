@@ -1,0 +1,10 @@
+[project]
+name = "zklogin-aiken"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies = [
+    "pycardano>=0.10.0",
+    "setuptools>=68.0.0",
+]
