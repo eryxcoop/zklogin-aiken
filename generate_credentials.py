@@ -4,6 +4,7 @@ signing_key = PaymentSigningKey.generate()
 signing_key.save("me.sk")
 
 verification_key = PaymentVerificationKey.from_signing_key(signing_key)
+verification_key.save("me.vkey")
 
 address = Address(payment_part=verification_key.hash(), network=Network.TESTNET)
 with open("me.addr", "w") as f:

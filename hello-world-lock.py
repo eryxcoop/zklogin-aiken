@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from dataclasses import dataclass
 from pycardano import (
     Address,
@@ -10,14 +11,18 @@ from pycardano import (
     ScriptHash,
     TransactionBuilder,
     TransactionOutput,
+    Unit,
+    Value,
 )
 from pycardano.hash import (
-    VerificationKeyHash,
+    VerificationKeyHash,    
     TransactionId,
     ScriptHash,
 )
+
 import json
 import os
+import cbor2
 
 def read_validator() -> dict:
     with open("src-backend/plutus.json", "r") as f:
@@ -34,16 +39,16 @@ def read_validator() -> dict:
 
 def lock(
         amount: int,
-        into: ScriptHash,
-        datum: PlutusData,
+        script: PlutusV3Script,
         signing_key: PaymentSigningKey,
         context: BlockFrostChainContext,
 ) -> TransactionId:
     # read addresses
     with open("me.addr", "r") as f:
         input_address = Address.from_primitive(f.read())
+
     contract_address = Address(
-        payment_part = into,
+        payment_part = script,
         network=Network.TESTNET,
     )
 
@@ -54,7 +59,6 @@ def lock(
         TransactionOutput(
             address=contract_address,
             amount=amount,
-            datum=datum,
         )
     )
     signed_tx = builder.build_and_sign(
@@ -63,13 +67,18 @@ def lock(
     )
 
     # submit transaction
-    context.submit_tx(signed_tx)
+    try:
+        tx_id = context.submit_tx(signed_tx)
+        print("TX enviada:", tx_id)
+    except:  
+        print("Fallo al enviar TX:", TransactionFailedException)
+        if TransactionFailedException.response is not None:
+            print("Detalles del error:", TransactionFailedException.response.text)
+
     return signed_tx.id
 
-@dataclass
-class HelloWorldDatum(PlutusData):
-    CONSTR_ID = 0
-    owner: bytes
+empty_datum = Unit()
+serialized_datum_hex = empty_datum.to_cbor().hex()
 
 context = BlockFrostChainContext(
     project_id=os.environ["BLOCKFROST_PROJECT_ID"],
@@ -82,16 +91,13 @@ validator = read_validator()
 
 owner = PaymentVerificationKey.from_signing_key(signing_key).hash()
 
-datum = HelloWorldDatum(owner=owner.to_primitive())
-
 tx_hash = lock(
-    amount=2_000_000,
-    into=validator["script_hash"],
-    datum=datum,
+    amount=Value(2_000_000),
+    script=validator["script_hash"],
     signing_key=signing_key,
     context=context,
 )
 
 print(
-    f"2 tADA locked into the contract\n\tTx ID: {tx_hash}\n\tDatum: {datum.to_cbor_hex()}"
+    f"2 tADA locked into the contract\n\tTx ID: {tx_hash}\n\t"
 )

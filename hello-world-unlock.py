@@ -13,9 +13,10 @@ from pycardano import (
     TransactionOutput,
     UTxO,
     PlutusData,
+    Redeemer,
+    VerificationKeyHash
 )
 from pycardano.hash import (
-    VerificationKeyHash,
     TransactionId,
     ScriptHash,
 )
@@ -69,7 +70,14 @@ def unlock(
     )
 
     # submit transaction
-    context.submit_tx(signed_tx)
+    try:
+        tx_id = context.submit_tx(signed_tx)
+        print("TX enviada:", tx_id)
+    except:  
+        print("Fallo al enviar TX:", TransactionFailedException)
+        if TransactionFailedException.response is not None:
+            print("Detalles del error:", TransactionFailedException.response.text)
+
     return signed_tx.id
 
 def get_utxo_from_str(context, tx_id: str, contract_address: Address) -> UTxO:
@@ -79,9 +87,8 @@ def get_utxo_from_str(context, tx_id: str, contract_address: Address) -> UTxO:
     raise Exception(f"UTxO not found for transaction {tx_id}")
 
 @dataclass
-class HelloWorldRedeemer(PlutusData):
+class ZKLoginRedeemer(PlutusData):
     CONSTR_ID = 0
-    msg: bytes
     ephemeral_key_hash: bytes
 
 context = BlockFrostChainContext(
@@ -103,7 +110,10 @@ utxo = get_utxo_from_str(context, sys.argv[1], Address(
 ))
 
 # build redeemer
-redeemer = Redeemer(data=HelloWorldRedeemer(msg=b"Hello, World!", ephemeral_key_hash=bytes(payment_verification_key)))
+redeemer = Redeemer(
+    data=ZKLoginRedeemer(
+        ephemeral_key_hash=payment_verification_key.payload
+    ))
 
 # execute transaction
 tx_hash = unlock(
@@ -111,7 +121,7 @@ tx_hash = unlock(
     from_script=validator["script_bytes"],
     redeemer=redeemer,
     signing_key=signing_key,
-    owner=PaymentVerificationKey.from_signing_key(signing_key).hash(),
+    owner=payment_verification_key.payload,
     context=context,
 )
 
