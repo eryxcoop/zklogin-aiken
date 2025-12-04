@@ -289,6 +289,11 @@ The algorithm used in this case is \textbf{Ed25519}, and it's the standard algor
 \subsubsection{Computing the zkLoginId}
 
 \subsection{Why Groth16?}
+The selection of \textbf{Groth16} as the primary proving system for the zkLogin protocol on Cardano, over alternatives like Plonk and systems based on FRI (e.g., Plonky2, Risc0), is driven by two critical factors: its efficiency with Cardano's existing primitives and its compliance with transaction size limits.
+
+The choice of Groth16 is highly synergistic with the cryptographic capabilities currently available in PlutusTx, Cardano's smart contract language. Cardano introduced built-ins for elliptic curve operations and pairings over \textbf{BLS12-381} specifically to reduce the cost of on-chain verification. Groth16, which utilizes the KZG polynomial commitment scheme over the BLS12-381 curve, is perfectly suited to leverage these primitives. The complexity of the Groth16 verifier is relatively low and is independent of the circuit size (apart from the number of public inputs). Verification involves fast operations supported directly by Plutus built-ins, such as four Miller loops and a final verification step, which is key to maintaining low computational costs and fast execution times on the blockchain.
+
+The defining factor that eliminates most other proving systems, particularly those based on \textbf{FRI} (such as Plonky2, Plonky3, Risc0, and others), is the stringent transaction size limit imposed by the Cardano network. A Groth16 proof is exceptionally compact: a compressed proof over BLS12-381 requires only \textbf{192 bytes}. This is far below the current maximum allowed transaction size on Cardano, which is set to \texttt{16,384 bytes (16 KB)}. In contrast, FRI-based proofs require a large number of Merkle authentication paths, meaning they inherently result in significantly larger proof sizes, often starting around 17 KB even for small circuits and reaching 500 KB or more for useful programs. Because FRI-based systems would easily exceed the 16 KB transaction limit, Groth16's minimal proof size makes it one of the only viable systems for on-chain verification in this environment.
 
 \section{Contributions}
 
