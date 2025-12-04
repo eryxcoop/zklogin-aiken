@@ -269,11 +269,25 @@ If you choose the second option, a compromised or corrupted third party could ha
 The downside of using zkLogin is that your address is linked to a specific OpenID provider and wallet/dApp, since the address is derived from the \texttt{sub}, \texttt{aud} and \texttt{iss} fields of the JWT. Some variants of the protocol prevent the dependency on the wallet by using only the \texttt{sub} and \texttt{iss} fields to compute the \texttt{zkLoginId}, but that is not explored in this project.
 
 \subsection{Signature Algorithms}
+Let's explore the detail of the signature algorithms that will be used in the protocol.
+The signature algorithms in the application frontend must match the ones demonstrated by the zk circuits.
+Otherwise, the zk proof verification will fail, and funds will not be unlocked from the account.
+
 \subsubsection{Google signature}
+For this instance of the protocol, we will use Google as our authenticator and OIDP.
+The Google signature is used to sign the JWT and thus guarantee its authenticity.
+The algorithm used is RS256 with the SHA256 hash function.
+It's an asymmetric algorithm that uses a pair of RSA private and public keys.
+
 \subsubsection{Cardano signature}
+The Cardano signature is used in the context of signing transactions.
+In zkLogin, the transactions must be signed with the \texttt{eph\_sk} that corresponds with the \texttt{eph\_pk} that will take part in the redeemer.
+The algorithm used in this case is \textbf{Ed25519}, and it's the standard algorithm for signing transactions in Cardano.
+
 \subsection{Hash Functions}
 \subsubsection{Computing the nonce}
 \subsubsection{Computing the zkLoginId}
+
 \subsection{Why Groth16?}
 
 \section{Contributions}
