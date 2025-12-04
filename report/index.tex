@@ -1,231 +1,226 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{amsthm}
-\usepackage{hyperref}
-\usepackage{fancyhdr}
-\usepackage{authblk}
+\usepackage{amstext}
 
-\title{zkLogin Report: Privacy-Preserving Blockchain Authentication for Cardano}
-\author{zkLogin Implementation Team}
+\title{zkLogin Report: Privacy-Preserving Authentication for Cardano}
+\author{Eryx Team}
 \date{\today}
 
 \begin{document}
 
-    \maketitle
+\maketitle
 
-    \begin{abstract}
-        This report details the implementation of \textbf{zkLogin} on the Cardano blockchain. zkLogin is an authentication protocol that allows Web3 users to access wallets and dApps using their existing Web2 credentials (e.g., Google, Facebook) while maintaining self-custody and privacy. The core innovation combines the \textbf{OAuth/OpenID} login flow with a \textbf{zero-knowledge proof} to ensure that the user's off-chain identity is not publicly linked to their on-chain address. We describe the protocol, its security model, design decisions, and future contributions.
-    \end{abstract}
 
-    \section{Tareas Pendientes (Pending Tasks)}
-    \label{sec:pendientes}
+\begin{center}
+    \large \textbf{zkLogin Report: Privacy-Preserving Blockchain Authentication for Cardano} \\
+    \vspace{0.5em}
+    Eryx Team \\
+    \vspace{0.5em}
+    \today
+\end{center}
 
-    Esta sección lista los puntos de discusión y decisiones técnicas aún por formalizar:
+\begin{abstract}
+    This report details the implementation of \textbf{zkLogin} on the Cardano blockchain. zkLogin is an authentication protocol that allows Web3 users to access wallets and dApps using their existing Web2 credentials (e.g., Google, Facebook) while maintaining self-custody and privacy. The core innovation combines the \textbf{OAuth/OpenID} login flow with a \textbf{zero-knowledge proof} to ensure that the user's off-chain identity is not publicly linked to their on-chain address. We describe the protocol, its security model, design decisions, and future contributions.
+\end{abstract}
+
+\section{What's zkLogin?}\label{sec:intro}
+
+\textbf{zkLogin} is an authentication method for Cardano that allows Web3 users of the Cardano ecosystem to access wallets and dApps with their existing web2 credentials (such as Google, Facebook, Apple, etc.) while preserving self-custody and privacy. Its core innovation lies in combining an \textbf{OAuth / OpenID login flow} with a \textbf{zero-knowledge proof} and a private component that ensures the user's off-chain identity is not publicly linked to their on-chain address.
+
+This protocol offers a login flow familiar to Web2 users while keeping the power of Web3. This allows for end-user growth in the Cardano community.
+
+In this report, the reader should find a description of the protocol, pros and cons of using zkLogin, design decisions, other possible implementations beyond the scope of this grant, and a description of the security model behind zkLogin.
+
+\section{Background and Investigation}
+
+The original protocol was presented in the paper ["zkLogin: Privacy-Preserving Blockchain Authentication with Existing Credentials"] (https://dl.acm.org/doi/abs/10.1145/3658644.3690356). We will make an overview of the background needed to make sense of zkLogin and a future section will enumerate the details that makes this Cardano implementation different from the base protocol.
+
+\subsection{OpenID Connect and JWT Format}
+
+\textbf{OpenID Connect (OIDC)} is a web2 authentication protocol built on top of the OAuth 2.0 framework. It involves 3 main actors:
+\begin{itemize}
+    \item An \textbf{OpenID Provider (OIDP)}
+    \item An \textbf{end user}
+    \item A \textbf{third-party application} (wallet or dApp)
+\end{itemize}
+
+The \textbf{OpenID provider} is an authority (like Google, Apple, Facebook, Microsoft, etc.) that provides an authentication mechanism for the user. A \textbf{third-party application} may allow a login mechanism via one of these providers.
+
+OpenID uses an ID Token which is a JSON Web Token (or \textbf{JWT}) that holds claims about the authenticated user. They are formed by:
+\begin{itemize}
+    \item \textbf{Header:} contains the type of the token, the algorithm used to digitally sign its content (for example, RS256) and the public key to check the signature. This public key must be published by the provider.
+    \item \textbf{Payload:} holds claims, including:
     \begin{itemize}
-        \item Qué funciones de hash usar (\textit{Puede quedar pendiente})
-        \item Qué firmas se usan (la del OpenID Provider, e.g., Google, y la de Cardano para firmar transacciones con la clave efímera).
-        \item Integrar una sección de \textbf{Technical Details} y \textbf{Future Contributions} para alinearse con los requerimientos del hito.
-        \item Desarrollar una sección de cierre/conclusión formal.
+        \item \textbf{\texttt{sub}}: identifies the user within the OIDP context.
+        \item \textbf{\texttt{iss}}: universally identifies the OIDP.
+        \item \textbf{\texttt{aud}}: identifies the third-party app within the OIDP context.
+        \item \textbf{\texttt{nonce}}: an arbitrary value generated by the app, returned untouched, useful for integrity checks and forming part of the signature body.
+        \item Other fields: issue time, expiration time, name and email of the user, etc.
     \end{itemize}
+    \item \textbf{Signature:} the signature of the Payload, generated by the OIDP's private key.
+\end{itemize}
 
-    \section{What's zkLogin?}
-    \label{sec:intro}
+\section{Protocol Overview}
 
-    \textbf{zkLogin} is an authentication method for Cardano that allows Web3 users of the Cardano ecosystem to access wallets and dApps with their existing web2 credentials (such as Google, Facebook, Apple, etc.) while preserving self-custody and privacy. Its core innovation lies in combining an \textbf{OAuth / OpenID login flow} with a \textbf{zero-knowledge proof} and a private component that ensures the user’s off-chain identity is not publicly linked to their on-chain address.
+zkLogin is designed to provide a Two Factor Authentication method for a non-traditional Cardano address. This address is a \textbf{validator's hash address}, not one derived from a private key. The tokens are unlocked via the zkLogin protocol.
 
-    This protocol offers a login flow familiar to Web2 users while keeping the power of Web3. This allows for end-user growth in the Cardano community.
+\subsection{Involved Actors}
+The protocol involves:
+\begin{itemize}
+    \item The \textbf{Users}: end users who own a zkLogin address.
+    \item An \textbf{OpenId Provider (OP)}: an authority that supports the OpenID Connect protocol.
+    \item A \textbf{Wallet (or dApp)}: implementing the zkLogin protocol, with a clear frontend/backend separation.
+    \item The \textbf{Cardano Blockchain}: where transactions are settled.
+    \item A \textbf{ZK proof service}: creates the Groth16 Zero Knowledge proofs.
+    \item A \textbf{Salt service}: holds a user's secret salt.
+\end{itemize}
 
-    In this report, the reader should find a description of the protocol, pros and cons of using zkLogin, design decisions, other possible implementations beyond the scope of this grant, and a description of the security model behind zkLogin.
+\subsection{App-Flow}
+Assuming Google as the OpenID provider:
+\begin{enumerate}
+    \item The user opens the wallet app (wApp).
+    \item The wApp frontend creates a set of \textbf{ephemeral credentials}.
+    \item The user logs into the wApp with Google credentials, generating a JWT.
+    \item The wApp requests access to the \textbf{secret salt}.
+    \item The wApp derives the user address and governing script.
+    \item User begins a transfer of funds.
+    \item A request is made to the \textbf{ZK proof service} to generate a proof ensuring certain statements.
+    \item The wApp frontend signs the transaction with the \textbf{ephemeral private key} ($\text{eph\_sk}$).
+    \item The transaction is submitted and succeeds if valid.
+\end{enumerate}
 
-    \section{Background and Investigation}
+\section{Adversarial Model}
 
-    The original protocol was presented in the paper \hyperref[https://dl.acm.org/doi/abs/10.1145/3658644.3690356]{"zkLogin: Privacy-Preserving Blockchain Authentication with Existing Credentials"}. We will make an overview of the background needed to make sense of zkLogin and a future section will enumerate the details that makes this Cardano implementation different from the base protocol.
+The protocol relies on partially trusting external agents, none of which are fully trusted. The design ensures no single external agent has enough information to act on the user's behalf.
+\begin{itemize}
+    \item The \textbf{OpenID provider} has authentication data but no $\text{salt}$, cannot derive the address.
+    \item The \textbf{Salt service} has the $\text{salt}$ but no OpenID login data.
+    \item The \textbf{ZK proof service} never has the session ephemeral secret key ($\text{eph\_sk}$) to sign transactions.
+\end{itemize}
+The \textbf{application frontend} is trusted during the session. Ephemeral credentials expire ($\text{max\_epoch}$), mitigating long-term security risks.
 
-    \subsection{OpenID Connect and JWT Format}
+\section{Protocol in Detail}
 
-    \textbf{OpenID Connect (OIDC)} is a web2 authentication protocol built on top of the OAuth 2.0 framework. It involves 3 main actors:
-    \begin{itemize}
-        \item An \textbf{OpenID Provider (OIDP)}
-        \item An \textbf{end user}
-        \item A \textbf{third-party application} (wallet or dApp)
-    \end{itemize}
+\subsection{Main Properties}
+The protocol is characterized by:
+\begin{itemize}
+    \item \textbf{Security}: Unforgeability and credential expiration.
+    \item \textbf{Unlinkability}: The on-chain address ($\text{zkLoginId}$) cannot be linked to the off-chain OpenID credentials by third parties.
+\end{itemize}
 
-    The \textbf{OpenID provider} is an authority (like Google, Apple, Facebook, Microsoft, etc.) that provides an authentication mechanism for the user. A \textbf{third-party application} may allow a login mechanism via one of these providers.
-
-    OpenID uses an ID Token which is a JSON Web Token (or \textbf{JWT}) that holds claims about the authenticated user. They are formed by:
-    \begin{itemize}
-        \item \textbf{Header:} contains the type of the token, the algorithm used to digitally sign its content (for example, RS256) and the public key to check the signature. This public key must be published by the provider.
-        \item \textbf{Payload:} holds claims, including:
-        \begin{itemize}
-            \item \textbf{\texttt{sub}}: identifies the user within the OIDP context.
-            \item \textbf{\texttt{iss}}: universally identifies the OIDP.
-            \item \textbf{\texttt{aud}}: identifies the third-party app within the OIDP context.
-            \item \textbf{\texttt{nonce}}: an arbitrary value generated by the app, returned untouched, useful for integrity checks and forming part of the signature body.
-            \item Other fields: issue time, expiration time, name and email of the user, etc.
-        \end{itemize}
-        \item \textbf{Signature:} the signature of the Payload, generated by the OIDP's private key.
-    \end{itemize}
-
-    \section{Protocol Overview}
-
-    zkLogin is designed to provide a Two Factor Authentication method for a non-traditional Cardano address. This address is a \textbf{validator's hash address}, not one derived from a private key. The tokens are unlocked via the zkLogin protocol.
-
-    \subsection{Involved Actors}
-    The protocol involves:
-    \begin{itemize}
-        \item The \textbf{Users}: end users who own a zkLogin address.
-        \item An \textbf{OpenId Provider (OP)}: an authority that supports the OpenID Connect protocol.
-        \item A \textbf{Wallet (or dApp)}: implementing the zkLogin protocol, with a clear frontend/backend separation.
-        \item The \textbf{Cardano Blockchain}: where transactions are settled.
-        \item A \textbf{ZK proof service}: creates the Groth16 Zero Knowledge proofs.
-        \item A \textbf{Salt service}: holds a user's secret salt.
-    \end{itemize}
-
-    \subsection{App-Flow}
-    Assuming Google as the OpenID provider:
-    \begin{enumerate}
-        \item The user opens the wallet app (wApp).
-        \item The wApp frontend creates a set of \textbf{ephemeral credentials}.
-        \item The user logs into the wApp with Google credentials, generating a JWT.
-        \item The wApp requests access to the \textbf{secret salt}.
-        \item The wApp derives the user address and governing script.
-        \item User begins a transfer of funds.
-        \item A request is made to the **ZK proof service** to generate a proof ensuring certain statements.
-        \item The wApp frontend signs the transaction with the **ephemeral private key** ($\text{eph\_sk}$).
-        \item The transaction is submitted and succeeds if valid.
-    \end{enumerate}
-
-    \section{Adversarial Model}
-
-    The protocol relies on partially trusting external agents, none of which are fully trusted. The design ensures no single external agent has enough information to act on the user's behalf.
-    \begin{itemize}
-        \item The **OpenID provider** has authentication data but no $\text{salt}$, cannot derive the address.
-        \item The **Salt service** has the $\text{salt}$ but no OpenID login data.
-        \item The **ZK proof service** never has the session ephemeral secret key ($\text{eph\_sk}$) to sign transactions.
-    \end{itemize}
-    The \textbf{application frontend} is trusted during the session. Ephemeral credentials expire ($\text{max\_epoch}$), mitigating long-term security risks.
-
-    \section{Protocol in Detail}
-
-    \subsection{Main Properties}
-    The protocol is characterized by:
-    \begin{itemize}
-        \item \textbf{Security}: Unforgeability and credential expiration.
-        \item \textbf{Unlinkability}: The on-chain address ($\text{zkLoginId}$) cannot be linked to the off-chain OpenID credentials by third parties.
-    \end{itemize}
-
-    \subsection{Session Credentials}
-    Ephemeral credentials created by the frontend for a session are:
-    \begin{itemize}
-        \item An ephemeral public and private key-pair ($\text{eph\_pk}$ and $\text{eph\_sk}$).
-        \item A random value ($\text{rand}$).
-        \item An expiration time ($\text{max\_epoch}$) expressed in Cardano slot time.
-    \end{itemize}
-    These values compute the \texttt{nonce}:
-    $$
+\subsection{Session Credentials}
+Ephemeral credentials created by the frontend for a session are:
+\begin{itemize}
+    \item An ephemeral public and private key-pair ($\text{eph\_pk}$ and $\text{eph\_sk}$).
+    \item A random value ($\text{rand}$).
+    \item An expiration time ($\text{max\_epoch}$) expressed in Cardano slot time.
+\end{itemize}
+These values compute the \texttt{nonce}:
+\[
     \text{nonce} = H(\text{eph\_pk}, \text{rand}, \text{max\_epoch})
-    $$
-    The $\text{eph\_sk}$ is used only to sign transactions. The session is invalid after $\text{max\_epoch}$.
+\]
+The $\text{eph\_sk}$ is used only to sign transactions. The session is invalid after $\text{max\_epoch}$.
 
-    \subsection{Interaction with OpenID Provider}
-    The computed $\text{nonce}$ is sent to the OIDP during the authentication request and is returned, untouched, inside the signed $\text{JWT}$.
+\subsection{Interaction with OpenID Provider}
+The computed $\text{nonce}$ is sent to the OIDP during the authentication request and is returned, untouched, inside the signed $\text{JWT}$.
 
-    \subsection{zkLoginId (Stable Identifier)}
-    To prevent linking the user's off-chain identity to the on-chain address, an additional secret $\text{salt}$ is used. The $\text{zkLoginId}$ (stable identifier, or $\text{stid}$) is computed as:
-    $$
+\subsection{zkLoginId (Stable Identifier)}
+To prevent linking the user's off-chain identity to the on-chain address, an additional secret $\text{salt}$ is used. The $\text{zkLoginId}$ (stable identifier, or $\text{stid}$) is computed as:
+\[
     \text{zkLoginId} = H(\text{sub}, \text{aud}, \text{iss}, \text{salt})
-    $$
+\]
 
-    \subsection{The Validator Script}
-    The zkLogin address is a validator's hash address. Each user has a unique address because the \textbf{$\text{zkLoginId}$ is hardcoded (engraved) in the validator's source code}.
+\subsection{The Validator Script}
+The zkLogin address is a validator's hash address. Each user has a unique address because the \textbf{$\text{zkLoginId}$ is hardcoded (engraved) in the validator's source code}.
 
-    For a transaction to be valid, the validator must verify a "link of associations":
+For a transaction to be valid, the validator must verify a "link of associations":
 
-    \begin{enumerate}
-        \item The transaction is signed with $\text{eph\_sk}$.
-        \item The redeemer proves $\text{eph\_sk}$ corresponds to $\text{eph\_pk}$.
-        \item The $\text{nonce}$ corresponds to $\text{eph\_pk}$, $\text{rand}$, and $\text{max\_epoch}$: $\text{nonce} = H(\text{eph\_pk}, \text{rand}, \text{max\_epoch})$.
-        \item The $\text{nonce}$ is present in the $\text{JWT}$.
-        \item The $\text{JWT}$ is verified against the publicly listed $\text{OIDP pk}$.
-        \item The $\text{zkLoginId}$ matches the data from the $\text{JWT}$ and the $\text{salt}$: $\text{zkLoginId} = H(\text{sub}, \text{aud}, \text{iss}, \text{salt})$.
-        \item The $\text{max\_epoch}$ has not expired.
-    \end{enumerate}
+\begin{enumerate}
+    \item The transaction is signed with $\text{eph\_sk}$.
+    \item The redeemer proves $\text{eph\_sk}$ corresponds to $\text{eph\_pk}$.
+    \item The $\text{nonce}$ corresponds to $\text{eph\_pk}$, $\text{rand}$, and $\text{max\_epoch}$: $\text{nonce} = H(\text{eph\_pk}, \text{rand}, \text{max\_epoch})$.
+    \item The $\text{nonce}$ is present in the $\text{JWT}$.
+    \item The $\text{JWT}$ is verified against the publicly listed $\text{OIDP pk}$.
+    \item The $\text{zkLoginId}$ matches the data from the $\text{JWT}$ and the $\text{salt}$: $\text{zkLoginId} = H(\text{sub}, \text{aud}, \text{iss}, \text{salt})$.
+    \item The $\text{max\_epoch}$ has not expired.
+\end{enumerate}
 
-    \subsection{Adapting the validator script to use zkProofs}
-    To maintain privacy and reduce on-chain computation, conditions 3 through 6 are embedded in a Zero-Knowledge Proof (ZK Proof).
+\subsection{Adapting the validator script to use zkProofs}
+To maintain privacy and reduce on-chain computation, conditions 3 through 6 are embedded in a Zero-Knowledge Proof (ZK Proof).
 
-    The protocol uses a **Groth16 proving system** with the following inputs:
+The protocol uses a **Groth16 proving system** with the following inputs:
 
-    \textbf{Public Inputs (On-Chain Visibility)}:
-    \begin{itemize}
-        \item $\text{eph\_pk}$
-        \item $\text{OIDP pk}$
-        \item $\text{zkLoginId}$
-        \item $\text{max\_epoch}$
-    \end{itemize}
+\textbf{Public Inputs (On-Chain Visibility)}:
+\begin{itemize}
+    \item $\text{eph\_pk}$
+    \item $\text{OIDP pk}$
+    \item $\text{zkLoginId}$
+    \item $\text{max\_epoch}$
+\end{itemize}
 
-    \textbf{Private Inputs (Off-Chain Secrecy)}:
-    \begin{itemize}
-        \item $\text{JWT}$ (including $\text{sub}, \text{aud}, \text{iss}, \text{nonce}$)
-        \item $\text{rand}$
-        \item $\text{salt}$
-    \end{itemize}
+\textbf{Private Inputs (Off-Chain Secrecy)}:
+\begin{itemize}
+    \item $\text{JWT}$ (including $\text{sub}, \text{aud}, \text{iss}, \text{nonce}$)
+    \item $\text{rand}$
+    \item $\text{salt}$
+\end{itemize}
 
-    The circuit asserts the following conditions are true:
-    \begin{itemize}
-        \item $\text{zkLoginId} = H(\text{sub}, \text{aud}, \text{iss}, \text{salt})$
-        \item $\text{nonce} = H(\text{eph\_pk}, \text{rand}, \text{max\_epoch})$
-        \item The $\text{sub}, \text{aud}, \text{iss}$ values used for the $\text{zkLoginId}$ match those in the $\text{JWT}$.
-        \item The $\text{JWT}$ signature validates with the $\text{OIDP pk}$.
-    \end{itemize}
-    The Aiken validator only needs to verify the Groth16 proof.
+The circuit asserts the following conditions are true:
+\begin{itemize}
+    \item $\text{zkLoginId} = H(\text{sub}, \text{aud}, \text{iss}, \text{salt})$
+    \item $\text{nonce} = H(\text{eph\_pk}, \text{rand}, \text{max\_epoch})$
+    \item The $\text{sub}, \text{aud}, \text{iss}$ values used for the $\text{zkLoginId}$ match those in the $\text{JWT}$.
+    \item The $\text{JWT}$ signature validates with the $\text{OIDP pk}$.
+\end{itemize}
+The Aiken validator only needs to verify the Groth16 proof.
 
-    \section{Wallet Responsibilities and Decisions}
+\section{Wallet Responsibilities and Decisions}
 
-    The application frontend (wallet/dApp) is responsible for coordinating the protocol flow.
+The application frontend (wallet/dApp) is responsible for coordinating the protocol flow.
 
-    \subsection{General Responsibilities}
-    The application must:
-    \begin{itemize}
-        \item Create, securely store, and delete **ephemeral credentials** ($\text{eph\_pk}$, $\text{eph\_sk}$, $\text{rand}$).
-        \item Compute the $\text{nonce}$ and fetch the $\text{JWT}$.
-        \item Obtain the user $\text{salt}$.
-        \item Compute the $\text{zkLoginId}$ and use it to create the unique **Aiken validator script** and user address.
-        \item Create or request the creation of the **ZK proof**.
-        \item Construct and sign the transaction, including the $\text{max\_epoch}$, $\text{zk proof}$, and $\text{eph\_pk}$ in the redeemer.
-    \end{itemize}
+\subsection{General Responsibilities}
+The application must:
+\begin{itemize}
+    \item Create, securely store, and delete **ephemeral credentials** ($\text{eph\_pk}$, $\text{eph\_sk}$, $\text{rand}$).
+    \item Compute the $\text{nonce}$ and fetch the $\text{JWT}$.
+    \item Obtain the user $\text{salt}$.
+    \item Compute the $\text{zkLoginId}$ and use it to create the unique **Aiken validator script** and user address.
+    \item Create or request the creation of the **ZK proof**.
+    \item Construct and sign the transaction, including the $\text{max\_epoch}$, $\text{zk proof}$, and $\text{eph\_pk}$ in the redeemer.
+\end{itemize}
 
-    \subsection{Salt Service Management}
-    The management of the secret $\text{salt}$ involves a trade-off between security and user experience:
-    \begin{itemize}
-        \item \textbf{Managed by the user}: Most secure against third-party compromise, but susceptible to user loss.
-        \item \textbf{Managed by the user device}: Locks the salt to a specific device via OS security features.
-        \item \textbf{Managed by a salt service (untrusted)}: Better UX, safe because the salt alone cannot control the wallet.
-    \end{itemize}
+\subsection{Salt Service Management}
+The management of the secret $\text{salt}$ involves a trade-off between security and user experience:
+\begin{itemize}
+    \item \textbf{Managed by the user}: Most secure against third-party compromise, but susceptible to user loss.
+    \item \textbf{Managed by the user device}: Locks the salt to a specific device via OS security features.
+    \item \textbf{Managed by a salt service (untrusted)}: Better UX, safe because the salt alone cannot control the wallet.
+\end{itemize}
 
-    \subsection{Proof Generation}
-    The location of the proof generation affects security and performance:
-    \begin{itemize}
-        \item \textbf{On the user's device}: Most secure (private inputs stay local), but resource-intensive and potentially slow.
-        \item \textbf{External service/Custom backend}: Faster generation, but the service gains access to the $\text{JWT}$ and $\text{salt}$, breaking \textbf{unlinkability} for the proof service.
-    \end{itemize}
+\subsection{Proof Generation}
+The location of the proof generation affects security and performance:
+\begin{itemize}
+    \item \textbf{On the user's device}: Most secure (private inputs stay local), but resource-intensive and potentially slow.
+    \item \textbf{External service/Custom backend}: Faster generation, but the service gains access to the $\text{JWT}$ and $\text{salt}$, breaking \textbf{unlinkability} for the proof service.
+\end{itemize}
 
-    \section{Advantages and Disadvantages of zkLogin}
+\section{Advantages and Disadvantages of zkLogin}
 
-    The main advantage is providing a **non-custodial** wallet where the user does not need to safeguard a traditional private key. This mitigates both the risk of third-party custodial corruption and user-induced key loss.
+The main advantage is providing a **non-custodial** wallet where the user does not need to safeguard a traditional private key. This mitigates both the risk of third-party custodial corruption and user-induced key loss.
 
-    The downside is that the user's address is linked to a specific OpenID provider and wallet/dApp, as the address derivation depends on the $\text{sub}$, $\text{aud}$, and $\text{iss}$ fields of the JWT.
+The downside is that the user's address is linked to a specific OpenID provider and wallet/dApp, as the address derivation depends on the $\text{sub}$, $\text{aud}$, and $\text{iss}$ fields of the JWT.
 
-    \section{Signature technical details}
+\section{Signature technical details}
 
-    \subsection{Funciones de hash}
-    \subsubsection{Google signature}
-    \subsubsection{Cardano signature}
-    \subsection{Algoritmos de firma (google y cardano)}
-    \subsubsection{Computing the nonce}
-    \subsubsection{Computing the zkLoginId}
-    \subsection{Why Groth16?}
+\subsection{Signature Algorithms}
+\subsubsection{Google signature}
+\subsubsection{Cardano signature}
+\subsection{Hash Functions}
+\subsubsection{Computing the nonce}
+\subsubsection{Computing the zkLoginId}
+\subsection{Why Groth16?}
+
+\section{Contributions}
 
 \end{document}
