@@ -259,6 +259,7 @@ If you choose the second option, a compromised or corrupted third party could ha
 
 The downside of using zkLogin is that your address is linked to a specific OpenID provider and wallet/dApp, since the address is derived from the \texttt{sub}, \texttt{aud} and \texttt{iss} fields of the JWT. Some variants of the protocol prevent the dependency on the wallet by using only the \texttt{sub} and \texttt{iss} fields to compute the \texttt{zkLoginId}, but that is not explored in this project.
 
+\section{Technical Details}
 \subsection{Signature Algorithms}
 Let's explore the detail of the signature algorithms that will be used in the protocol.
 The signature algorithms in the application frontend must match the ones demonstrated by the zk circuits.
