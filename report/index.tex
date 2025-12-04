@@ -105,115 +105,168 @@ The \textbf{application frontend} is trusted during the session. Ephemeral crede
 \section{Protocol in Detail}
 
 \subsection{Main Properties}
-First, let's start by enumerating the main properties that make this protocol different from a traditional scheme: **security** and **unlinkability**.
+First, let's start by enumerating the main properties that make this protocol different from a traditional scheme: \textbf{security} and \textbf{unlinkability}.
 \begin{itemize}
-    \item \textbf{Security}: Unforgeability and credential expiration.
-    \item \textbf{Unlinkability}: The on-chain address ($\text{zkLoginId}$) cannot be linked to the off-chain OpenID credentials by third parties.
+    \item \textbf{Security}: refers to the unforgeability of the scheme. An adversary cannot sign transactions on behalf of the user. Also, zkLogin supports expiration for its credentials.
+    \item \textbf{Unlinkability}: no third party (except the application frontend, controlled by the user) is able to link the user zkLogin address with the OpenID Connect user credentials. In other words, on-chain and off-chain identity cannot be linked by any of the involved parties.
 \end{itemize}
 
 \subsection{Session Credentials}
-Ephemeral credentials created by the frontend for a session are:
+It was mentioned in the protocol overview that some ephemeral credentials must be created by the application frontend when the user wants access to its account. These credentials are:
 \begin{itemize}
-    \item An ephemeral public and private key-pair ($\text{eph\_pk}$ and $\text{eph\_sk}$).
-    \item A random value ($\text{rand}$).
-    \item An expiration time ($\text{max\_epoch}$) expressed in Cardano slot time.
+    \item an ephemeral public and private key-pair (\texttt{eph\_pk} and \texttt{eph\_sk}).
+    \item a random value (\texttt{rand}).
+    \item an expiration time. This is a way to set an expiration time for the session, and must be expressed in blockchain time. For Cardano, this can be a slot in an epoch, but we'll call it \texttt{max\_epoch} for convention.
 \end{itemize}
-These values compute the \texttt{nonce}:
+
+These values are used to compute a \texttt{nonce} value with the formula
 \[
-    \text{nonce} = H(\text{eph\_pk}, \text{rand}, \text{max\_epoch})
+    \text{nonce} = H(\text{eph\_pk}, \text{rand}, \text{max\_epoch}).
 \]
-The $\text{eph\_sk}$ is used only to sign transactions. The session is invalid after $\text{max\_epoch}$.
+
+The \texttt{eph\_sk} is not used to compute the \texttt{nonce}. Instead, it's used to sign the transactions in this session.
+
+These credentials are only valid for a single session, and are no longer valid when the \texttt{max\_epoch} has passed in the Cardano blockchain.
 
 \subsection{Interaction with OpenID Provider}
-The computed $\text{nonce}$ is sent to the OIDP during the authentication request and is returned, untouched, inside the signed $\text{JWT}$.
+Once the session credentials are created, we can start the interaction with the OpenId Provider. For the development of the protocol, we will support Google as our authenticator by default. Recall from the JWT section that when requesting Google for authentication credentials we can send a \texttt{nonce} value that will return untouched in the JWT. Not surprisingly, this \texttt{nonce} will be the \texttt{nonce} computed from the session credentials.
 
-\subsection{zkLoginId (Stable Identifier)}
-To prevent linking the user's off-chain identity to the on-chain address, an additional secret $\text{salt}$ is used. The $\text{zkLoginId}$ (stable identifier, or $\text{stid}$) is computed as:
+Once the authentication process is completed, the application frontend will receive a JWT with an \texttt{iss}, \texttt{sub}, \texttt{aud} and \texttt{nonce} as described above. This JWT is encoded in base64 and signed by Google, which is a key point for the protocol security.
+
+\subsection{zkLoginId}
+Each user will have a \textbf{zkLoginId} linked to it's address. This is not the Cardano address itself, but a value from which the address can be derived. Let's explain how we generate this value. The OpenID flow has 3 values that we'll use for this purpose and that were mentioned earlier. These are the subject identifier (\textbf{sub}), the app's audience (\textbf{aud}) and the OIDP's identifier (\textbf{iss}).
+
+If we were to build the zkLoginId from these 3 values, the user off-chain identity (Google credentials) would be directly linked to the on-chain identity (zkLoginId). To avoid this, the protocol uses an additional \textbf{salt}. The zkLoginId is what is called a \textbf{stable identifier} (or \textbf{stid}).
+
+In other words, we compute
 \[
-    \text{zkLoginId} = H(\text{sub}, \text{aud}, \text{iss}, \text{salt})
+    \text{zkLoginId} = H(\text{sub}, \text{aud}, \text{iss}, \text{salt}).
 \]
 
-\subsection{The Validator Script}
-The zkLogin address is a validator's hash address. Each user has a unique address because the \textbf{$\text{zkLoginId}$ is hardcoded (engraved) in the validator's source code}.
+Remember that the \texttt{sub}, \texttt{aud} and \texttt{iss} values are obtained by the frontend when the user authenticates with the OpenID Provider, and the \texttt{salt} is retrieved by the user itself or by the communication with some salt service.
 
-For a transaction to be valid, the validator must verify a "link of associations":
+\subsection{The validator script}
+
+At the beginning of this report it was stated that a zkLogin address is not a regular Cardano address, in the sense that it's not derived from a private key. Instead, it's a validator's hash address. Now we must address what is it that the validator is doing, because there lies the core of the protocol. Let's do a quick summary. At this point, the application frontend holds the following data:
+
+\textbf{Stable} $\rightarrow$ Doesn't change over sessions.
+\begin{itemize}
+    \item \texttt{sub} (identifies the user in the context of the OIDP)
+    \item \texttt{aud} (identifies the application in the context of the OIDP)
+    \item \texttt{iss} (identifies the OIDP)
+    \item \texttt{salt} (secret value that unlinks the OIDP credentials from the zkLoginId)
+    \item $\text{zkLoginId} = H(\text{sub}, \text{aud}, \text{iss}, \text{salt})$
+\end{itemize}
+
+\textbf{Ephemeral} $\rightarrow$ Different for each session.
+\begin{itemize}
+    \item \texttt{[eph\_pk, eph\_sk]} (public and private key-pair)
+    \item \texttt{rand} (a random session value)
+    \item \texttt{max\_epoch} (expiration time for the session)
+    \item $\text{nonce} = H(\text{eph\_pk}, \text{rand}, \text{max\_epoch})$
+    \item The complete and signed \texttt{JWT} from Google. Note that this is considered ephemeral because it contains the \texttt{nonce} value, so it will be different for each session although \texttt{sub}, \texttt{aud} and \texttt{iss} do not change over time.
+\end{itemize}
+
+A different script means a different address, and since we want all users to have an unique address, the protocol must make each validator script different. The way it's achieved is by \textbf{engraving the \texttt{zkLoginId} in the validator's source code}. This makes all the validators different thus making all the addresses different, which is what we were looking for. But now let's see which conditions should hold for an application to use such address.
+
+The validator script must verify the association between the \texttt{eph\_pk} and the hardcoded zkLoginId. These values are not directly linked, but they are linked in a specific session through the JWT. We can think of a “link of associations'':
 
 \begin{enumerate}
-    \item The transaction is signed with $\text{eph\_sk}$.
-    \item The redeemer proves $\text{eph\_sk}$ corresponds to $\text{eph\_pk}$.
-    \item The $\text{nonce}$ corresponds to $\text{eph\_pk}$, $\text{rand}$, and $\text{max\_epoch}$: $\text{nonce} = H(\text{eph\_pk}, \text{rand}, \text{max\_epoch})$.
-    \item The $\text{nonce}$ is present in the $\text{JWT}$.
-    \item The $\text{JWT}$ is verified against the publicly listed $\text{OIDP pk}$.
-    \item The $\text{zkLoginId}$ matches the data from the $\text{JWT}$ and the $\text{salt}$: $\text{zkLoginId} = H(\text{sub}, \text{aud}, \text{iss}, \text{salt})$.
-    \item The $\text{max\_epoch}$ has not expired.
+    \item The transaction \texttt{tx} that includes the validator and consumes an UTxO with the validator's address is signed with the \texttt{eph\_sk}.
+    \item The \texttt{tx} redeemer must contain the \texttt{eph\_pk} and validate the transaction signature. At this point we've only proved that the \texttt{eph\_sk} and the \texttt{eph\_pk} correspond to each other.
+    \item The \texttt{nonce} is composed by the \texttt{eph\_pk}, \texttt{rand} and \texttt{max\_epoch}, so the validator should also check the correspondence $\text{nonce} = H(\text{eph\_pk}, \text{rand}, \text{max\_epoch})$. But where does this \texttt{nonce} come from? The JWT.
+    \item The validator should check that the \texttt{nonce} is present in the \texttt{JWT}. However, the provenance of this value is uncertain until it's signed by an OpenID Provider.
+    \item The OpenID provider signature should be checked in the \texttt{JWT} respect to an official public key of the provider. Once the validator checked that, it's sure that the rest of the \texttt{JWT} is also correct.
+    \item The last step is to verify that the written \texttt{zkLoginId} is composed by the data from the \texttt{JWT} and the provided salt, in other words, check the formula $\text{zkLoginId} = H(\text{sub}, \text{aud}, \text{iss}, \text{salt})$.
+    \item The \texttt{max\_epoch} is valid respect to the current blockchain time (isn't expired).
 \end{enumerate}
 
+Once all the steps are completed, the validator can be sure that the transaction was signed by someone who
+\begin{enumerate}
+    \setcounter{enumi}{7}
+    \item has access to the \texttt{salt}
+    \item is able to obtain a valid \texttt{JWT} with the credentials associated to the address (in other words, someone that is able to authenticate successfully with the OpenID Provider)
+\end{enumerate}
+
+This would be enough if it wasn't for the visibility of the transaction: all the information used to verify the connection is public for everyone to see, and that is something that breaks both security and unlinkability. This is why we need to use ZK Proofs.
+
 \subsection{Adapting the validator script to use zkProofs}
-To maintain privacy and reduce on-chain computation, conditions 3 through 6 are embedded in a Zero-Knowledge Proof (ZK Proof).
+Most of the conditions the validator needs to check contain private inputs and are expensive computations to perform in a blockchain (like the hash function computation or the signature verification). These are the main reasons to use zk proofs as the main tool to preserve privacy and reduce the on-chain computation.
 
-The protocol uses a **Groth16 proving system** with the following inputs:
+The protocol designs a circuit using the Groth16 proving system with the following inputs:
 
-\textbf{Public Inputs (On-Chain Visibility)}:
+\textbf{Public}:
 \begin{itemize}
-    \item $\text{eph\_pk}$
-    \item $\text{OIDP pk}$
-    \item $\text{zkLoginId}$
-    \item $\text{max\_epoch}$
+    \item \texttt{eph\_pk}
+    \item \texttt{OIDP pk}
+    \item \texttt{zkLoginId}
+    \item \texttt{max\_epoch}
 \end{itemize}
 
-\textbf{Private Inputs (Off-Chain Secrecy)}:
+\textbf{Private}:
 \begin{itemize}
-    \item $\text{JWT}$ (including $\text{sub}, \text{aud}, \text{iss}, \text{nonce}$)
-    \item $\text{rand}$
-    \item $\text{salt}$
+    \item \texttt{JWT} (including \texttt{sub}, \texttt{aud}, \texttt{iss} and \texttt{nonce})
+    \item \texttt{rand}
+    \item \texttt{salt}
 \end{itemize}
 
-The circuit asserts the following conditions are true:
+The circuit must assert the following conditions:
 \begin{itemize}
     \item $\text{zkLoginId} = H(\text{sub}, \text{aud}, \text{iss}, \text{salt})$
     \item $\text{nonce} = H(\text{eph\_pk}, \text{rand}, \text{max\_epoch})$
-    \item The $\text{sub}, \text{aud}, \text{iss}$ values used for the $\text{zkLoginId}$ match those in the $\text{JWT}$.
-    \item The $\text{JWT}$ signature validates with the $\text{OIDP pk}$.
+    \item The values for \texttt{sub}, \texttt{aud} and \texttt{iss} used to compute the \texttt{zkLoginId} are the ones present in the \texttt{JWT}
+    \item The signature of the \texttt{JWT} validates with the publicly listed \texttt{OIDP pk}.
 \end{itemize}
-The Aiken validator only needs to verify the Groth16 proof.
 
-\section{Wallet Responsibilities and Decisions}
+In other words, steps from 3. to 6. from the previous section are not performed by the validator itself but embedded in a zk proof that the Aiken script must verify. Since there are Groth16 validators implemented in Aiken, this is something possible to do.
 
-The application frontend (wallet/dApp) is responsible for coordinating the protocol flow.
+\section{Wallet responsibilities and decisions}
+The novelty of this project is the implementation of the base circuits and Aiken validators for the zkLogin protocol, but there are many things that a wallet or dApp frontend must do in order to integrate it. Also, there are many decisions to be made that affect security and integrity of the system. This section will list those responsibilities and decisions to be made by a willing application.
 
-\subsection{General Responsibilities}
+\subsection{General responsibilities}
 The application must:
 \begin{itemize}
-    \item Create, securely store, and delete **ephemeral credentials** ($\text{eph\_pk}$, $\text{eph\_sk}$, $\text{rand}$).
-    \item Compute the $\text{nonce}$ and fetch the $\text{JWT}$.
-    \item Obtain the user $\text{salt}$.
-    \item Compute the $\text{zkLoginId}$ and use it to create the unique **Aiken validator script** and user address.
-    \item Create or request the creation of the **ZK proof**.
-    \item Construct and sign the transaction, including the $\text{max\_epoch}$, $\text{zk proof}$, and $\text{eph\_pk}$ in the redeemer.
+    \item Create the ephemeral credentials when the user wishes to start a new session: an ephemeral public and private key-pair (\texttt{eph\_pk} and \texttt{eph\_sk}) and a random value (\texttt{rand}). The application must ensure the secure storage of those credentials in the user device (the frontend) throughout the session, and its deletion when the session expires in such a way that set of credentials is never used again.
+    \item It should be able to fetch the Cardano blockchain to get the current time, to set an according expiration time. The expiration time must be reasonable for a user session, not too long, not too short, but that's a design desition of the application.
+    \item Based on those values, it should compute the \texttt{nonce} (and also store it throughout the session).
+    \item It should be registered as a Google Client in the OpenID Connect protocol and allow authentication using this method. The authentication request must be done with the \texttt{nonce} from the previous step. Once the credentials are fetched, it should decode and parse them to get the \texttt{iss}, \texttt{aud} and \texttt{sub} values.
+    \item It should obtain the user salt (more on salt management later).
+    \item Based on the salt and the Google credentials, it should compute the \texttt{zkLoginId}. With this \texttt{zkLoginId} it should create the Aiken script that will govern the transactions from this address. The user address should be derived from that script.
+    \item It should create or request the creation of the zk proof (more on proof creation later).
+    \item Lastly, it should create the transaction. The transaction should consume an UTxO governed by the script, and should include the \texttt{max\_epoch}, \texttt{zk proof} and \texttt{eph\_pk} in the redeemer.
 \end{itemize}
 
-\subsection{Salt Service Management}
-The management of the secret $\text{salt}$ involves a trade-off between security and user experience:
+\subsection{Salt service}
+The salt management has some variations. It's treated as something external to the protocol, in the sense that the protocol does not dictate how it should be done. However, this report will mention some possibilities for managing the user secret salt.
 \begin{itemize}
-    \item \textbf{Managed by the user}: Most secure against third-party compromise, but susceptible to user loss.
-    \item \textbf{Managed by the user device}: Locks the salt to a specific device via OS security features.
-    \item \textbf{Managed by a salt service (untrusted)}: Better UX, safe because the salt alone cannot control the wallet.
+    \item \textbf{Managed by the user}: this is the most traditional approach. It has the advantage that no third party will ever have access to the secret salt, but the disadvantage is that this key can be lost like any other.
+    \item \textbf{Managed by the user device}: this is a sophistication of the previous option. The key can be locked in the user device and be kept safe by the operating system security rings. This, however, links the salt to a specific device. If this device were lost or stolen, the responsibility to remember the salt would fall into the user again.
+    \item \textbf{Managed by a salt service}: this option relies on an untrusted third party to hold the salt. It should have its own authentication method (ideally different from the OIDC already use for zkLogin), store the user salt and retrieve it whenever needed. This option is not as unsafe as it seems, since the salt alone isn't enough to create a transaction in the name of the user. This is different than storing a secret key, since the secret key alone can be used to sign transactions.
+    \item \textbf{Using a custom backend}: this is no different than the salt service, except the salt service is the backend of the application itself.
 \end{itemize}
 
-\subsection{Proof Generation}
-The location of the proof generation affects security and performance:
+The ideal method will be the result of a trade-off between security and user experience.
+
+\subsection{Proof generation}
+The proof generation is a key point of the protocol, however there are some variations respect of where the proof can be created.
 \begin{itemize}
-    \item \textbf{On the user's device}: Most secure (private inputs stay local), but resource-intensive and potentially slow.
-    \item \textbf{External service/Custom backend}: Faster generation, but the service gains access to the $\text{JWT}$ and $\text{salt}$, breaking \textbf{unlinkability} for the proof service.
+    \item \textbf{On the user's device}: this option is by far the most secure, but has the disadvantage of using many resources that the device might not have. The proof generation could be slow which would make the general user experience worse.
+    \item \textbf{Use an external service}: this option can speed-up the proof generation time by still preserving the security, since the \texttt{eph\_sk} used to sign transactions is hidden. However, this breaks the unlinkability property for the zk proof service since it will have access to the \texttt{JWT} and the \texttt{salt}.
+    \item \textbf{Using a custom backend}: this is no different than the previous option, except that the proof is generated by the application itself.
 \end{itemize}
 
-\section{Advantages and Disadvantages of zkLogin}
+\section{Advantages and disadvantages of zkLogin}
+The most important advantage of using zkLogin is that no third party will have a way of using the user address if this protocol is implemented according to the security model, but the user doesn't need to be the keeper of the secret keys.
 
-The main advantage is providing a **non-custodial** wallet where the user does not need to safeguard a traditional private key. This mitigates both the risk of third-party custodial corruption and user-induced key loss.
+In a traditional model, the user has 2 options:
+\begin{enumerate}
+    \item safeguard the private key associated with his address (self-managed, non-custodial wallets).
+    \item trust a 3rd party to do it for him (custodial wallets).
+\end{enumerate}
 
-The downside is that the user's address is linked to a specific OpenID provider and wallet/dApp, as the address derivation depends on the $\text{sub}$, $\text{aud}$, and $\text{iss}$ fields of the JWT.
+If you choose the second option, a compromised or corrupted third party could have full control over the user's address. While choosing the first option may seem the best, handling and securing private keys is often error-prone, and many users end up losing their credentials and consequently, their assets. Some implementations of the zkLogin protocol prevent both scenarios. In particular, if the user chooses to use a salt service it wouldn't have to safeguard any data, but the salt alone isn't enough to control the wallet.
 
-\section{Signature technical details}
+The downside of using zkLogin is that your address is linked to a specific OpenID provider and wallet/dApp, since the address is derived from the \texttt{sub}, \texttt{aud} and \texttt{iss} fields of the JWT. Some variants of the protocol prevent the dependency on the wallet by using only the \texttt{sub} and \texttt{iss} fields to compute the \texttt{zkLoginId}, but that is not explored in this project.
 
 \subsection{Signature Algorithms}
 \subsubsection{Google signature}
