@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
 \usepackage{amstext}
+\usepackage{hyperref}
 
 \title{zkLogin Report: Privacy-Preserving Authentication for Cardano}
 \author{Eryx Team}
@@ -20,11 +21,7 @@
     \today
 \end{center}
 
-\begin{abstract}
-    This report details the implementation of \textbf{zkLogin} on the Cardano blockchain. zkLogin is an authentication protocol that allows Web3 users to access wallets and dApps using their existing Web2 credentials (e.g., Google, Facebook) while maintaining self-custody and privacy. The core innovation combines the \textbf{OAuth/OpenID} login flow with a \textbf{zero-knowledge proof} to ensure that the user's off-chain identity is not publicly linked to their on-chain address. We describe the protocol, its security model, design decisions, and future contributions.
-\end{abstract}
-
-\section{What's zkLogin?}\label{sec:intro}
+\section{Introduction}\label{sec:intro}
 
 \textbf{zkLogin} is an authentication method for Cardano that allows Web3 users of the Cardano ecosystem to access wallets and dApps with their existing web2 credentials (such as Google, Facebook, Apple, etc.) while preserving self-custody and privacy. Its core innovation lies in combining an \textbf{OAuth / OpenID login flow} with a \textbf{zero-knowledge proof} and a private component that ensures the user's off-chain identity is not publicly linked to their on-chain address.
 
@@ -34,7 +31,7 @@ In this report, the reader should find a description of the protocol, pros and c
 
 \section{Background and Investigation}
 
-The original protocol was presented in the paper ["zkLogin: Privacy-Preserving Blockchain Authentication with Existing Credentials"] (https://dl.acm.org/doi/abs/10.1145/3658644.3690356). We will make an overview of the background needed to make sense of zkLogin and a future section will enumerate the details that makes this Cardano implementation different from the base protocol.
+The original protocol was presented in the paper \href{https://dl.acm.org/doi/abs/10.1145/3658644.3690356}{zkLogin: Privacy-Preserving Blockchain Authentication with Existing Credentials}. We will make an overview of the background needed to make sense of zkLogin and a future section will enumerate the details that makes this Cardano implementation different from the original protocol.
 
 \subsection{OpenID Connect and JWT Format}
 
