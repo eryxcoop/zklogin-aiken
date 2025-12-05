@@ -287,7 +287,55 @@ The selection of \textbf{Groth16} as the primary proving system for the zkLogin 
 The choice of Groth16 is highly synergistic with the cryptographic capabilities currently available in PlutusTx, Cardano's smart contract language. Cardano introduced built-ins for elliptic curve operations and pairings over \textbf{BLS12-381} specifically to reduce the cost of on-chain verification. Groth16, which utilizes the KZG polynomial commitment scheme over the BLS12-381 curve, is perfectly suited to leverage these primitives. The complexity of the Groth16 verifier is relatively low and is independent of the circuit size (apart from the number of public inputs). Verification involves fast operations supported directly by Plutus built-ins, such as four Miller loops and a final verification step, which is key to maintaining low computational costs and fast execution times on the blockchain.
 
 The defining factor that eliminates most other proving systems, particularly those based on \textbf{FRI} (such as Plonky2, Plonky3, Risc0, and others), is the stringent transaction size limit imposed by the Cardano network. A Groth16 proof is exceptionally compact: a compressed proof over BLS12-381 requires only \textbf{192 bytes}. This is far below the current maximum allowed transaction size on Cardano, which is set to \texttt{16,384 bytes (16 KB)}. In contrast, FRI-based proofs require a large number of Merkle authentication paths, meaning they inherently result in significantly larger proof sizes, often starting around 17 KB even for small circuits and reaching 500 KB or more for useful programs. Because FRI-based systems would easily exceed the 16 KB transaction limit, Groth16's minimal proof size makes it one of the only viable systems for on-chain verification in this environment.
+    
+\section{Difference with previous implementations}
+This protocol was implemented, tested and used in a productive environment in the SUI blockchain. However, the implementation differs in one key aspect. SUI blockchain has zkLogin embedded in its core protocol, allowing the \texttt{zkLoginId} to be the address itself. To do this, the SUI protocol has to include the zk proof validation in the nodes natively.
 
-\section{Contributions}
+In our cardano implementaion, we had to find a workaround to this, since we do not intend to change the core Cardano protocol to support the protocol. Instead, an easier way is to embeed the \texttt{zkLoginId} in an Aiken validator, use the validator's hash as the user address and use the Aiken validator to check the zk proof.
+
+\section{Future Contributions}
+
+The present implementation of zkLogin for Cardano establishes the fundamental components of the protocol, enabling an end-to-end authentication flow based on OpenID credentials, ephemeral session keys, salts, and Groth16 zero-knowledge proofs. However, this work also opens several avenues for expansion and refinement. This section outlines future contributions that can strengthen interoperability, security, performance, and ecosystem adoption.
+
+\subsection{Multi-Provider Support}
+
+The current system integrates Google as the initial OpenID Provider due to its mature infrastructure and reliable OIDC implementation. A key future contribution is supporting additional providers such as Meta, Apple, X, Microsoft, GitHub, and enterprise identity platforms.
+
+This requires handling:
+\begin{itemize}
+    \item different JWT claim formats,
+    \item multiple signature algorithms (ES256, RS256, PS256)
+    \item distinct JWK rotation mechanisms
+\end{itemize}
+
+Extending the protocol to multiple providers is essential to broad adoption and a fully trustless, interoperable authentication ecosystem.
+
+\subsection{Multi-Device and Recovery Mechanisms}
+
+Since zkLogin replaces long-term private keys with salts and OIDC authentication, account persistence depends on the user’s ability to:
+\begin{enumerate}
+    \item authenticate to the same OpenID account
+    \item recover or re-access their salt.
+\end{enumerate}
+
+Future work includes:
+\begin{itemize}
+    \item salt recovery flows
+    \item device migration strategies
+    \item optional multi-device key-sharing schemes
+    \item secure storage in device hardware (TPM, Secure Enclave)
+\end{itemize}
+
+These improvements aim to avoid single points of failure while maintaining privacy guarantees.
+
+\subsection{Handling OIDC Public Key Rotation}
+
+OpenID Providers periodically rotate their public keys, and long-lived validators must maintain compatibility with these rotations. Future work should explore:
+\begin{itemize}
+    \item automatic caching of JWK sets with expiration policies
+    \item circuit-level support for multiple accepted provider keys
+\end{itemize}
+
+Correct handling of key rotation is critical for maintaining protocol security in production environments.
 
 \end{document}
