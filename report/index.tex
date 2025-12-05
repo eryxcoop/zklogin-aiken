@@ -131,7 +131,7 @@ If we were to build the zkLoginId from these 3 values, the user off-chain identi
 
 In other words, we compute
 \[
-    \text{zkLoginId} = H(\text{sub}, \text{aud}, \text{iss}, \text{salt}).
+    \text{zkLoginId} = H(\text{iss}, \text{aud}, \text{sub}, \text{salt}).
 \]
 
 Remember that the \texttt{sub}, \texttt{aud} and \texttt{iss} values are obtained by the frontend when the user authenticates with the OpenID Provider, and the \texttt{salt} is retrieved by the user itself or by the communication with some salt service.
@@ -146,7 +146,7 @@ At the beginning of this report it was stated that a zkLogin address is not a re
     \item \texttt{aud} (identifies the application in the context of the OIDP)
     \item \texttt{iss} (identifies the OIDP)
     \item \texttt{salt} (secret value that unlinks the OIDP credentials from the zkLoginId)
-    \item $\text{zkLoginId} = H(\text{sub}, \text{aud}, \text{iss}, \text{salt})$
+    \item $\text{zkLoginId} = H(\text{iss}, \text{aud}, \text{sub}, \text{salt})$
 \end{itemize}
 
 \textbf{Ephemeral} $\rightarrow$ Different for each session.
@@ -168,7 +168,7 @@ The validator script must verify the association between the \texttt{eph\_pk} an
     \item The \texttt{nonce} is composed by the \texttt{eph\_pk}, \texttt{rand} and \texttt{max\_epoch}, so the validator should also check the correspondence $\text{nonce} = H(\text{eph\_pk}, \text{rand}, \text{max\_epoch})$. But where does this \texttt{nonce} come from? The JWT.
     \item The validator should check that the \texttt{nonce} is present in the \texttt{JWT}. However, the provenance of this value is uncertain until it's signed by an OpenID Provider.
     \item The OpenID provider signature should be checked in the \texttt{JWT} respect to an official public key of the provider. Once the validator checked that, it's sure that the rest of the \texttt{JWT} is also correct.
-    \item The last step is to verify that the written \texttt{zkLoginId} is composed by the data from the \texttt{JWT} and the provided salt, in other words, check the formula $\text{zkLoginId} = H(\text{sub}, \text{aud}, \text{iss}, \text{salt})$.
+    \item The last step is to verify that the written \texttt{zkLoginId} is composed by the data from the \texttt{JWT} and the provided salt, in other words, check the formula $\text{zkLoginId} = H(\text{iss}, \text{aud}, \text{sub}, \text{salt})$.
     \item The \texttt{max\_epoch} is valid respect to the current blockchain time (isn't expired).
 \end{enumerate}
 
@@ -203,7 +203,7 @@ The protocol designs a circuit using the Groth16 proving system with the followi
 
 The circuit must assert the following conditions:
 \begin{itemize}
-    \item $\text{zkLoginId} = H(\text{sub}, \text{aud}, \text{iss}, \text{salt})$
+    \item $\text{zkLoginId} = H(\text{iss}, \text{aud}, \text{sub}, \text{salt})$
     \item $\text{nonce} = H(\text{eph\_pk}, \text{rand}, \text{max\_epoch})$
     \item The values for \texttt{sub}, \texttt{aud} and \texttt{iss} used to compute the \texttt{zkLoginId} are the ones present in the \texttt{JWT}
     \item The signature of the \texttt{JWT} validates with the publicly listed \texttt{OIDP pk}.
@@ -277,8 +277,9 @@ In zkLogin, the transactions must be signed with the \texttt{eph\_sk} that corre
 The algorithm used in this case is \textbf{Ed25519}, and it's the standard algorithm for signing transactions in Cardano.
 
 \subsection{Hash Functions}
-\subsubsection{Computing the nonce}
-\subsubsection{Computing the zkLoginId}
+The zkLogin protocol uses hash functions to compute the \texttt{nonce} and the \texttt{zkLoginId}.
+The algorithms used are a combination of the PoseidonBN254 hash function and the Blake2b\_256 hash function.
+Poseidon is a function that is called zk-friendly because it doesn't use too much bitwise arithmetic, which is usually expensive to represent in arithmetic equations.
 
 \subsection{Why Groth16?}
 The selection of \textbf{Groth16} as the primary proving system for the zkLogin protocol on Cardano, over alternatives like Plonk and systems based on FRI (e.g., Plonky2, Risc0), is driven by two critical factors: its efficiency with Cardano's existing primitives and its compliance with transaction size limits.
