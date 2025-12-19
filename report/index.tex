@@ -3,6 +3,59 @@
 \usepackage{amsmath}
 \usepackage{amstext}
 \usepackage[hidelinks]{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstdefinelanguage{json}{
+    keywords={type},
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numberstyle=\tiny,
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    string=[s]{"}{"},
+}
+
+\lstdefinelanguage{Rust}{
+    keywords={zkLoginID, Validator, spend, fn, let, mut, pub, impl, struct, enum, match, if, else, while, for, in, loop, return, break, continue, use, mod, crate, super, self, Self, const, static, ref, move, async, await, trait, where},
+    keywordstyle=\color{blue}\bfseries,
+    comment=[l]{//},
+    commentstyle=\color{gray}\itshape,
+    stringstyle=\color{red},
+    morestring=[b]",
+}
+
+\lstset{
+    language=Rust,
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numberstyle=\tiny,
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    tabsize=2
+}
+
+\lstdefinelanguage{Circom}{
+    keywords={pragma, circom, template, component, signal, input, output},
+    keywordstyle=\color{blue}\bfseries,
+    comment=[l]{//},
+    commentstyle=\color{gray}\itshape,
+    morestring=[b]",
+}
+
+\lstset{
+    language=Circom,
+    basicstyle=\ttfamily\small,
+    frame=single,
+    breaklines=true,
+    showstringspaces=false
+}
 
 \title{zkLogin Report: Privacy-Preserving Authentication for Cardano}
 \author{Eryx Team}
@@ -78,7 +131,8 @@ Assuming Google as the OpenID provider, a zkLogin use case should have the follo
     \item The user logs into the wApp with Google credentials, obtaining a signed JWT from Google with the user data.
     \item The wApp requests access to the \textbf{secret salt} (from the salt service or the user itself).
     \item The wApp derives the user address and governing script, so now it can show the account funds and history of transactions.
-    \item User begins a transfer of funds from the wallet to any Cardano address.
+    \item Given the derived address, the user now is able to deposit their assets in that specific address.
+    \item User begins a transfer of funds from the wallet to any Cardano address. The spending is then controlled by the ephemeral secret data, the salt and the Google authentication credentials.
     \item A request is made to the \textbf{ZK proof service} to generate a proof ensuring certain statements (detailed later in the report).
     \item The wApp frontend signs the transaction with one of the ephemeral credentials.
     \item The transaction is submitted and succeeds if valid.
@@ -263,6 +317,90 @@ If you choose the second option, a compromised or corrupted third party could ha
 The downside of using zkLogin is that your address is linked to a specific OpenID provider and wallet/dApp, since the address is derived from the \texttt{sub}, \texttt{aud} and \texttt{iss} fields of the JWT. Some variants of the protocol prevent the dependency on the wallet by using only the \texttt{sub} and \texttt{iss} fields to compute the \texttt{zkLoginId}, but that is not explored in this project.
 
 \section{Technical Details}
+\subsection{Validator overview}
+Let's see the data that should be present in the redeemer for the protocol to work:
+
+\begin{lstlisting}[language=json, caption={Transaction Redeemer format}, label={lst:json}]
+type ZkLoginRedeemer {
+    max_epoch: Int,
+    proof: Groth16Proof,
+    eph_pk: ByteArray,
+}
+\end{lstlisting}
+
+The validator body and its main functions look as follows:
+
+\begin{lstlisting}[caption={Validator body}, label={lst:rust}]
+Validator ZKLogin {
+    spend(
+        _datum: Option<Data>,
+        redeemer: ZkLoginRedeemer,
+        _utxo: OutputReference,
+        self: Transaction) {
+    verifyGroth16(
+        redeemer.proof,
+        redeemer.eph_pk,
+        redeemer.max_epoch,
+        zkLoginID
+    );
+    verify_tx_is_signed(
+        self.extra_signatories,
+        redeemer.eph_pk
+    );
+    verify_timestamp(redeemer.max_epoch)
+  }
+}
+\end{lstlisting}
+
+An overview of the circuit looks like the following:
+
+\begin{lstlisting}[caption={Circom circuit overview}, label={lst:circom}]
+template ZkLogin {
+    // Public
+    signal input eph_pk;
+    signal input OIDP_pk;
+    signal input jwt_signature;
+    signal input zkLoginId;
+    signal input nonce;
+    signal input max_epoch;
+
+    //Private
+    signal input JWT;
+    signal input rand;
+    signal input salt;
+    signal input sub;
+    signal input aud;
+    signal input iss;
+
+    // JWT parsing
+    component parser = JWTParser;
+    parser.jwt <== JWT;
+    parser.sub <== sub;
+    parser.aud <== aud;
+    parser.iss <== iss;
+    parser.nonce <== nonce;
+
+    // zkLoginId derivation check
+    component id_derivation = ZkLoginIdDerivation;
+    id_derivation.jwt <== JWT;
+    id_derivation.salt <== salt;
+    zkLoginId === id_derivation.out;
+
+    // nonce derivation check
+    component nonce_derivation = NonceDerivation;
+    nonce_derivation.eph_pk <== eph_pk;
+    nonce_derivation.rand <== rand;
+    nonce_derivation.max_epoch <== max_epoch;
+    nonce_derivation.out === nonce;
+
+    // OIDP signature verification
+    component verificator = JWTSignatureVerification;
+    verificator.OIDP_pk <== OIDP_pk;
+    verificator.jwt_signature <== jwt_signature;
+    verificator.jwt <== JWT;
+}
+\end{lstlisting}
+
 \subsection{Signature Algorithms}
 Let's explore the detail of the signature algorithms that will be used in the protocol.
 The signature algorithms in the application frontend must match the ones demonstrated by the zk circuits.
@@ -281,8 +419,8 @@ The algorithm used in this case is \textbf{Ed25519}, and it's the standard algor
 
 \subsection{Hash Functions}
 The zkLogin protocol uses hash functions to compute the \texttt{nonce} and the \texttt{zkLoginId}.
-The algorithms used are a combination of the PoseidonBN254 hash function and the Blake2b\_256 hash function.
-Poseidon is a function that is called zk-friendly because it doesn't use too much bitwise arithmetic, which is usually expensive to represent in arithmetic equations.
+The algorithm used is the PoseidonBN254 hash function.
+Poseidon is a function that is called zk-friendly because it doesn't use too much bitwise arithmetic, which is usually expensive to represent in arithmetic equations. The Poseidon version used in the circuits must match exactly the one in the offchain components, or the verification will fail.
 
 \subsection{Why Groth16?}
 The selection of \textbf{Groth16} as the primary proving system for the zkLogin protocol on Cardano, over alternatives like Plonk and systems based on FRI (e.g., Plonky2, Risc0), is driven by two critical factors: its efficiency with Cardano's existing primitives and its compliance with transaction size limits.
@@ -315,7 +453,7 @@ Extending the protocol to multiple providers is essential to broad adoption and 
 
 \subsection{Multi-Device and Recovery Mechanisms}
 
-Since zkLogin replaces long-term private keys with salts and OIDC authentication, account persistence depends on the user’s ability to:
+Since zkLogin replaces long-term private keys with salts and OIDC authentication, account persistence depends on the user's ability to:
 \begin{enumerate}
     \item authenticate to the same OpenID account
     \item recover or re-access their salt.
@@ -340,5 +478,15 @@ OpenID Providers periodically rotate their public keys, and long-lived validator
 \end{itemize}
 
 Correct handling of key rotation is critical for maintaining protocol security in production environments.
+
+\subsection{Preserving Staking Rewards in zkLogin-based Addresses}
+
+In the current zkLogin design, user identities are bound to script-based payment credentials, which could difficult participation in Cardano’s staking mechanism. In this direction, future improvements should explore mechanisms that allow zkLogin-controlled funds to accumulate and withdraw rewards without compromising the non-custodial and privacy-preserving properties of the protocol. Possible directions include:
+\begin{itemize}
+    \item The use of hybrid addresses combining a zkLogin-based payment script with a conventional stake key
+    \item Controlled withdrawal of rewards via stake scripts enforcing the same identity constraints as the zkLogin validator
+\end{itemize}
+
+Enabling staking compatibility would significantly improve capital efficiency and user experience, while preserving the security guarantees of zkLogin-based authentication.
 
 \end{document}
