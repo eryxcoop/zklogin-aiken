@@ -28,4 +28,5 @@ To try the new features introduced in the milestone 2 of the Catalyst proposal (
 * Run ```aiken check```. If everything went as expected, you should have the test passing!
 
 #### Option 2: Deploy a real transaction
-* Run ```aiken-zk prove meshjs circuits/zkLogin.circom verification_key.zkey circuit_inputs/input_zkLogin.json deployment/zk_redeemer.ts```
+* Run ```aiken-zk prove meshjs circuits/zkLogin.circom verification_key.zkey circuit_inputs/input_zkLogin.json deployment/zk_redeemer.ts```. This will generate a file in ```backend/deployment/zk_redeemer.ts``` with an integrated zk proof.
+* 
