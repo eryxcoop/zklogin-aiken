@@ -1,6 +1,6 @@
 use aiken/collection/list
 use ak_381/groth16.{Proof, SnarkVerificationKey, groth_verify}
-use aiken/interval.{Finite, IntervalBound, entirely_before}
+use aiken/interval.{entirely_before}
 use aiken/primitive/bytearray.{to_int_big_endian, take, drop}
 use cardano/transaction.{OutputReference, Transaction}
 use types.{ZkLoginRedeemer}
