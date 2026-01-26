@@ -93,7 +93,7 @@ async function lockTxWithDatum() {
             quantity: AMOUNT_TO_SEND_TO_SCRIPT
         }])
         .txOutInlineDatumValue(mConStr0([]))
-        .changeAddress("addr_test1wppd592s633n2lp56mqjcxt3u79y9mujkxtvtkewg47074slwn59g")
+        .changeAddress("addr_test1qqd3yru5fdy97ascnrae2dtaxk03t9j2zumcv25x6fzze2fqqtlgdr0qadpj9jjt9sn8kyl475npqj4x770879fc5sss0yjd36")
         .selectUtxosFrom(await wallet.getUtxos())
         .complete();
 
