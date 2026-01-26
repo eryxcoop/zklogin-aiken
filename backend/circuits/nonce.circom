@@ -1,5 +1,5 @@
 pragma circom 2.2.3;
-include "./node_modules/poseidon-bls12381-circom/circuits/poseidon255.circom";
+include "../node_modules/poseidon-bls12381-circom/circuits/poseidon255.circom";
 
 
 template Nonce {

@@ -1,6 +1,6 @@
 pragma circom 2.2.3;
-include "./node_modules/poseidon-bls12381-circom/circuits/poseidon255.circom";
-include "./ascii_to_bigint.circom";
+include "../node_modules/poseidon-bls12381-circom/circuits/poseidon255.circom";
+include "ascii_to_bigint.circom";
 
 template ZkLoginId {
     signal input salt;

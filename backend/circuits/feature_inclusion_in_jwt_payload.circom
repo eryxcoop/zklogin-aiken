@@ -1,7 +1,7 @@
 pragma circom 2.2.3;
 
 include "slice.circom";
-include "./node_modules/circomlib/circuits/bitify.circom";
+include "../node_modules/circomlib/circuits/bitify.circom";
 
 template FeatureInclusionInJwtPayload(payloadSize, nonceSize, issSize, audSize, subSize) {
 

@@ -1,7 +1,7 @@
 pragma circom 2.2.3;
-include "./nonce.circom";
-include "./zkLoginId.circom";
-include "./feature_inclusion_in_jwt_payload.circom";
+include "nonce.circom";
+include "zkLoginId.circom";
+include "feature_inclusion_in_jwt_payload.circom";
 
 template ZkLogin(payloadSize, nonceSize, issSize, audSize, subSize) {
     // Public
@@ -36,8 +36,6 @@ template ZkLogin(payloadSize, nonceSize, issSize, audSize, subSize) {
     parser.nonceOffset <== nonce_offset;
     parser.nonce <== nonce_ascii;
 
-    // TODO: chequear consistencia entre nonce y nonce_ascii
-
     // signature verification
     // signal input OIDP_pk;
     // signal input jwt_signature;
@@ -58,13 +56,6 @@ template ZkLogin(payloadSize, nonceSize, issSize, audSize, subSize) {
     nonce_derivation.max_epoch <== max_epoch;
     nonce_derivation.nonce === nonce;
 
-
-
-    // OIDP signature verification
-    /* component verificator = JWTSignatureVerification;
-    verificator.OIDP_pk <== OIDP_pk;
-    verificator.jwt_signature <== jwt_signature;
-    verificator.jwt <== JWT; */
 }
 
 component main {public [eph_pk_high, eph_pk_low, zkLoginId, max_epoch]} = ZkLogin(384,44,27,72,21);
