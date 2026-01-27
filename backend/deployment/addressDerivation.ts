@@ -17,7 +17,7 @@ async function main() {
         {code: parameterized_script, version: "V3"}
     ).address;
     console.log(scriptAddr);
-    return scriptAddr;
+    return 0;
 }
 
 main();
