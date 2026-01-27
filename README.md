@@ -28,7 +28,13 @@ To try the new features introduced in the milestone 2 of the Catalyst proposal (
 * Run ```aiken check```. If everything went as expected, you should have the test passing!
 
 #### Option 2: Deploy a real transaction
-* In the ```backend``` directory run ```aiken build```
+* In the ```backend``` directory run ```aiken build```. This should generate a ```plutus.json``` file in the ```backend``` directory.
 * Run ```aiken-zk prove meshjs circuits/zkLogin.circom verification_key.zkey circuit_inputs/input_zkLogin.json deployment/zk_redeemer.ts```. This will generate a file in ```backend/deployment/zk_redeemer.ts``` with an integrated zk proof.
-* Fill the ```.env``` file with your own Blockfrost key. Create or look for it in https://blockfrost.io
-* 
+* Fill the ```.env``` file with your own Blockfrost key. Create or look for it in https://blockfrost.io.
+* Fill your own data in ```deployment/transactionData.ts```. The fields are:
+  * ```zkLoginId```: found in the step 5 of the frontend
+  * ```max_epoch```: at this point should be in the ```input_zkLogin.json``` file
+  * ```ephemeral_public_key``` and ```ephemeral_private_key```: found in the console in the frontend, the second json printed. It should be a hexadecimal number.
+* Run ```npx tsx addressDerivation.ts```. This will generate your zkLogin address based on the zkLoginId you provided in the previous step.  
+* Run ```npx tsx lockWithDatum.ts```. This will send funds to your zkLoginAddress.
+* Run ```npx tsx spend.ts```. This will unlock funds from your zkLoginAddress into another address (which you can pick by changing the ```txOut``` in the ```spend.ts``` file).

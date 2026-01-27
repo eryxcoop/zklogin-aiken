@@ -17,7 +17,7 @@ import {MAX_EPOCH, EPH_PUBLIC_KEY_HEX, EPH_PRIVATE_KEY_HEX} from "./transactionD
 async function main() {
 
     const {scriptCbor, scriptAddr} = getScript();
-    console.log("Enviando ADA al address ", scriptAddr)
+    console.log("Sending ADA to address ", scriptAddr)
 
     // --- Obtain public and private keys --- //
 
@@ -36,15 +36,15 @@ async function main() {
     }
 
     const inputScriptUTxOWithDatum = scriptUtxosWithDatum[0];
-    console.log("inputScriptUTxOWithDatum: ",JSON.stringify(inputScriptUTxOWithDatum, null, 2));
+    // console.log("inputScriptUTxOWithDatum: ",JSON.stringify(inputScriptUTxOWithDatum, null, 2));
 
     let collaterals = await sponsorWallet.getCollateral();
     const collateral = collaterals[0];
 
     let max_epoch_POSIX_time = new Date(MAX_EPOCH);
-    console.log("max_epoch_POSIX_time", max_epoch_POSIX_time.getTime())
+    // console.log("max_epoch_POSIX_time", max_epoch_POSIX_time.getTime())
     const max_epoch_slot = resolveSlotNo('preview', max_epoch_POSIX_time.getTime());
-    console.log("max_epoch_slot", max_epoch_slot)
+    // console.log("max_epoch_slot", max_epoch_slot)
 
     let redeemer = mConStr0([MAX_EPOCH, Buffer.from(eph_public_key_bytes).toString("hex")]);
     let zk_redeemer = mZKRedeemer(redeemer);
@@ -110,7 +110,7 @@ async function main() {
     // console.log(signedTx.to_json());
 
     // --- Submit transaction --- //
-    console.log("Se va a submitear la transaccion")
+    console.log("The transaction is being submited")
     const signedTxHex = signedTx.to_hex();
     const response = await sponsorWallet.submitTx(signedTxHex);
     console.log("Tx hash:", response);
