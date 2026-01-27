@@ -11,12 +11,9 @@ To try the new features introduced in the milestone 2 of the Catalyst proposal (
 
 * Go to the ```frontend``` directory and run ```npm install```.
 * Run ```npm run dev```. This will start a server that will let you enter the application flow (most likely in http://localhost:5173/).
-* Follow the steps for generating the temporal credentials for the zkLogin Access. If at any point you want to reset the flow, just click the red button in the top right corner that says "Reset LocalState".
-* In step 2, the application will ask you to login with your google account ("Sing In With Google"). This will redirect you to our example wallet called "zkLogin". 
-* In step 4 you will be asked to generate or provide a ```salt```. If you generate a random value, store it for future use of the same zkLogin address.
-* In step 5, after generating the zkLoginId, open the browser console and press the button "Print session data". This will print 2 json strings in the console that will be used later for generating the zk proof and generating the zkLogin transaction.
-* Let's go to the backend now. Go to the ```backend``` directory and run ```npm install```. 
-* Copy the first json printed in the console in the ```circuit_inputs/input_zkLogin.json``` file. 
+* Follow the steps 1-5 for generating the temporal credentials for the zkLogin Access. If at any point you want to reset the flow, just click the red button in the top right corner that says "Reset LocalState".
+* After having generated the session data in step 5, you should move to the backend now. Go to the ```backend``` directory and run ```npm install```. 
+* Copy ```input_zkLogin.json``` value into the ```circuit_inputs/input_zkLogin.json``` file.
 * Install ```aiken-zk``` (listed in dependencies) if you haven't already.
 
 #### Option 1: Run the Aiken test
@@ -24,7 +21,7 @@ To try the new features introduced in the milestone 2 of the Catalyst proposal (
 * Open the ```validators/zk_login.ak``` file and paste the contents of ```proof.ak``` in the ```test_example()``` method, replacing the previous one. Also, in the function ```fn test_proof_is_valid(proof: Proof) -> Bool``` of the same file, you should replace the values of:
   * ```zkLoginId```: found in the step 5 of the frontend
   * ```max_epoch```: at this point should be in the ```input_zkLogin.json``` file
-  * ```ephemeral_public_key```: found in the console in the frontend, the second json printed. It should be a hexadecimal number.
+  * ```ephemeral_public_key```: data from step 5 of the frontend. It should be a hexadecimal number.
 * Run ```aiken check```. If everything went as expected, you should have the test passing!
 
 #### Option 2: Deploy a real transaction
@@ -34,7 +31,7 @@ To try the new features introduced in the milestone 2 of the Catalyst proposal (
 * Fill your own data in ```deployment/transactionData.ts```. The fields are:
   * ```zkLoginId```: found in the step 5 of the frontend
   * ```max_epoch```: at this point should be in the ```input_zkLogin.json``` file
-  * ```ephemeral_public_key``` and ```ephemeral_private_key```: found in the console in the frontend, the second json printed. It should be a hexadecimal number.
+  * ```ephemeral_public_key``` and ```ephemeral_private_key```: data from step 5 of the frontend. They should be both hexadecimal numbers.
 * Run ```npx tsx addressDerivation.ts```. This will generate your zkLogin address based on the zkLoginId you provided in the previous step.  
 * Run ```npx tsx lockWithDatum.ts```. This will send funds to your zkLoginAddress.
 * Run ```npx tsx spend.ts```. This will unlock funds from your zkLoginAddress into another address (which you can pick by changing the ```txOut``` in the ```spend.ts``` file).
