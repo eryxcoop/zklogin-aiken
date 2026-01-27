@@ -1,7 +1,8 @@
 import {BlockfrostProvider, MeshTxBuilder, MeshWallet, serializePlutusScript, UTxO} from "@meshsdk/core";
 import {applyParamsToScript} from "@meshsdk/core-csl";
 import blueprint from "../plutus.json";
-import { ZKLOGIN_ID } from "./transactionData"
+import { ZKLOGIN_ID } from "./transactionData";
+import "dotenv/config";
 
 const blockfrostKey = process.env.BLOCKFROST_PROJECT_ID;
 export const blockchainProvider = new BlockfrostProvider(blockfrostKey);

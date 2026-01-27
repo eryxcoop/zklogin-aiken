@@ -49,6 +49,10 @@ async function main() {
     let redeemer = mConStr0([MAX_EPOCH, Buffer.from(eph_public_key_bytes).toString("hex")]);
     let zk_redeemer = mZKRedeemer(redeemer);
 
+    let amount_to_spend = 1000000
+    let fee_cap = 2000000
+    let return_quantity = (Number(inputScriptUTxOWithDatum.output.amount[0].quantity) - amount_to_spend - fee_cap).toString();
+
     const txBuilder = getTxBuilder();
     await txBuilder
         .spendingPlutusScript("V3")
@@ -72,10 +76,17 @@ async function main() {
             collateral.output.address
         )
         .invalidHereafter(Number(max_epoch_slot))
-        .txOut("addr1wqrqca4ww7cwheu0aa7768a68v3rg9vv99ht8hms2yjdj3gs5l58f", [{
+        .txOut(scriptAddr, [{
             unit: "lovelace",
-            quantity: "1000000"
+            quantity: amount_to_spend.toString()
         }])
+        .txOutInlineDatumValue(mConStr0([]))
+        .txOut(scriptAddr, [{
+            unit: "lovelace",
+            quantity: return_quantity,
+
+        }])
+        .txOutInlineDatumValue(mConStr0([]))
         .complete();
 
     // --- Sign transaction with dummy wallet for collateral --- //
