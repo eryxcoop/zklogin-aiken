@@ -310,8 +310,8 @@ function App() {
       }
 
       let keys = {
-          "public_key": publicKeyBytes.toString(16),
-          "private_key": base64ToBigInt(secretKey).toString(16),
+          "public_key": publicKeyBytes.toString(16).padStart(64, '0'),
+          "private_key": base64ToBigInt(secretKey).toString(16).padStart(64, '0'),
       }
 
       const dump_str = JSON.stringify(dump, (_, v) =>
