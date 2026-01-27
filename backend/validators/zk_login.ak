@@ -85,18 +85,24 @@ fn zk_verify_or_fail(
 
 test test_example() {
   let proof: Proof = Proof {
-                     	piA: #"af0edcd733271e1585d02fe9748a041cb822324639928e879242b7f43c2e2dda89dc5cae4ae702a04d33a9057ce5d8b5",
-                     	piB: #"99443c9347f13641671ede901896c7f50143699860411be24cd5064256c2e7cda176f6486503235aa4dcea2347c94bb219ab9d6c37167cbaf25593be17831aa6d671071bdc707acdb12b422bfcdbe26c9fc44ab0062f98a2d9dd1b275fc69895",
-                     	piC: #"8d6dd46b5f2553f2bc61dfcb6cbfbc63b6e5d45df0d7456ac9b30bb21429c9e2f6d89b4e075a7692edcdd3f40e3dd38b",
+                     	piA: #"970b9588e1946f41b9e15880ed4b505e1222cd5243368676f32029f73d912ba49ae728ab77468742e47e6e0cd6cceb04",
+                     	piB: #"b39e3dea0463e6aefeadd74498462807b14bb045f54332f598d5498b938e1e344113b7cfbe1c8705b4d3b59243b3178b198662587205f2874b6b39e22f6e6a172d7a0459eeadb66e686ad0b07fbb39ce7d590bf5a5a6a465e245fabf07bd7fe2",
+                     	piC: #"93d79dc4fd3629c52ac125e8164c07d7bcf128cf73d7bcdd36e4d4ee1e5295a15d0cc052814abda89150bda2315c5fd0",
                      }
 
   test_proof_is_valid(proof)
 }
 
 fn test_proof_is_valid(proof: Proof) -> Bool {
+    // ---- REPLACE THESE VALUES ---- //
+    let zkLoginId = 14148750501214927097030011212605728027483349936086135333593501826084812421527
+    let max_epoch = 1769542273000
+    let ephemeral_public_key = #"fbc4d2a26e628fa073c1dc4dee4b9934baee20ce18503ebf48a2610e77673f08"
+    // ------------------------------ //
+
     let zklogin_redeemer = ZkLoginRedeemer {
-        max_epoch: 1769535438000,
-        ephemeral_public_key: #"0f31c5411bbcb96fcdebec480c26511bf5eaaa055d2424c57c38e3c737d0580b"
+        max_epoch: max_epoch,
+        ephemeral_public_key: ephemeral_public_key
     }
 
     let hashed_ephemeral_public_key = blake2b_224(zklogin_redeemer.ephemeral_public_key)
@@ -107,7 +113,7 @@ fn test_proof_is_valid(proof: Proof) -> Bool {
     let utxo_reference = OutputReference { transaction_id: "", output_index: 0 }
 
     zk_login.spend(
-        14148750501214927097030011212605728027483349936086135333593501826084812421527,
+        zkLoginId,
         None,
         ZK { redeemer: zklogin_redeemer, proofs: [proof] },
         utxo_reference,
