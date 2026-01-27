@@ -1,14 +1,5 @@
-import {
-    BlockfrostProvider,
-    mConStr0,
-    MeshTxBuilder,
-    MeshWallet,
-    resolveSlotNo,
-    serializePlutusScript,
-    UTxO
-} from "@meshsdk/core";
-import {applyParamsToScript} from "@meshsdk/core-csl";
-import blueprint from "../plutus.json";
+import {mConStr0, MeshWallet, resolveSlotNo} from "@meshsdk/core";
+
 import {
     PrivateKey,
     PublicKey,
@@ -20,97 +11,52 @@ import {
 import "dotenv/config";
 import {blake2b} from "blakejs";
 import {mZKRedeemer} from "./zk_redeemer";
-
-export const AMOUNT_TO_SEND_TO_SCRIPT: string = (500 * 1000000).toString();
-
-let blockfrostKey = process.env.BLOCKFROST_PROJECT_ID;
-const blockchainProvider = new BlockfrostProvider(blockfrostKey);
-
-function createDummyWallet() {
-    return new MeshWallet({
-        networkId: 0,
-        fetcher: blockchainProvider,
-        submitter: blockchainProvider,
-        key: {
-            type: "mnemonic",
-            words: ["solution", "solution", "solution", "solution", "solution", "solution", "solution", "solution", "solution", "solution", "solution", "solution", "solution", "solution", "solution", "solution", "solution", "solution", "solution", "solution", "solution", "solution", "solution", "solution"],
-        },
-    });
-}
-
-export function getScript() {
-    const scriptCbor = applyParamsToScript(
-        blueprint.validators[0].compiledCode,
-        [BigInt("14148750501214927097030011212605728027483349936086135333593501826084812421527")]
-    );
-
-    const scriptAddr = serializePlutusScript(
-        {code: scriptCbor, version: "V3"},
-    ).address;
-
-    return {scriptCbor, scriptAddr};
-}
-
-// reusable function to get a transaction builder
-export function getTxBuilder() {
-    return new MeshTxBuilder({
-        fetcher: blockchainProvider,
-        submitter: blockchainProvider,
-    });
-}
-
-async function getUtxoByTxHashAndAddress(blockchainProvider: BlockfrostProvider, txHash: string, address: string): Promise<UTxO> {
-    const utxos = await blockchainProvider.fetchUTxOs(txHash);
-
-    const matchingUtxos = utxos.filter((utxo) => utxo.output.address === address);
-
-    if (matchingUtxos.length === 0) {
-        throw new Error(`UTxO not found for address: ${address}`);
-    }
-
-    return matchingUtxos[0];
-}
+import {sponsorWallet, blockchainProvider, getScript, getTxBuilder} from "./common"
+import {MAX_EPOCH, EPH_PUBLIC_KEY_HEX, EPH_PRIVATE_KEY_HEX} from "./transactionData"
 
 async function main() {
-    // Future parameters
-    const max_epoch = 1769535438000;
-    const eph_public_key_hex = "0f31c5411bbcb96fcdebec480c26511bf5eaaa055d2424c57c38e3c737d0580b";
-    const eph_private_key_hex = "1e474cb19b4e9a86dd267b16d5afc5554fba4fa6277224c958c9d3be066a8a1d";
 
     const {scriptCbor, scriptAddr} = getScript();
     console.log("Enviando ADA al address ", scriptAddr)
-    let dummyWallet = createDummyWallet();
 
     // --- Obtain public and private keys --- //
 
-    const eph_private_key = PrivateKey.from_normal_bytes(Buffer.from(eph_private_key_hex, "hex"));
+    const eph_private_key = PrivateKey.from_normal_bytes(Buffer.from(EPH_PRIVATE_KEY_HEX, "hex"));
 
-    const eph_public_key_bytes = Uint8Array.from(Buffer.from(eph_public_key_hex, "hex"));
+    const eph_public_key_bytes = Uint8Array.from(Buffer.from(EPH_PUBLIC_KEY_HEX, "hex"));
     const eph_public_key = PublicKey.from_bytes(eph_public_key_bytes)
 
     const scriptUtxos = (await blockchainProvider.fetchAddressUTxOs(scriptAddr));
-    const scriptUtxo = scriptUtxos.filter((utxo)=> utxo.output.amount[0].quantity == AMOUNT_TO_SEND_TO_SCRIPT)[0];
-    console.log("scriptWithDatum: ",JSON.stringify(scriptUtxo, null, 2));
+    const scriptUtxosWithDatum  = scriptUtxos.filter(
+        (utxo)=> utxo.output.plutusData !== undefined && utxo.output.dataHash !== undefined );
 
-    let collaterals = await dummyWallet.getCollateral();
+    if (scriptUtxosWithDatum.length === 0) {
+        console.error("No UTxOs with datum found");
+        return 1;
+    }
+
+    const inputScriptUTxOWithDatum = scriptUtxosWithDatum[0];
+    console.log("inputScriptUTxOWithDatum: ",JSON.stringify(inputScriptUTxOWithDatum, null, 2));
+
+    let collaterals = await sponsorWallet.getCollateral();
     const collateral = collaterals[0];
 
-    let max_epoch_POSIX_time = new Date(max_epoch);
+    let max_epoch_POSIX_time = new Date(MAX_EPOCH);
     console.log("max_epoch_POSIX_time", max_epoch_POSIX_time.getTime())
     const max_epoch_slot = resolveSlotNo('preview', max_epoch_POSIX_time.getTime());
     console.log("max_epoch_slot", max_epoch_slot)
 
-    let redeemer = mConStr0([max_epoch, Buffer.from(eph_public_key_bytes).toString("hex")]);
+    let redeemer = mConStr0([MAX_EPOCH, Buffer.from(eph_public_key_bytes).toString("hex")]);
     let zk_redeemer = mZKRedeemer(redeemer);
 
     const txBuilder = getTxBuilder();
     await txBuilder
         .spendingPlutusScript("V3")
         .txIn(
-            scriptUtxo.input.txHash,
-            scriptUtxo.input.outputIndex,
-            scriptUtxo.output.amount,
-            scriptUtxo.output.address
+            inputScriptUTxOWithDatum.input.txHash,
+            inputScriptUTxOWithDatum.input.outputIndex,
+            inputScriptUTxOWithDatum.output.amount,
+            inputScriptUTxOWithDatum.output.address
         )
         .txInScript(scriptCbor)
         .txInRedeemerValue(zk_redeemer)
@@ -133,7 +79,7 @@ async function main() {
         .complete();
 
     // --- Sign transaction with dummy wallet for collateral --- //
-    const partiallySigned = await dummyWallet.signTx(txBuilder.txHex, true);
+    const partiallySigned = await sponsorWallet.signTx(txBuilder.txHex, true);
 
     // --- Sign transaction with ephemeral private key --- //
     const unsignedTx = Transaction.from_bytes(
@@ -166,10 +112,8 @@ async function main() {
     // --- Submit transaction --- //
     console.log("Se va a submitear la transaccion")
     const signedTxHex = signedTx.to_hex();
-    const response = await dummyWallet.submitTx(signedTxHex);
+    const response = await sponsorWallet.submitTx(signedTxHex);
     console.log("Tx hash:", response);
 }
-
-
 
 main()

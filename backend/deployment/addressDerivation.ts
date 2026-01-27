@@ -1,7 +1,7 @@
 import {readFileSync} from "node:fs";
 import {applyParamsToScript} from "@meshsdk/core-csl";
 import {serializePlutusScript} from "@meshsdk/core";
-
+import {ZKLOGIN_ID} from "./transactionData"
 
 async function main() {
     const compiledContractPath = "./plutus.json";
@@ -11,7 +11,7 @@ async function main() {
     const parsedJson = JSON.parse(jsonString);
     const parameterized_script = applyParamsToScript(
         parsedJson.validators[validatorScriptIndex].compiledCode,
-        [BigInt("14148750501214927097030011212605728027483349936086135333593501826084812421527")]
+        [ZKLOGIN_ID]
     );
     const scriptAddr = serializePlutusScript(
         {code: parameterized_script, version: "V3"}
