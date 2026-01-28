@@ -110,6 +110,11 @@ function App() {
   const [executingTxn, setExecutingTxn] = useState(false);
   const [executeDigest, setExecuteDigest] = useState("");
 
+  //Generate user Cardano address
+  const [inputZkLoginJson, setInputZkLoginJson] = useState("");
+  const [ephemeralPublicKey, setEphemeralPublicKey] = useState("");
+  const [ephemeralPrivateKey, setEphemeralPrivateKey] = useState("");
+
   // Change language
   useEffect(() => {
     i18n.changeLanguage(lang);
@@ -290,7 +295,7 @@ function App() {
       const aud_ascii = base64toAscii(jwtDecoded.aud)
       const sub_ascii = base64toAscii(jwtDecoded.sub)
 
-      let dump = {
+      const inputZkLogin = {
           "nonce": base64ToBigInt(nonce),
           "eph_pk_high": eph_public_key_high.toString(10),
           "eph_pk_low": eph_public_key_low.toString(10),
@@ -309,17 +314,12 @@ function App() {
           "sub_offset": 206,
       }
 
-      let keys = {
-          "public_key": publicKeyBytes.toString(16),
-          "private_key": base64ToBigInt(secretKey).toString(16),
-      }
+      const publicKeyString = publicKeyBytes.toString(16).padStart(64, '0');
+      const privateKeyString = base64ToBigInt(secretKey).toString(16).padStart(64, '0');
 
-      const dump_str = JSON.stringify(dump, (_, v) =>
-          typeof v === 'bigint' ? v.toString() : v
-      , 2);
-
-      console.log(dump_str);
-      console.log(JSON.stringify(keys))
+      setInputZkLoginJson(inputZkLogin);
+      setEphemeralPublicKey(publicKeyString);
+      setEphemeralPrivateKey(privateKeyString);
   }
 
   return (
@@ -952,12 +952,63 @@ ${JSON.stringify(decodedJwt, null, 2)}`}
               )}
 
             </Typography>
-              <Button
-                  variant="contained"
-                  onClick={gatherData}
+              <Box>
+                  <Button
+                      variant="contained"
+                      onClick={gatherData}
+                  >
+                      Generate session data
+                  </Button>
+              </Box>
+              input_zkLogin.json:
+              {ephemeralPublicKey && (
+                  <SyntaxHighlighter
+                      wrapLongLines
+                      language="json"
+                      style={oneDark}
+                      customStyle={{height: '300px', overflow: 'auto'}}
+                  >
+                  {JSON.stringify(inputZkLoginJson, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2)}
+                </SyntaxHighlighter>
+              )}
+              <Typography
+                  sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "20px",
+                  }}
               >
-                  Print session data
-              </Button>
+                  ephemeral_public_key:
+                  {ephemeralPublicKey && (
+                      <code>
+                          <Typography
+                              component="span"
+                              sx={{ fontFamily: "'Noto Sans Mono', monospace;", fontWeight: 600 }}
+                          >
+                              {ephemeralPublicKey}
+                          </Typography>
+                      </code>
+                  )}
+              </Typography>
+                  <Typography
+                      sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "20px",
+                      }}
+                  >
+                  ephemeral_private_key:
+                      {ephemeralPrivateKey && (
+                          <code>
+                              <Typography
+                                  component="span"
+                                  sx={{ fontFamily: "'Noto Sans Mono', monospace;", fontWeight: 600 }}
+                              >
+                                  {ephemeralPrivateKey}
+                              </Typography>
+                          </code>
+                      )}
+              </Typography>
               {/*<Typography>
                   <LoadingButton
                       variant="contained"

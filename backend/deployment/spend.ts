@@ -17,7 +17,7 @@ import {MAX_EPOCH, EPH_PUBLIC_KEY_HEX, EPH_PRIVATE_KEY_HEX} from "./transactionD
 async function main() {
 
     const {scriptCbor, scriptAddr} = getScript();
-    console.log("Enviando ADA al address ", scriptAddr)
+    console.log("Sending ADA to address ", scriptAddr)
 
     // --- Obtain public and private keys --- //
 
@@ -36,18 +36,22 @@ async function main() {
     }
 
     const inputScriptUTxOWithDatum = scriptUtxosWithDatum[0];
-    console.log("inputScriptUTxOWithDatum: ",JSON.stringify(inputScriptUTxOWithDatum, null, 2));
+    // console.log("inputScriptUTxOWithDatum: ",JSON.stringify(inputScriptUTxOWithDatum, null, 2));
 
     let collaterals = await sponsorWallet.getCollateral();
     const collateral = collaterals[0];
 
     let max_epoch_POSIX_time = new Date(MAX_EPOCH);
-    console.log("max_epoch_POSIX_time", max_epoch_POSIX_time.getTime())
+    // console.log("max_epoch_POSIX_time", max_epoch_POSIX_time.getTime())
     const max_epoch_slot = resolveSlotNo('preview', max_epoch_POSIX_time.getTime());
-    console.log("max_epoch_slot", max_epoch_slot)
+    // console.log("max_epoch_slot", max_epoch_slot)
 
     let redeemer = mConStr0([MAX_EPOCH, Buffer.from(eph_public_key_bytes).toString("hex")]);
     let zk_redeemer = mZKRedeemer(redeemer);
+
+    let amount_to_spend = 1000000
+    let fee_cap = 2000000
+    let return_quantity = (Number(inputScriptUTxOWithDatum.output.amount[0].quantity) - amount_to_spend - fee_cap).toString();
 
     const txBuilder = getTxBuilder();
     await txBuilder
@@ -72,10 +76,17 @@ async function main() {
             collateral.output.address
         )
         .invalidHereafter(Number(max_epoch_slot))
-        .txOut("addr1wqrqca4ww7cwheu0aa7768a68v3rg9vv99ht8hms2yjdj3gs5l58f", [{
+        .txOut(scriptAddr, [{
             unit: "lovelace",
-            quantity: "1000000"
+            quantity: amount_to_spend.toString()
         }])
+        .txOutInlineDatumValue(mConStr0([]))
+        .txOut(scriptAddr, [{
+            unit: "lovelace",
+            quantity: return_quantity,
+
+        }])
+        .txOutInlineDatumValue(mConStr0([]))
         .complete();
 
     // --- Sign transaction with dummy wallet for collateral --- //
@@ -110,7 +121,7 @@ async function main() {
     // console.log(signedTx.to_json());
 
     // --- Submit transaction --- //
-    console.log("Se va a submitear la transaccion")
+    console.log("The transaction is being submited")
     const signedTxHex = signedTx.to_hex();
     const response = await sponsorWallet.submitTx(signedTxHex);
     console.log("Tx hash:", response);

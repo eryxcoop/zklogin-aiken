@@ -1,6 +1,8 @@
 import {BlockfrostProvider, MeshTxBuilder, MeshWallet, serializePlutusScript, UTxO} from "@meshsdk/core";
 import {applyParamsToScript} from "@meshsdk/core-csl";
 import blueprint from "../plutus.json";
+import { ZKLOGIN_ID } from "./transactionData";
+import "dotenv/config";
 
 const blockfrostKey = process.env.BLOCKFROST_PROJECT_ID;
 export const blockchainProvider = new BlockfrostProvider(blockfrostKey);
@@ -8,7 +10,7 @@ export const blockchainProvider = new BlockfrostProvider(blockfrostKey);
 export function getScript() {
     const scriptCbor = applyParamsToScript(
         blueprint.validators[0].compiledCode,
-        [BigInt("14148750501214927097030011212605728027483349936086135333593501826084812421527")]
+        [ZKLOGIN_ID]
     );
 
     const scriptAddr = serializePlutusScript(
