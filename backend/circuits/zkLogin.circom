@@ -58,5 +58,29 @@ template ZkLogin(payloadSize, nonceSize, issSize, audSize, subSize) {
 
 }
 
+template checkJwtSignature(headerSize, payloadSize, signatureSize) {
+    signal jwt_header_dot_payload;
+    signal jwt_signature;
+    signal input OIDC_provider_pk;
+
+    var headerDotPayloadSize = headerSize + 1 + payloadSize;
+    var jwtSize = headerDotPayloadSize + 1 + signatureSize;
+
+    component jwt_header_dot_payloadExtract = SliceFixed(jwtSize, headerDotPayloadSize);
+    jwt_header_dot_payloadExtract.in <== jwt;
+    jwt_header_dot_payloadExtract.offset <== 0;
+    jwt_header_dot_payload <== jwt_header_dot_payloadExtract.out;
+
+
+    /*Verificar firma jwt(jwt, pubkey)
+    HeaderB4url
+    PayloadB64url
+    pubkey
+    Firma: base64url
+    sha256(HeaderB64url.PayloadB64.url) = HASH
+    decrypt(pubkey, signatureB64url) = decodedSignature
+    decodedSignature == HASH*/
+}
+
 component main {public [eph_pk_high, eph_pk_low, zkLoginId, max_epoch]} = ZkLogin(384,44,27,72,21);
 
