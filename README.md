@@ -2,9 +2,11 @@
 This repo contains an implementation of the zkLogin protocol in the cardano blockchain. The key contributions are the Aiken source code that regulates the fund spending of the zkLogin addresses and the Circom circuits that verify the autenticity of the owner. 
 
 ## Dependencies
-* npm
-* aiken-zk (https://github.com/eryxcoop/cardano-zk-aiken). Clone the repo and follow the steps in https://github.com/eryxcoop/cardano-zk-aiken/tree/main/aiken-zk (Prerequisites and Installation sections).
-* aiken
+* ```npm```
+* ```aiken-zk``` (https://github.com/eryxcoop/cardano-zk-aiken). Clone the repo and follow the steps in https://github.com/eryxcoop/cardano-zk-aiken/tree/main/aiken-zk (Prerequisites and Installation sections).
+* ```aiken```
+* ```git lfs``` (https://git-lfs.com/)
+* ```snarkjs``` **globally** (also a dependency of aiken-zk)
 
 ## Note
 Most of the flow in the next section is going to be automated in the milestone 3 so that the user can interact only with the frontend. 
@@ -12,6 +14,7 @@ Most of the flow in the next section is going to be automated in the milestone 3
 ## User flow for the 2nd milestone 
 To try the new features introduced in the milestone 2 of the Catalyst proposal (https://milestones.projectcatalyst.io/projects/1400130/milestones/2) you should follow the next steps:
 
+* Run ```git lfs pull```, if it fails, install git lfs (listed in the dependencies).
 * Go to the ```frontend``` directory and run ```npm install```.
 * Run ```npm run dev```. This will start a server that will let you enter the application flow (most likely in http://localhost:5173/).
 * Follow the steps 1-5 for generating the temporal credentials for the zkLogin Access. If at any point you want to reset the flow, just click the red button in the top right corner that says "Reset LocalState".
@@ -20,7 +23,7 @@ To try the new features introduced in the milestone 2 of the Catalyst proposal (
 * Install ```aiken-zk``` (listed in dependencies) if you haven't already.
 
 #### Option 1: Run the Aiken test
-* Go to the ```backend``` directory. 
+* Go to the ```backend``` directory and run ```npm install```. 
 * Run ```aiken-zk prove aiken circuits/zkLogin.circom verification_key.zkey circuit_inputs/input_zkLogin.json proof.ak```. If you installed ```aiken-zk``` and all its dependencies correctly, you should find a ```proof.ak``` in the ```backend``` directory. This file contains a Groth16 zk proof formatted ready for an aiken test!  
 * Open the ```validators/zk_login.ak``` file and paste the contents of ```proof.ak``` in the ```test_example()``` method, replacing the previous one. Also, in the function ```fn test_proof_is_valid(proof: Proof) -> Bool``` of the same file, you should replace the values of:
   * ```zkLoginId```: found in the step 5 of the frontend
