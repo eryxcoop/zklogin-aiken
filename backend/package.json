@@ -4,13 +4,17 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  },
   "dependencies": {
     "@emurgo/cardano-serialization-lib-nodejs": "^15.0.3",
     "@meshsdk/core": "^1.9.0-beta.96",
     "@meshsdk/core-csl": "^1.9.0-beta.96",
     "blakejs": "^1.2.1",
     "chai": "^6.2.2",
+    "circom_tester": "^0.0.24",
     "circomlib": "^2.0.5",
     "dotenv": "^17.2.3",
     "poseidon-bls12381": "^1.0.2",

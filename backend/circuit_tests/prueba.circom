@@ -1,5 +1,7 @@
+pragma circom 2.2.3;
+
 template xxx() {
-    1 == 1;
+    1 === 1;
 }
 
-componente main = xxx();
+component main = xxx();
