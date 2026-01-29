@@ -79,7 +79,7 @@ template checkJwtSignature(headerSize, payloadSize, signatureSize) {
     Firma: base64url
     sha256(HeaderB64url.PayloadB64.url) = HASH
     decrypt(pubkey, signatureB64url) = decodedSignature
-    decodedSignature == HASH*/
+    decodedSignature === HASH*/
 }
 
 component main {public [eph_pk_high, eph_pk_low, zkLoginId, max_epoch]} = ZkLogin(384,44,27,72,21);
