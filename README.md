@@ -32,6 +32,7 @@ To try the new features introduced in the milestone 2 of the Catalyst proposal (
 * Run ```aiken check```. If everything went as expected, you should have the test passing!
 
 #### Option 2: Deploy a real transaction
+* Go to the ```backend``` directory and run ```npm install``` if you haven't already.
 * In the ```backend``` directory run ```aiken build```. This should generate a ```plutus.json``` file in the ```backend``` directory.
 * Run ```aiken-zk prove meshjs circuits/zkLogin.circom verification_key.zkey circuit_inputs/input_zkLogin.json deployment/zk_redeemer.ts```. This will generate a file in ```backend/deployment/zk_redeemer.ts``` with an integrated zk proof.
 * Fill the ```.env``` file with your own Blockfrost key. Create or look for it in https://blockfrost.io.
