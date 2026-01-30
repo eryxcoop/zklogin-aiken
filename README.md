@@ -41,5 +41,5 @@ To try the new features introduced in the milestone 2 of the Catalyst proposal (
   * ```max_epoch```: at this point should be in the ```input_zkLogin.json``` file
   * ```ephemeral_public_key``` and ```ephemeral_private_key```: data from step 5 of the frontend. They should be both hexadecimal numbers.
 * Run ```npx tsx deployment/addressDerivation.ts```. This will generate your zkLogin address based on the zkLoginId you provided in the previous step.  
-* Run ```npx tsx deployment/lockWithDatum.ts```. This will send funds to your zkLoginAddress.
+* Run ```npx tsx deployment/lockWithDatum.ts```. This will send funds to your zkLoginAddress and you should wait for the transaction to take impact (check for the generated address in [cardanoscan](https://preprod.cardanoscan.io/)).
 * Run ```npx tsx deployment/spend.ts```. This will unlock funds from your zkLoginAddress into another address (which you can pick by changing the ```txOut``` in the ```spend.ts``` file).
