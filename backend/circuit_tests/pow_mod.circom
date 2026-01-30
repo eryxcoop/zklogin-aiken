@@ -1,6 +1,6 @@
 pragma circom 2.0.0;
  
-include "../circom-ecdsa/circuits/bigint.circom";
+include "./bigint.circom";
 // w = 32
 // base ** exp mod modulus
 // nb is the length of the input number
