@@ -1,4 +1,3 @@
-import {assert} from "chai";
 import {wasm as wasm_tester} from "circom_tester";
 import {fileURLToPath} from 'url';
 import path from 'path';
@@ -6,8 +5,7 @@ import path from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// const assert = chai.assert;
-function bigint_to_limbs(limbSizeInBits, amountOfLimbs, bigint) {
+function a_bigint_to_limbs(amountOfLimbs, limbSizeInBits, bigint) {
     let mod = 1n;
     for (var idx = 0; idx < limbSizeInBits; idx++) {
         mod = mod * 2n;
@@ -40,10 +38,10 @@ describe("Circuit test", function () {
         let signature = BigInt("5145559121648581779772074153094490247393445260452952141482684307469231428748548144983684147091020528283748226457169802377763197677906082875379043113855634752062186025818864488745257351456651783340753505130064101035830740199094856463226782725519549056338442963660265485420759911223585393698016426247702101842926601471191270412325619723591911258864004588065914607780968553021546595631752559089255150912010385265002613684225837756637514982674733376021179464774090472654689419916992370827091889421252937825753980860643068000942650360058170396691631601029310791359435532906100455010378178799578875298407393407890159548193");
         // hashed data. decimal
         let hashed = BigInt("0xe5ae8342fb5e645fadf301f7d265e299dc08068c17b35f79aed65922722bbdd5");
-        let public_key_exponent_array = bigint_to_limbs(64, 32, public_key_exponent);
-        let signature_array = bigint_to_limbs(64, 32, signature);
-        let public_key_modulus_array = bigint_to_limbs(64, 32, public_key_modulus);
-        let hashed_array = bigint_to_limbs(64, 4, hashed);
+        let public_key_exponent_array = a_bigint_to_limbs(32, 64, public_key_exponent);
+        let signature_array = a_bigint_to_limbs(32, 64, signature);
+        let public_key_modulus_array = a_bigint_to_limbs(32, 64, public_key_modulus);
+        let hashed_array = a_bigint_to_limbs(4, 64, hashed);
         const witness = await circuit.calculateWitness({
             "headerDotPayloadBitArray": headerDotPayloadBitArray,
             "public_key_exponent": public_key_exponent_array,
@@ -62,10 +60,21 @@ describe("Circuit test", function () {
     }, 1000000);
 
     it("can converter a bigint zero into 256 limbs of 1 bit (256bits)", async () => {
-        const inputBits = bigint_to_limbs(1, 256, BigInt("0x0000000000000000000000000000000000000000000000000000000000000000"));
+        const inputBits = a_bigint_to_limbs(256, 1, BigInt("0x0000000000000000000000000000000000000000000000000000000000000000"));
         const witness = await circuit_converter.calculateWitness({
             "inputBits": inputBits,
             "outputLimbs": [0,0]
+        }, true);
+        // await circuit.assertOut(witness, {hash : F.toObject(res2)});
+        await circuit_converter.checkConstraints(witness);
+    }, 1000000);
+
+    it("can converter a bigint zero into 256 limbs of 1 bit (256bits) xxx", async () => {
+        const oneTailedWith127Zeroes = 2n**127n;
+        let input = oneTailedWith127Zeroes*(2n**128n) + oneTailedWith127Zeroes;
+        const witness = await circuit_converter.calculateWitness({
+            "inputBits": a_bigint_to_limbs(256, 1, input),
+            "outputLimbs": a_bigint_to_limbs(2, 128, input)
         }, true);
         // await circuit.assertOut(witness, {hash : F.toObject(res2)});
         await circuit_converter.checkConstraints(witness);
