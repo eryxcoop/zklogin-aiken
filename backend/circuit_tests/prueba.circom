@@ -1,27 +1,7 @@
 pragma circom 2.2.3;
 include "../node_modules/circomlib/circuits/sha256/sha256.circom";
 include "./rsa_verify.circom";
-
-template Converter256BitsTo2FieldElements(numberOfLimbs) {
-    signal input in[256];
-    signal output out[numberOfLimbs];
-
-    assert (256 % numberOfLimbs == 0);
-
-    var sizeOfLimbs = 256 / numberOfLimbs;
-
-    signal accumulator[numberOfLimbs][sizeOfLimbs];
-    var indexOfLimb;
-    var k;
-
-    for (indexOfLimb=0; indexOfLimb < numberOfLimbs; indexOfLimb++) {
-        accumulator[indexOfLimb][0] <== in[sizeOfLimbs*indexOfLimb];
-        for (k=1; k < sizeOfLimbs; k++) {
-             accumulator[indexOfLimb][k] <== (2 * accumulator[indexOfLimb][k-1]) + in[k+sizeOfLimbs*indexOfLimb];
-        }
-        out[indexOfLimb] <== accumulator[indexOfLimb][sizeOfLimbs-1];
-    }
-}
+include "./converter_256_bits_to_n_field_elements.circom";
 
 template xxx() {
     signal input headerDotPayloadBitArray[1024]; // [0, 1, 0, ... 0, 1]
@@ -40,11 +20,12 @@ template xxx() {
 
     hash === sha.out;
 
-    component converter = Converter256BitsTo2FieldElements(4);
+    /*
+    component converter = Converter256BitsToNFieldElements(4);
 
     converter.in <== sha.out;
     converter.out === hashed;
-
+    */
 
     // RsaVerifyPkcs1v15(w, nb, e_bits, hashLen)
     component rsaVerify = RsaVerifyPkcs1v15(64, 32, 17, 4);
