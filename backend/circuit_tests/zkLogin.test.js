@@ -73,8 +73,8 @@ describe("Circuit test", function () {
         const oneTailedWith127Zeroes = 2n**127n;
         let input = oneTailedWith127Zeroes*(2n**128n) + oneTailedWith127Zeroes;
         const witness = await circuit_converter.calculateWitness({
-            "inputBits": a_bigint_to_limbs(256, 1, input),
-            "outputLimbs": a_bigint_to_limbs(2, 128, input)
+            "inputBits": a_bigint_to_limbs(256, 1, input).reverse(),
+            "outputLimbs": a_bigint_to_limbs(2, 128, input).reverse()
         }, true);
         // await circuit.assertOut(witness, {hash : F.toObject(res2)});
         await circuit_converter.checkConstraints(witness);

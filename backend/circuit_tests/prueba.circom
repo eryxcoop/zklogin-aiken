@@ -20,19 +20,23 @@ template xxx() {
 
     hash === sha.out;
 
-    /*
     component converter = Converter256BitsToNFieldElements(4);
 
-    converter.in <== sha.out;
-    converter.out === hashed;
-    */
+    converter.inputBits <== sha.out;
+    converter.outputLimbs[0] === hashed[3];
+    converter.outputLimbs[1] === hashed[2];
+    converter.outputLimbs[2] === hashed[1];
+    converter.outputLimbs[3] === hashed[0];
 
     // RsaVerifyPkcs1v15(w, nb, e_bits, hashLen)
     component rsaVerify = RsaVerifyPkcs1v15(64, 32, 17, 4);
     rsaVerify.exp <== public_key_exponent;
     rsaVerify.sign <== signature;
     rsaVerify.modulus <== public_key_modulus;
-    rsaVerify.hashed <== hashed;
+    rsaVerify.hashed[0] <== converter.outputLimbs[3];
+    rsaVerify.hashed[1] <== converter.outputLimbs[2];
+    rsaVerify.hashed[2] <== converter.outputLimbs[1];
+    rsaVerify.hashed[3] <== converter.outputLimbs[0];
 }
 
 component main = xxx();
