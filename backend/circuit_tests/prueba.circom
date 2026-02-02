@@ -4,9 +4,9 @@ include "./rsa_verify.circom";
 
 template xxx() {
     signal input headerDotPayloadBitArray[5552]; // [0, 1, 0, ... 0, 1]
-    signal input exp[32];
+    signal input public_key_exponent[32];
     signal input signature[32];
-    signal input modulus[32];
+    signal input public_key_modulus[32];
     signal input hashed[4];
     signal output hash[256];
 
@@ -21,9 +21,9 @@ template xxx() {
 
     // RsaVerifyPkcs1v15(w, nb, e_bits, hashLen)
     component rsaVerify = RsaVerifyPkcs1v15(64, 32, 17, 4);
-    rsaVerify.exp <== exp;
+    rsaVerify.exp <== public_key_exponent;
     rsaVerify.sign <== signature;
-    rsaVerify.modulus <== modulus;
+    rsaVerify.modulus <== public_key_modulus;
     rsaVerify.hashed <== hashed;
 }
 
