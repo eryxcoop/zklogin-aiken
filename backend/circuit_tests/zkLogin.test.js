@@ -7,15 +7,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // const assert = chai.assert;
-function bigint_to_array(n, k, x) {
+function bigint_to_limbs(limbSizeInBits, amountOfLimbs, bigint) {
     let mod = 1n;
-    for (var idx = 0; idx < n; idx++) {
+    for (var idx = 0; idx < limbSizeInBits; idx++) {
         mod = mod * 2n;
     }
 
     let ret = [];
-    var x_temp = x;
-    for (var idx = 0; idx < k; idx++) {
+    var x_temp = bigint;
+    for (var idx = 0; idx < amountOfLimbs; idx++) {
         ret.push(x_temp % mod);
         x_temp = x_temp / mod;
     }
@@ -25,9 +25,11 @@ function bigint_to_array(n, k, x) {
 
 describe("Circuit test", function () {
     let circuit;
+    let circuit_converter;
 
     beforeAll(async () => {
         circuit = await wasm_tester(path.join(__dirname, "prueba.circom"));
+        circuit_converter = await wasm_tester(path.join(__dirname, "test_converter_256_bits_to_n_field_elements.circom"));
     }, 1000000);
 
     it("verifies jwt signature using RS256", async () => {
@@ -38,10 +40,10 @@ describe("Circuit test", function () {
         let signature = BigInt("5145559121648581779772074153094490247393445260452952141482684307469231428748548144983684147091020528283748226457169802377763197677906082875379043113855634752062186025818864488745257351456651783340753505130064101035830740199094856463226782725519549056338442963660265485420759911223585393698016426247702101842926601471191270412325619723591911258864004588065914607780968553021546595631752559089255150912010385265002613684225837756637514982674733376021179464774090472654689419916992370827091889421252937825753980860643068000942650360058170396691631601029310791359435532906100455010378178799578875298407393407890159548193");
         // hashed data. decimal
         let hashed = BigInt("0xe5ae8342fb5e645fadf301f7d265e299dc08068c17b35f79aed65922722bbdd5");
-        let public_key_exponent_array = bigint_to_array(64, 32, public_key_exponent);
-        let signature_array = bigint_to_array(64, 32, signature);
-        let public_key_modulus_array = bigint_to_array(64, 32, public_key_modulus);
-        let hashed_array = bigint_to_array(64, 4, hashed);
+        let public_key_exponent_array = bigint_to_limbs(64, 32, public_key_exponent);
+        let signature_array = bigint_to_limbs(64, 32, signature);
+        let public_key_modulus_array = bigint_to_limbs(64, 32, public_key_modulus);
+        let hashed_array = bigint_to_limbs(64, 4, hashed);
         const witness = await circuit.calculateWitness({
             "headerDotPayloadBitArray": headerDotPayloadBitArray,
             "public_key_exponent": public_key_exponent_array,
@@ -59,22 +61,13 @@ describe("Circuit test", function () {
         await circuit.checkConstraints(witness);
     }, 1000000);
 
-    /*it("XXX converter", async () => {
-        //eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTc3MDEyOTA4OX0
-        const headerDotPayloadBitArray = [0,1,1,0,0,1,0,1,0,1,1,1,1,0,0,1,0,1,0,0,1,0,1,0,0,1,1,0,1,0,0,0,0,1,1,0,0,0,1,0,0,1,0,0,0,1,1,1,0,1,1,0,0,0,1,1,0,1,1,0,1,0,0,1,0,1,0,0,1,1,1,1,0,1,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0,1,1,0,1,0,1,0,1,0,1,0,1,1,1,1,0,1,0,0,1,0,0,1,0,0,1,0,0,1,1,0,0,0,1,0,1,0,0,1,1,1,0,0,1,1,0,1,0,0,1,0,1,0,0,1,0,0,1,0,1,1,1,0,0,1,1,0,1,0,0,1,0,0,1,0,1,1,0,1,1,1,0,0,1,0,1,0,0,1,0,0,0,1,1,0,1,0,1,0,1,1,0,0,0,1,1,0,1,0,0,0,0,1,1,0,1,0,0,1,0,0,1,0,0,1,1,0,1,1,0,0,1,0,0,1,0,0,1,0,1,1,0,1,0,1,1,0,1,1,1,0,0,0,0,0,1,0,1,1,0,0,0,0,1,0,1,0,1,1,0,0,1,0,0,0,0,1,1,0,1,0,0,1,0,1,0,0,0,1,1,1,0,0,1,0,0,1,0,1,1,1,0,0,1,1,0,0,1,0,1,0,1,1,1,1,0,0,1,0,1,0,0,1,0,1,0,0,1,1,1,1,0,1,0,0,1,1,0,0,1,0,0,0,1,0,1,0,1,1,1,0,1,0,0,1,0,0,1,0,1,1,0,1,0,0,1,0,1,0,0,1,1,1,1,0,1,1,0,1,0,0,1,0,1,0,0,1,0,0,1,0,1,1,1,1,0,0,0,0,1,0,0,1,1,0,1,0,1,1,0,1,0,1,0,0,1,0,0,1,1,0,1,0,0,1,1,0,0,0,0,0,1,0,0,1,1,1,0,0,1,0,1,0,1,0,0,0,1,0,1,1,0,0,1,0,0,1,1,0,0,1,1,0,1,0,0,1,1,1,1,0,1,0,0,0,1,0,0,0,1,1,0,1,0,1,1,0,1,1,1,0,1,1,1,0,1,0,0,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,1,0,1,1,1,0,1,1,0,1,0,0,1,0,1,1,0,0,0,1,0,0,1,1,0,1,1,0,1,0,1,0,0,0,1,1,0,0,1,1,1,0,1,0,0,0,1,0,1,1,0,1,0,0,1,0,1,0,0,1,1,0,1,0,0,1,0,0,1,0,0,1,1,0,1,1,0,0,1,0,0,1,0,0,1,0,1,1,0,1,0,1,1,0,1,1,1,0,0,0,0,0,1,1,1,0,1,1,0,0,1,1,0,0,0,0,1,0,1,0,0,0,1,1,1,0,0,1,1,0,1,0,0,0,1,1,0,0,1,1,1,0,1,0,1,0,0,1,0,0,1,0,0,0,1,1,1,0,0,1,1,1,0,0,1,0,1,1,0,1,1,0,0,0,1,0,0,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,1,0,1,1,1,0,1,1,0,1,0,0,1,0,1,0,1,1,0,0,1,0,1,0,1,0,1,1,1,0,1,0,1,0,0,1,0,0,1,1,1,0,1,0,0,0,1,1,0,0,0,0,1,0,1,0,1,0,1,1,1,0,0,1,1,0,1,0,0,0,1,1,0,1,0,0,1,0,1,0,0,1,1,1,1,0,1,1,0,1,1,1,0,0,1,0,1,0,0,1,0,0,1,1,1,1,0,0,1,0,1,1,0,0,1,0,0,0,1,0,1,0,1,1,1,0,1,0,1,0,1,0,1,0,1,1,1,0,0,1,1,0,1,0,0,1,0,0,1,0,1,1,0,1,1,0,1,0,1,1,0,1,1,0,0,0,1,1,0,1,0,0,0,0,1,1,0,0,1,0,0,0,1,0,0,0,0,1,1,0,1,0,0,1,0,0,1,0,0,1,1,0,1,1,0,0,1,0,0,1,1,0,1,0,1,0,1,0,1,0,0,0,1,1,0,0,0,1,1,0,0,1,1,0,0,1,1,0,1,0,0,1,1,0,1,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,1,0,1,1,1,1,0,0,1,0,1,0,0,1,1,1,1,0,1,0,1,0,1,0,0,0,1,0,0,0,0,0,1,0,0,1,1,0,1,0,0,0,1,0,0,1,1,1,1,0,1,0,1,1,0,0,0,0,0,1,1,0,0,0,0];
-        let hashed = BigInt("0xe5ae8342fb5e645fadf301f7d265e299dc08068c17b35f79aed65922722bbdd5");
-        let hashed_array = bigint_to_array(64, 4, hashed);
-        const witness = await circuit.calculateWitness({
-            "input": headerDotPayloadBitArray,
-            "output": hashed_array
+    it("can converter a bigint zero into 256 limbs of 1 bit (256bits)", async () => {
+        const inputBits = bigint_to_limbs(1, 256, BigInt("0x0000000000000000000000000000000000000000000000000000000000000000"));
+        const witness = await circuit_converter.calculateWitness({
+            "inputBits": inputBits,
+            "outputLimbs": [0,0]
         }, true);
-        //const res2 = poseidon([1,2,0,0,0]);
-
-        // header.loadout
-        // eyJhbGciOiJSUzI1NiIsImtpZCI6Ijk1NDRkMGZmMDU5MGYwMjUzMDE2NDNmMzI3NWJmNjg3NzY3NjU4MjIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiI5MjA3MTkyMzA0MjEtbzZrdDUyMzVjczhwbTBic2ZkdGt0MGk1ZmxhN20wNzIuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI5MjA3MTkyMzA0MjEtbzZrdDUyMzVjczhwbTBic2ZkdGt0MGk1ZmxhN20wNzIuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMDI1NjMxNzQzNTY1ODczMDA2MTgiLCJub25jZSI6ImIvaTFmVUtVTEhpMzB0R25yZU80Y3BJQ0FoOXdmUFVkdUJ2bWNvYmpMWk09IiwibmJmIjoxNzY5NjI3NTA4LCJpYXQiOjE3Njk2Mjc4MDgsImV4cCI6MTc2OTYzMTQwOCwianRpIjoiZTQ4NGQxZTFhYjMxYmJmYzgwZGVlZjQyYzg1YzI0NTE3MmI5NTI0YiJ9
-
-        //assert(F.eq(F.e("1018317224307729531995786483840663576608797660851238720571059489595066344487"), F.e(res2)));
         // await circuit.assertOut(witness, {hash : F.toObject(res2)});
-        await circuit.checkConstraints(witness);
-    }, 1000000);*/
+        await circuit_converter.checkConstraints(witness);
+    }, 1000000);
 });
