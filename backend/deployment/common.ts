@@ -3,6 +3,7 @@ import {applyParamsToScript} from "@meshsdk/core-csl";
 import blueprint from "../plutus.json";
 import { ZKLOGIN_ID } from "./transactionData";
 import "dotenv/config";
+import {SPONSOR_WALLET_SK} from "./sponsorWalletCredentials";
 
 const blockfrostKey = process.env.BLOCKFROST_PROJECT_ID;
 export const blockchainProvider = new BlockfrostProvider(blockfrostKey);
@@ -45,6 +46,6 @@ export const sponsorWallet = new MeshWallet({
     submitter: blockchainProvider,
     key: {
         type: "root",
-        bech32: "xprv1dzs5hhar28g9npexd9jchdv28scvsv7pgcwjjlrk3mwd75svvexq34q43upfat3l6lugea6w29yw2q5lmz4efm5s9jp3u9ljeq8zjv92nyx63ysjtxagtrw8lt4js7pxeteqcystyvx9hcwvred95aggdyss3t6r"
+        bech32: SPONSOR_WALLET_SK
     },
 });

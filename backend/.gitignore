@@ -3,3 +3,5 @@ proof.ak
 me.addr
 me.sk
 plutus.json
+.env
+deployment/zk_redeemer.ts

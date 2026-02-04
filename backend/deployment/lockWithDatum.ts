@@ -2,6 +2,7 @@ import {ADA_TO_SEND_TO_SCRIPT, LOVELACE_TO_SEND_TO_SCRIPT} from "./transactionDa
 import {getScript, getTxBuilder, sponsorWallet} from "./common"
 import {mConStr0} from "@meshsdk/core";
 import "dotenv/config";
+import {SPONSOR_WALLET_ADDR} from "./sponsorWalletCredentials";
 
 async function lockTxWithDatum() {
     const {scriptAddr} = getScript();
@@ -12,7 +13,7 @@ async function lockTxWithDatum() {
             quantity: LOVELACE_TO_SEND_TO_SCRIPT
         }])
         .txOutInlineDatumValue(mConStr0([]))
-        .changeAddress("addr_test1qqd3yru5fdy97ascnrae2dtaxk03t9j2zumcv25x6fzze2fqqtlgdr0qadpj9jjt9sn8kyl475npqj4x770879fc5sss0yjd36")
+        .changeAddress(SPONSOR_WALLET_ADDR)
         .selectUtxosFrom(await sponsorWallet.getUtxos())
         .complete();
     const signedTx = await sponsorWallet.signTx(unsignedTx);
