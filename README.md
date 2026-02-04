@@ -19,7 +19,7 @@ To try the new features introduced in the milestone 2 of the Catalyst proposal (
 * Run ```npm run dev```. This will start a server that will let you enter the application flow (most likely in http://localhost:5173/).
 * Follow the steps 1-5 for generating the temporal credentials for the zkLogin Access. If at any point you want to reset the flow, just click the red button in the top right corner that says "Reset LocalState".
 * After having generated the session data in step 5, you should move to the backend now. Go to the ```backend``` directory and run ```npm install```. 
-* Copy ```input_zkLogin.json``` value into the ```circuit_inputs/input_zkLogin.json``` file.
+* Create a new file called ```circuit_inputs/input_zkLogin.json``` and copy ```input_zkLogin.json``` value from step 5.
 * Install ```aiken-zk``` (listed in dependencies) if you haven't already.
 
 #### Option 1: Run the Aiken test
