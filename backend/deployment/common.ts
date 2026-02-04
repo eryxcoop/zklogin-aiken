@@ -1,4 +1,4 @@
-import {BlockfrostProvider, MeshTxBuilder, MeshWallet, serializePlutusScript, UTxO} from "@meshsdk/core";
+import {BlockfrostProvider, MeshTxBuilder, MeshWallet, serializePlutusScript, UTxO, Network} from "@meshsdk/core";
 import {applyParamsToScript} from "@meshsdk/core-csl";
 import blueprint from "../plutus.json";
 import { ZKLOGIN_ID } from "./transactionData";
@@ -7,6 +7,12 @@ import {SPONSOR_WALLET_SK} from "./sponsorWalletCredentials";
 
 const blockfrostKey = process.env.BLOCKFROST_PROJECT_ID;
 export const blockchainProvider = new BlockfrostProvider(blockfrostKey);
+
+export function networkFromBlockfrostKey(): Network{
+    if (blockfrostKey.startsWith("mainnet")) return "mainnet";
+    if (blockfrostKey.startsWith("preprod")) return "preprod";
+    if (blockfrostKey.startsWith("preview")) return "preview";
+}
 
 export function getScript() {
     const scriptCbor = applyParamsToScript(

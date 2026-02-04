@@ -35,11 +35,13 @@ To try the new features introduced in the milestone 2 of the Catalyst proposal (
 * Go to the ```backend``` directory and run ```npm install``` if you haven't already.
 * In the ```backend``` directory run ```aiken build```. This should generate a ```plutus.json``` file in the ```backend``` directory.
 * Run ```aiken-zk prove meshjs circuits/zkLogin.circom verification_key.zkey circuit_inputs/input_zkLogin.json deployment/zk_redeemer.ts```. This will generate a file in ```backend/deployment/zk_redeemer.ts``` with an integrated zk proof.
-* Fill the ```.env``` file with your own Blockfrost key. Create or look for it in https://blockfrost.io.
+* Create the ```.env``` file with your own Blockfrost key (check the `.env.example` for reference). Create or look for it in https://blockfrost.io.
 * Fill your own data in ```deployment/transactionData.ts```. The fields are:
   * ```zkLoginId```: found in the step 5 of the frontend
   * ```max_epoch```: at this point should be in the ```input_zkLogin.json``` file
   * ```ephemeral_public_key``` and ```ephemeral_private_key```: data from step 5 of the frontend. They should be both hexadecimal numbers.
-* Run ```npx tsx deployment/addressDerivation.ts```. This will generate your zkLogin address based on the zkLoginId you provided in the previous step.  
+* Run ```npx tsx deployment/addressDerivation.ts```. This will generate your zkLogin address based on the zkLoginId you provided in the previous step.
+* The next step is to send funds to your zkLoginAddress. To do it, you want to make sure that the sponsorWallet has enough funds to make the transaction. The address can be found in `deployment/sponsorWalletCredentials.ts`. You can check the balance of the sponsorWallet in [cardanoscan preprod](https://preprod.cardanoscan.io/) or [cardanoscan preview](https://preview.cardanoscan.io/) depending on which network you chose for the Blockfrost project.
+  * If the balance is not enough, you can fund the sponsorWallet by sending funds from the [cardano faucet](https://docs.cardano.org/cardano-testnets/tools/faucet). Check the `ADA_TO_SEND_TO_SCRIPT` constant in `deployment/transactionData.ts` to calculate the minimum amount needed (remember that are fees involved).
 * Run ```npx tsx deployment/lockWithDatum.ts```. This will send funds to your zkLoginAddress and you should wait for the transaction to take impact (check for the generated address in [cardanoscan](https://preprod.cardanoscan.io/)).
 * Run ```npx tsx deployment/spend.ts```. This will unlock funds from your zkLoginAddress into another address (which you can pick by changing the ```txOut``` in the ```spend.ts``` file).
