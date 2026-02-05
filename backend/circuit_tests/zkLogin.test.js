@@ -37,17 +37,14 @@ describe("Circuit test", function () {
         let public_key_exponent = BigInt(65537);
         let signature = BigInt("5145559121648581779772074153094490247393445260452952141482684307469231428748548144983684147091020528283748226457169802377763197677906082875379043113855634752062186025818864488745257351456651783340753505130064101035830740199094856463226782725519549056338442963660265485420759911223585393698016426247702101842926601471191270412325619723591911258864004588065914607780968553021546595631752559089255150912010385265002613684225837756637514982674733376021179464774090472654689419916992370827091889421252937825753980860643068000942650360058170396691631601029310791359435532906100455010378178799578875298407393407890159548193");
         // hashed data. decimal
-        let hashed = BigInt("0xe5ae8342fb5e645fadf301f7d265e299dc08068c17b35f79aed65922722bbdd5");
         let public_key_exponent_array = a_bigint_to_limbs(32, 64, public_key_exponent);
         let signature_array = a_bigint_to_limbs(32, 64, signature);
         let public_key_modulus_array = a_bigint_to_limbs(32, 64, public_key_modulus);
-        let hashed_array = a_bigint_to_limbs(4, 64, hashed);
         const witness = await circuit.calculateWitness({
             "headerDotPayloadBitArray": headerDotPayloadBitArray,
             "public_key_exponent": public_key_exponent_array,
             "signature": signature_array,
             "public_key_modulus": public_key_modulus_array,
-            "hashed": hashed_array
         }, true);
         //const res2 = poseidon([1,2,0,0,0]);
 
