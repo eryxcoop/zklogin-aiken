@@ -4,7 +4,7 @@ include "./rsa_verify.circom";
 include "./converter_256_bits_to_n_field_elements.circom";
 
 template xxx() {
-    signal input headerDotPayloadBitArray[1024]; // [0, 1, 0, ... 0, 1]
+    signal input headerDotPayloadBitArray[32]; // [0, 1, 0, ... 0, 1]
     signal input public_key_exponent[32];
     signal input signature[32];
     signal input public_key_modulus[32];
