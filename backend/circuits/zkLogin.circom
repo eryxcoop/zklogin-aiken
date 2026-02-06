@@ -14,6 +14,7 @@ template ZkLogin(payloadSize, nonceSize, issSize, audSize, subSize) {
     //Private
     signal input rand;
     signal input salt;
+    // opcionales
     signal input iss_ascii[issSize];
     signal input aud_ascii[audSize];
     signal input sub_ascii[subSize];
