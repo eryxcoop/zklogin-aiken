@@ -7,13 +7,13 @@ const __dirname = path.dirname(__filename);
 
 function a_bigint_to_limbs(amountOfLimbs, limbSizeInBits, bigint) {
     let mod = 1n;
-    for (var idx = 0; idx < limbSizeInBits; idx++) {
+    for (let idx = 0; idx < limbSizeInBits; idx++) {
         mod = mod * 2n;
     }
 
     let ret = [];
     var x_temp = bigint;
-    for (var idx = 0; idx < amountOfLimbs; idx++) {
+    for (let idx = 0; idx < amountOfLimbs; idx++) {
         ret.push(x_temp % mod);
         x_temp = x_temp / mod;
     }
@@ -26,7 +26,7 @@ describe("Circuit test", function () {
     let circuit_converter;
 
     beforeAll(async () => {
-        circuit = await wasm_tester(path.join(__dirname, "prueba.circom"));
+        circuit = await wasm_tester(path.join(__dirname, "verify_signature_is_valid_for_header_dot_payload.circom"));
         circuit_converter = await wasm_tester(path.join(__dirname, "test_converter_256_bits_to_n_field_elements.circom"));
     }, 1000000);
 

@@ -3,7 +3,7 @@ include "../node_modules/circomlib/circuits/sha256/sha256.circom";
 include "./rsa_verify.circom";
 include "./converter_256_bits_to_n_field_elements.circom";
 
-template xxx() {
+template verifySignatureIsValidForHeaderDotPayload() {
     signal input headerDotPayloadBitArray[1024]; // [0, 1, 0, ... 0, 1]
     signal input signature[32];
     signal input public_key_modulus[32];
@@ -34,4 +34,4 @@ template xxx() {
     rsaVerify.hashed[3] <== converter.outputLimbs[0];
 }
 
-component main = xxx();
+component main = verifySignatureIsValidForHeaderDotPayload();
