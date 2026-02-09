@@ -4,25 +4,32 @@ include "./rsa_verify.circom";
 include "./converter_256_bits_to_n_field_elements.circom";
 
 template verifySignatureIsValidForHeaderDotPayload(headerDotPayloadBitArraySize) {
+    // The modulus is expressed as an array of numbers.
+    // The size of the array is the number of limbs.
+    // Each element of the array is a number that has at most 64 bits
+    // So the modulus is a number that can be expressed in 32 * 64 = 2048 bits
+    var modulusAmountOfLimbs = 32;
+    var sizeOfLimbsInBits = 64;
+    var amountOfBitsOfExponent = 17;
     signal input headerDotPayloadBitArray[headerDotPayloadBitArraySize]; // [0, 1, 0, ... 0, 1]
-    signal input signature[32];
-    signal input public_key_modulus[32];
-    signal input public_key_exponent[32];
+    signal input signature[modulusAmountOfLimbs];
+    signal input public_key_modulus[modulusAmountOfLimbs];
+    signal input public_key_exponent[modulusAmountOfLimbs];
 
     component sha = Sha256(headerDotPayloadBitArraySize);
 
     sha.in <== headerDotPayloadBitArray;
 
-    signal hashOfheaderDotPayload[256];
+    signal hashOfHeaderDotPayload[256];
 
-    hashOfheaderDotPayload <== sha.out;
+    hashOfHeaderDotPayload <== sha.out;
 
-    var numberOfLimbs = 4;
-    component converter = Converter256BitsToNFieldElements(numberOfLimbs);
-    converter.inputBits <== hashOfheaderDotPayload;
+    var hashOfHeaderDotPayloadAmountOfLimbs = 4;
+    component converter = Converter256BitsToNFieldElements(hashOfHeaderDotPayloadAmountOfLimbs);
+    converter.inputBits <== hashOfHeaderDotPayload;
 
     // RsaVerifyPkcs1v15(w, nb, e_bits, hashLen)
-    component rsaVerify = RsaVerifyPkcs1v15(64, 32, 17, numberOfLimbs);
+    component rsaVerify = RsaVerifyPkcs1v15(sizeOfLimbsInBits, modulusAmountOfLimbs, amountOfBitsOfExponent, hashOfHeaderDotPayloadAmountOfLimbs);
     rsaVerify.exp <== public_key_exponent;
     rsaVerify.sign <== signature;
     rsaVerify.modulus <== public_key_modulus;
