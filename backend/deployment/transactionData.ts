@@ -1,7 +1,9 @@
-export const AMOUNT_TO_SEND_TO_SCRIPT: string = (500 * 1000000).toString();
+export const ADA_TO_SEND_TO_SCRIPT: number = 500
+const ADA_TO_LOVELACE: number = 1000000
+export const LOVELACE_TO_SEND_TO_SCRIPT: string = (ADA_TO_SEND_TO_SCRIPT * ADA_TO_LOVELACE).toString();
 
-export const ZKLOGIN_ID = BigInt("14148750501214927097030011212605728027483349936086135333593501826084812421527")
+export const ZKLOGIN_ID = BigInt("your_zkLoginId")
 
-export const MAX_EPOCH = 1769535438000;
-export const EPH_PUBLIC_KEY_HEX = "0f31c5411bbcb96fcdebec480c26511bf5eaaa055d2424c57c38e3c737d0580b";
-export const EPH_PRIVATE_KEY_HEX = "1e474cb19b4e9a86dd267b16d5afc5554fba4fa6277224c958c9d3be066a8a1d";
+export const MAX_EPOCH = 0;
+export const EPH_PUBLIC_KEY_HEX = "your_eph_public_key";
+export const EPH_PRIVATE_KEY_HEX = "your_eph_private_key";

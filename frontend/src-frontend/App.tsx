@@ -612,7 +612,7 @@ ${JSON.stringify(ephemeralKeyPair?.getPublicKey().toBase64())}`}
                 onClick={async () => {
                   const currentPosixTime = Date.now()
                   setCurrentEpoch(currentPosixTime);
-                  const validityHours = 24;
+                  const validityHours = 2;
                   const validitySeconds = validityHours*60*60;
                   const validityMilliseconds = validitySeconds * 1000;
                   let maxEpoch = currentPosixTime + validityMilliseconds;

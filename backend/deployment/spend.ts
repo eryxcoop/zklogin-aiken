@@ -11,7 +11,7 @@ import {
 import "dotenv/config";
 import {blake2b} from "blakejs";
 import {mZKRedeemer} from "./zk_redeemer";
-import {sponsorWallet, blockchainProvider, getScript, getTxBuilder} from "./common"
+import {sponsorWallet, blockchainProvider, getScript, getTxBuilder, networkFromBlockfrostKey} from "./common"
 import {MAX_EPOCH, EPH_PUBLIC_KEY_HEX, EPH_PRIVATE_KEY_HEX} from "./transactionData"
 
 async function main() {
@@ -43,7 +43,7 @@ async function main() {
 
     let max_epoch_POSIX_time = new Date(MAX_EPOCH);
     // console.log("max_epoch_POSIX_time", max_epoch_POSIX_time.getTime())
-    const max_epoch_slot = resolveSlotNo('preview', max_epoch_POSIX_time.getTime());
+    const max_epoch_slot = resolveSlotNo(networkFromBlockfrostKey(), max_epoch_POSIX_time.getTime());
     // console.log("max_epoch_slot", max_epoch_slot)
 
     let redeemer = mConStr0([MAX_EPOCH, Buffer.from(eph_public_key_bytes).toString("hex")]);
