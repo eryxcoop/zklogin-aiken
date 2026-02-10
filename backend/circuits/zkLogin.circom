@@ -13,13 +13,12 @@ template ZkLogin(payloadSize, nonceSize, issSize, audSize, subSize) {
 
     //Private
     signal input rand;
+    signal input nonce; // podrías no pasarlo
     signal input salt;
     // opcionales
     signal input iss_ascii[issSize];
     signal input aud_ascii[audSize];
     signal input sub_ascii[subSize];
-
-    signal input nonce; // podrías no pasarlo
 
     // jwt parsing
     //signal input jwt_ascii
