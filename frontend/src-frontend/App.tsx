@@ -1009,6 +1009,25 @@ ${JSON.stringify(decodedJwt, null, 2)}`}
                           </code>
                       )}
               </Typography>
+              <Typography
+                  sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "20px",
+                  }}
+              >
+                  id_token_base64(jwt):
+                  {jwtString && (
+                      <code >
+                          <Typography
+                              component="span"
+                              sx={{ fontFamily: "'Noto Sans Mono', monospace;", fontWeight: 600 }}
+                          >
+                              {jwtString}
+                          </Typography>
+                      </code>
+                  )}
+              </Typography>
               {/*<Typography>
                   <LoadingButton
                       variant="contained"
