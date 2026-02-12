@@ -40,5 +40,3 @@ template verifySignatureIsValidForHeaderDotPayload(headerDotPayloadBitArraySize)
     rsaVerify.hashed[2] <== converter.outputLimbs[1];
     rsaVerify.hashed[3] <== converter.outputLimbs[0];
 }
-
-component main = verifySignatureIsValidForHeaderDotPayload(1024);

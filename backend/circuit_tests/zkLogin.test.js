@@ -2,11 +2,15 @@ import {wasm as wasm_tester} from "circom_tester";
 import {fileURLToPath} from 'url';
 import path from 'path';
 import {
+    google_public_key,
+    jwt_header,
     jwt_header_dot_payload,
     jwt_signature,
     session_data,
     string_to_bit_array
 } from './testDataForACompleteFlowOfZkLogin'
+import {jwtDecode} from "jwt-decode";
+import {base64url} from "jose";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,17 +30,19 @@ function a_bigint_to_limbs(amountOfLimbs, limbSizeInBits, bigint) {
     return ret;
 }
 
+function base64ToBigInt(numberEncodedInBase64) {
+    const publicKeyModulusAsByteArray = base64url.decode(numberEncodedInBase64);
+    const publicKeyModulusAsHex = Buffer.from(publicKeyModulusAsByteArray).toString('hex');
+    return BigInt('0x' + publicKeyModulusAsHex);
+}
 
 describe("Circuit test", function () {
-    let circuit;
-    let circuit_converter;
 
-    beforeAll(async () => {
-        circuit = await wasm_tester(path.join(__dirname, "verify_signature_is_valid_for_header_dot_payload.circom"));
-        circuit_converter = await wasm_tester(path.join(__dirname, "test_converter_256_bits_to_n_field_elements.circom"));
-    }, 1000000);
+    it("verifies jwt signature using RS256 with another JWT size", async () => {
+        const circuit = await wasm_tester(path.join(__dirname, "verify_signature_is_valid_for_header_dot_payload.circom"),
+            { templateParams: [1024] }
+        );
 
-    it("verifies jwt signature using RS256(old)", async () => {
         const headerDotPayload = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTc3MDEyOTA4OX0";
         const headerDotPayloadBitArray = string_to_bit_array(headerDotPayload);
         let public_key_modulus = BigInt("0xBB5494D4B7D52CF1C2A333311F6328E2580E11E3F3366D2D46078B7B357A7DF02DD20BA75532F0EE89CB467AEAD3F2335BBC9647B424AE604BEE34CA127E6EFAA2A16F029F06CB48B3E6CC636664A75F209D3C4A2F1A12DAD15CCC690F2CF822CEC92E7A63208519E259AA0B7327A191DDEAA86125BD6FD50CBE406964E0D272D5923468F73FB8D11433B95684F00900166C59CE8C37C7E54960A763CA4909D224FDC024B40D14D7BB6EBD576EB855FFF78EFADE75988A46483094BF71340C315C5834C7F5C5C34D3951655122476070A5938E904FD9D3F0559E16582FBD68655DF86CA7D68D022DE95FE2B1231A85DB00012002A786531ADC2256E35DF6DC9B");
@@ -55,15 +61,25 @@ describe("Circuit test", function () {
         await circuit.checkConstraints(witness);
     }, 1000000);
 
-    it.skip("verifies jwt signature using RS256", async () => {
+    it("verifies jwt signature using RS256", async () => {
+        const circuit = await wasm_tester(path.join(__dirname, "verify_signature_is_valid_for_header_dot_payload.circom"),
+            { templateParams: [4920] }
+        );
+
         const headerDotPayloadBitArray = string_to_bit_array(jwt_header_dot_payload());
-        let public_key_modulus = BigInt("0xBB5494D4B7D52CF1C2A333311F6328E2580E11E3F3366D2D46078B7B357A7DF02DD20BA75532F0EE89CB467AEAD3F2335BBC9647B424AE604BEE34CA127E6EFAA2A16F029F06CB48B3E6CC636664A75F209D3C4A2F1A12DAD15CCC690F2CF822CEC92E7A63208519E259AA0B7327A191DDEAA86125BD6FD50CBE406964E0D272D5923468F73FB8D11433B95684F00900166C59CE8C37C7E54960A763CA4909D224FDC024B40D14D7BB6EBD576EB855FFF78EFADE75988A46483094BF71340C315C5834C7F5C5C34D3951655122476070A5938E904FD9D3F0559E16582FBD68655DF86CA7D68D022DE95FE2B1231A85DB00012002A786531ADC2256E35DF6DC9B");
-        let public_key_exponent = BigInt(65537);
-        let signature = BigInt(jwt_signature());
+        const jwtHeaderDecoded = jwtDecode(jwt_header(), {header: true});
+        const keyId = jwtHeaderDecoded.kid;
+        const publicKey = google_public_key()["keys"].find((candidateKey) => candidateKey["kid"] === keyId);
+        const publicKeyModulusInBase64 = publicKey["n"];
+        const publicKeyModulusAsBigInt = base64ToBigInt(publicKeyModulusInBase64);
+        const publicKeyExponentInBase64 = publicKey["e"];
+        const publicKeyExponentAsBigInt = base64ToBigInt(publicKeyExponentInBase64);
+        let signatureAsBigint = base64ToBigInt(jwt_signature());
+
         // hashed data. decimal
-        let public_key_exponent_array = a_bigint_to_limbs(32, 64, public_key_exponent);
-        let signature_array = a_bigint_to_limbs(32, 64, signature);
-        let public_key_modulus_array = a_bigint_to_limbs(32, 64, public_key_modulus);
+        let public_key_exponent_array = a_bigint_to_limbs(32, 64, publicKeyExponentAsBigInt);
+        let signature_array = a_bigint_to_limbs(32, 64, signatureAsBigint);
+        let public_key_modulus_array = a_bigint_to_limbs(32, 64, publicKeyModulusAsBigInt);
         const witness = await circuit.calculateWitness({
             "headerDotPayloadBitArray": headerDotPayloadBitArray,
             "public_key_exponent": public_key_exponent_array,
@@ -74,6 +90,8 @@ describe("Circuit test", function () {
     }, 1000000);
 
     it("can converter a bigint zero into 256 limbs of 1 bit (256bits)", async () => {
+        const circuit_converter = await wasm_tester(path.join(__dirname, "test_converter_256_bits_to_n_field_elements.circom"));
+
         const inputBits = a_bigint_to_limbs(256, 1, BigInt("0x0000000000000000000000000000000000000000000000000000000000000000"));
         const witness = await circuit_converter.calculateWitness({
             "inputBits": inputBits, "outputLimbs": [0, 0]
@@ -83,6 +101,8 @@ describe("Circuit test", function () {
     }, 1000000);
 
     it("can converter a bigint zero into 256 limbs of 1 bit (256bits) xxx", async () => {
+        const circuit_converter = await wasm_tester(path.join(__dirname, "test_converter_256_bits_to_n_field_elements.circom"));
+
         const oneTailedWith127Zeroes = 2n ** 127n;
         let input = oneTailedWith127Zeroes * (2n ** 128n) + oneTailedWith127Zeroes;
         const witness = await circuit_converter.calculateWitness({
@@ -94,7 +114,7 @@ describe("Circuit test", function () {
     }, 1000000);
 
     it("can validate the main circuit with session data", async () => {
-        circuit = await wasm_tester(path.join(__dirname, "../circuits/zkLogin.circom"), {prime: "bls12381"});
+        const circuit = await wasm_tester(path.join(__dirname, "../circuits/zkLogin.circom"), {prime: "bls12381"});
         const input = session_data();
         const witness = await circuit.calculateWitness(input, true);
 
