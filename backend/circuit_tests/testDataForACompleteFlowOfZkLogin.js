@@ -23,6 +23,35 @@ function jwt() {
     return "eyJhbGciOiJSUzI1NiIsImtpZCI6ImMyN2JhNDBiMDk1MjlhZDRmMTY4MjJjZTgzMTY3YzFiYzM5MTAxMjIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJhenAiOiI5MjA3MTkyMzA0MjEtbzZrdDUyMzVjczhwbTBic2ZkdGt0MGk1ZmxhN20wNzIuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI5MjA3MTkyMzA0MjEtbzZrdDUyMzVjczhwbTBic2ZkdGt0MGk1ZmxhN20wNzIuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMDI1NjMxNzQzNTY1ODczMDA2MTgiLCJub25jZSI6IlRNM3loSzloT01KUDIvRkllWWJMZjZURHlGL2o2MkJFOUcrSVZpUTZUZkU9IiwibmJmIjoxNzcwNzUzMDQyLCJpYXQiOjE3NzA3NTMzNDIsImV4cCI6MTc3MDc1Njk0MiwianRpIjoiYWZmMWZmMDVhMTY4MDRkYzZkNzRmNzk5YTE1NDgyZDNlNTNhOTE2MCJ9.F7VTcpWo8U9Rn1jxtf59ZVSe07_7r1G-k4hNSj0lu2YPK9i_JTWg8kILqU_s73SqNgBh0YSEBUOmu3b8hVvf01qBMBtx9M7nZsH__ULjaCS7lbQ_Y9nQHKN_QYRMET2S5xTp4z2O7qLCw7YATvIwmu8uVfslXIinw4vjMMy7FWecH5anA_0MEdDhDpWREa2hKQEF27o3LBLYjT3zLbPJkaukfbj2Sfo9fdHGg8duD8Kor71ITPZ9dDAQXb1N5iYhyFysYpbGwGFK_EN6e0TY07u61JDmino-w3KMRYw9PEVvyhMZ2auwicku02N4pwq44nsVDy4ZmqGu0k7g4TV_qA"
 }
 
+function jwt_header() {
+    return jwt().split(".")[0];
+}
+
+function jwt_payload() {
+    return jwt().split(".")[1];
+}
+
+export function jwt_signature() {
+    return jwt().split(".")[2];
+}
+
+export function jwt_header_dot_payload() {
+    return jwt_header() + "." + jwt_payload();
+}
+
+export function string_to_bit_array(string) {
+    const encoder = new TextEncoder(); // UTF-8
+    const bytes = encoder.encode(string);
+
+    const bits = [];
+    for (const byte of bytes) {
+        for (let i = 7; i >= 0; i--) {
+            bits.push((byte >> i) & 1);
+        }
+    }
+    return bits;
+}
+
 function ephemeral_public_key() {
     return "94330401d8a0b43194ac06f7ae8f4258f5c31ba1fb298f2acba6360f2ebb4902";
 }
