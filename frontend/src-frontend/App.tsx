@@ -1021,7 +1021,11 @@ ${JSON.stringify(decodedJwt, null, 2)}`}
                       <code >
                           <Typography
                               component="span"
-                              sx={{ fontFamily: "'Noto Sans Mono', monospace;", fontWeight: 600 }}
+                              sx={{
+                                  fontFamily: "'Noto Sans Mono', monospace;",
+                                  fontWeight: 600,
+                                  wordBreak: "break-all",
+                          }}
                           >
                               {jwtString}
                           </Typography>
