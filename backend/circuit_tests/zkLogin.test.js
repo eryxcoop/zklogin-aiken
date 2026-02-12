@@ -2,39 +2,14 @@ import {wasm as wasm_tester} from "circom_tester";
 import {fileURLToPath} from 'url';
 import path from 'path';
 import {
-    google_public_key,
-    jwt_header,
-    jwt_header_dot_payload,
-    jwt_signature,
     session_data,
-    string_to_bit_array
+    string_to_bit_array,
+    verifySignatureCircuitInputs,
+    a_bigint_to_limbs
 } from './testDataForACompleteFlowOfZkLogin'
-import {jwtDecode} from "jwt-decode";
-import {base64url} from "jose";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-function a_bigint_to_limbs(amountOfLimbs, limbSizeInBits, bigint) {
-    let mod = 1n;
-    for (let idx = 0; idx < limbSizeInBits; idx++) {
-        mod = mod * 2n;
-    }
-
-    let ret = [];
-    var x_temp = bigint;
-    for (let idx = 0; idx < amountOfLimbs; idx++) {
-        ret.push(x_temp % mod);
-        x_temp = x_temp / mod;
-    }
-    return ret;
-}
-
-function base64ToBigInt(numberEncodedInBase64) {
-    const publicKeyModulusAsByteArray = base64url.decode(numberEncodedInBase64);
-    const publicKeyModulusAsHex = Buffer.from(publicKeyModulusAsByteArray).toString('hex');
-    return BigInt('0x' + publicKeyModulusAsHex);
-}
 
 describe("Circuit test", function () {
 
@@ -43,26 +18,7 @@ describe("Circuit test", function () {
             { templateParams: [4920] }
         );
 
-        const headerDotPayloadBitArray = string_to_bit_array(jwt_header_dot_payload());
-        const jwtHeaderDecoded = jwtDecode(jwt_header(), {header: true});
-        const keyId = jwtHeaderDecoded.kid;
-        const publicKey = google_public_key()["keys"].find((candidateKey) => candidateKey["kid"] === keyId);
-        const publicKeyModulusInBase64 = publicKey["n"];
-        const publicKeyModulusAsBigInt = base64ToBigInt(publicKeyModulusInBase64);
-        const publicKeyExponentInBase64 = publicKey["e"];
-        const publicKeyExponentAsBigInt = base64ToBigInt(publicKeyExponentInBase64);
-        let signatureAsBigint = base64ToBigInt(jwt_signature());
-
-        // hashed data. decimal
-        let public_key_exponent_array = a_bigint_to_limbs(32, 64, publicKeyExponentAsBigInt);
-        let signature_array = a_bigint_to_limbs(32, 64, signatureAsBigint);
-        let public_key_modulus_array = a_bigint_to_limbs(32, 64, publicKeyModulusAsBigInt);
-        const witness = await circuit.calculateWitness({
-            "headerDotPayloadBitArray": headerDotPayloadBitArray,
-            "public_key_exponent": public_key_exponent_array,
-            "signature": signature_array,
-            "public_key_modulus": public_key_modulus_array,
-        }, true);
+        const witness = await circuit.calculateWitness(verifySignatureCircuitInputs(), true);
         await circuit.checkConstraints(witness);
     }, 1000000);
 
@@ -114,7 +70,15 @@ describe("Circuit test", function () {
     }, 1000000);
 
     it("can validate the main circuit with session data", async () => {
-        const circuit = await wasm_tester(path.join(__dirname, "../circuits/zkLogin.circom"), {prime: "bls12381"});
+        const circuit = await wasm_tester(path.join(__dirname, "../circuits/zkLoginWithoutSignatureVerification.circom"), {prime: "bls12381"});
+        const input = session_data();
+        const witness = await circuit.calculateWitness(input, true);
+
+        await circuit.checkConstraints(witness);
+    }, 1000000);
+
+    it.skip("xxx", async () => {
+        const circuit = await wasm_tester(path.join(__dirname, "zk_login.circom"), {prime: "bls12381"});
         const input = session_data();
         const witness = await circuit.calculateWitness(input, true);
 

@@ -1,3 +1,6 @@
+import {jwtDecode} from "jwt-decode";
+import {base64url} from "jose";
+
 export function google_public_key() {
     return {
         "keys": [{
@@ -78,5 +81,49 @@ export function session_data() {
         "iss_offset": 8,
         "aud_offset": 125,
         "sub_offset": 206
+    };
+}
+
+export function a_bigint_to_limbs(amountOfLimbs, limbSizeInBits, bigint) {
+    let mod = 1n;
+    for (let idx = 0; idx < limbSizeInBits; idx++) {
+        mod = mod * 2n;
+    }
+
+    let ret = [];
+    var x_temp = bigint;
+    for (let idx = 0; idx < amountOfLimbs; idx++) {
+        ret.push(x_temp % mod);
+        x_temp = x_temp / mod;
+    }
+    return ret;
+}
+
+function base64ToBigInt(numberEncodedInBase64) {
+    const publicKeyModulusAsByteArray = base64url.decode(numberEncodedInBase64);
+    const publicKeyModulusAsHex = Buffer.from(publicKeyModulusAsByteArray).toString('hex');
+    return BigInt('0x' + publicKeyModulusAsHex);
+}
+
+export function verifySignatureCircuitInputs() {
+    const headerDotPayloadBitArray = string_to_bit_array(jwt_header_dot_payload());
+    const jwtHeaderDecoded = jwtDecode(jwt_header(), {header: true});
+    const keyId = jwtHeaderDecoded.kid;
+    const publicKey = google_public_key()["keys"].find((candidateKey) => candidateKey["kid"] === keyId);
+    const publicKeyModulusInBase64 = publicKey["n"];
+    const publicKeyModulusAsBigInt = base64ToBigInt(publicKeyModulusInBase64);
+    const publicKeyExponentInBase64 = publicKey["e"];
+    const publicKeyExponentAsBigInt = base64ToBigInt(publicKeyExponentInBase64);
+    const signatureAsBigint = base64ToBigInt(jwt_signature());
+
+    // hashed data. decimal
+    let public_key_exponent_array = a_bigint_to_limbs(32, 64, publicKeyExponentAsBigInt);
+    let signature_array = a_bigint_to_limbs(32, 64, signatureAsBigint);
+    let public_key_modulus_array = a_bigint_to_limbs(32, 64, publicKeyModulusAsBigInt);
+    return {
+        "headerDotPayloadBitArray": headerDotPayloadBitArray,
+        "public_key_exponent": public_key_exponent_array,
+        "signature": signature_array,
+        "public_key_modulus": public_key_modulus_array,
     };
 }
