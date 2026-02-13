@@ -86,7 +86,7 @@ describe("Circuit test", function () {
     }, 1000000);
 
     it.only("compare byte array to bit array", async () => {
-        const circuit = await wasm_tester(path.join(__dirname, "convert_byte_array_to_bit_array.circom"), {prime: "bls12381"});
+        const circuit = await wasm_tester(path.join(__dirname, "convert_byte_array_to_bit_array.circom"), {prime: "bls12381", templateParams: [1]});
         const a_byte_array = [65];
         const expected_bit_array = [0, 1, 0, 0, 0, 0, 0, 1].reverse();
         const circuitInputs = { byte_array: a_byte_array };
