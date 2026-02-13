@@ -1,8 +1,11 @@
 pragma circom 2.2.3;
 include "../node_modules/circomlib/circuits/bitify.circom";
 
-template convert_byte_array_to_bit_array() {
+template ConvertByteArrayToBitArray() {
     signal input byte_array[1];
-//    signal input bit_array[byte_array_size * 8];
+    signal output bit_array[8];
 
+    component converter = Num2Bits(8);
+    converter.in <== byte_array[0];
+    bit_array <== converter.out;
 }
