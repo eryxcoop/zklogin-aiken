@@ -85,12 +85,12 @@ describe("Circuit test", function () {
         await circuit.checkConstraints(witness);
     }, 1000000);
 
-it("compare byte array to bit array", async () => {
-        const a_byte_array = [128, 128];
-        const expected_bit_array = [1, 0, 0, 0, 0, 0, 0, 0].concat([1, 0, 0, 0, 0, 0, 0, 0]);
+it("convert byte array to bit array", async () => {
+        const byte_array_to_convert = [128, 129];
+        const expected_bit_array = [1, 0, 0, 0, 0, 0, 0, 0].concat([1, 0, 0, 0, 0, 0, 0, 1]);
         console.log(expected_bit_array)
-        const circuit = await wasm_tester(path.join(__dirname, "convert_byte_array_to_bit_array.circom"), {prime: "bls12381", templateParams: [a_byte_array.length]});
-        const circuitInputs = { byte_array: a_byte_array };
+        const circuit = await wasm_tester(path.join(__dirname, "convert_byte_array_to_bit_array.circom"), {prime: "bls12381", templateParams: [byte_array_to_convert.length]});
+        const circuitInputs = { byte_array: byte_array_to_convert };
         const witness = await circuit.calculateWitness(circuitInputs, true);
 
         await circuit.assertOut(witness, {bit_array : expected_bit_array});
