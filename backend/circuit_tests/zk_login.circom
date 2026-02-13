@@ -11,15 +11,15 @@ template ZkLogin(payloadSize, nonceSize, issSize, audSize, subSize) {
     signal input eph_pk_low;
     signal input zkLoginId;
     signal input max_epoch;
-    signal input OIDC_provider_pk_modulus;
-    signal input OIDC_provider_pk_exponent;
+//    signal input OIDC_provider_pk_modulus;
+//    signal input OIDC_provider_pk_exponent;
 
     //Private
     signal input rand;
     signal input nonce; // podrías no pasarlo
     signal input salt;
-    signal input jwt_header_dot_payload_in_ascii[jwt_header_dot_payload_size];
-    signal input jwt_signature;
+//    signal input jwt_header_dot_payload_in_ascii[jwt_header_dot_payload_size];
+//    signal input jwt_signature;
 
     // opcionales
     signal input iss_ascii[issSize];
