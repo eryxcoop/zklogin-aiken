@@ -59,6 +59,8 @@ import { base, gray } from "./theme/colors";
 import {generateNonce, toBigIntBE} from "./aux/nonce.ts";
 import {computeZkLoginId} from "./aux/zkLoginId.ts";
 import {base64url} from "jose";
+import SignatureData from "./aux/signatureData.ts";
+import {base64ToBigInt} from "./aux/base64toBigInt.ts";
 
 export type PartialZkLoginSignature = Omit<
   Parameters<typeof getZkLoginSignature>["0"]["inputs"],
@@ -111,7 +113,7 @@ function App() {
   const [executeDigest, setExecuteDigest] = useState("");
 
   //Generate user Cardano address
-  const [inputZkLoginJson, setInputZkLoginJson] = useState("");
+  const [inputZkLoginJson, setInputZkLoginJson] = useState({});
   const [ephemeralPublicKey, setEphemeralPublicKey] = useState("");
   const [ephemeralPrivateKey, setEphemeralPrivateKey] = useState("");
 
@@ -265,19 +267,7 @@ function App() {
       return base64Text.split("").map(char => char.charCodeAt(0))
   }
 
-    function base64ToBigInt(base64) {
-
-        const binary = atob(base64);
-
-        let result = 0n;
-        for (let i = 0; i < binary.length; i++) {
-            result = (result << 8n) + BigInt(binary.charCodeAt(i));
-        }
-
-        return result;
-    }
-
-  function gatherData(){
+  async function gatherData(){
 
       const publicKey = ephemeralKeyPair.getPublicKey()
       const publicKeyBytes = toBigIntBE(publicKey.toRawBytes());
@@ -294,6 +284,8 @@ function App() {
       const iss_ascii = base64toAscii(jwtDecoded.iss)
       const aud_ascii = base64toAscii(jwtDecoded.aud)
       const sub_ascii = base64toAscii(jwtDecoded.sub)
+
+      let signatureData = await (new SignatureData(jwtString)).verifySignatureCircuitInputs()
 
       const inputZkLogin = {
           "nonce": base64ToBigInt(nonce),
@@ -312,6 +304,10 @@ function App() {
           "iss_offset": 8,
           "aud_offset": 125,
           "sub_offset": 206,
+          "headerDotPayloadBitArray": signatureData.headerDotPayloadBitArray,
+          "public_key_exponent": signatureData.public_key_exponent,
+          "signature": signatureData.signature,
+          "public_key_modulus": signatureData.public_key_modulus,
       }
 
       const publicKeyString = publicKeyBytes.toString(16).padStart(64, '0');
