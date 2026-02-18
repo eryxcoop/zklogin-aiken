@@ -1,5 +1,5 @@
 pragma circom 2.2.3;
-include "./converter_256_bits_to_n_field_elements.circom";
+include "../circuits/converter_256_bits_to_n_field_elements.circom";
 
 template Test() {
     signal input inputBits[256];

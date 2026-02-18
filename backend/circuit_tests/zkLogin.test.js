@@ -14,7 +14,7 @@ const __dirname = path.dirname(__filename);
 describe("Circuit test", function () {
 
     it("verifies jwt signature using RS256", async () => {
-        const circuit = await wasm_tester(path.join(__dirname, "verify_signature_is_valid_for_header_dot_payload.circom"),
+        const circuit = await wasm_tester(path.join(__dirname, "../circuits/verify_signature_is_valid_for_header_dot_payload.circom"),
             { templateParams: [4920] }
         );
 
@@ -23,7 +23,7 @@ describe("Circuit test", function () {
     }, 1000000);
 
     it("verifies jwt signature using RS256 with another JWT size", async () => {
-        const circuit = await wasm_tester(path.join(__dirname, "verify_signature_is_valid_for_header_dot_payload.circom"),
+        const circuit = await wasm_tester(path.join(__dirname, "../circuits/verify_signature_is_valid_for_header_dot_payload.circom"),
             { templateParams: [1024] }
         );
 
@@ -78,14 +78,14 @@ describe("Circuit test", function () {
     }, 1000000);
 
     it("can validate the main circuit with session data and signature data", async () => {
-        const circuit = await wasm_tester(path.join(__dirname, "zk_login.circom"), {prime: "bls12381"});
+        const circuit = await wasm_tester(path.join(__dirname, "../circuits/zk_login.circom"), {prime: "bls12381"});
         const circuitInputs = { ...session_data(), ...verifySignatureCircuitInputs() };
         const witness = await circuit.calculateWitness(circuitInputs, true);
 
         await circuit.checkConstraints(witness);
     }, 1000000);
 
-it("convert byte array to bit array", async () => {
+    it("convert byte array to bit array", async () => {
         const byte_array_to_convert = [128, 129];
         const expected_bit_array = [1, 0, 0, 0, 0, 0, 0, 0].concat([1, 0, 0, 0, 0, 0, 0, 1]);
         console.log(expected_bit_array)
