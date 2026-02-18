@@ -1012,24 +1012,24 @@ ${JSON.stringify(decodedJwt, null, 2)}`}
                       </code>
                   )}
               </Typography>
-                  <Typography
-                      sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "20px",
-                      }}
-                  >
-                  ephemeral_private_key:
-                      {ephemeralPrivateKey && (
-                          <code>
-                              <Typography
-                                  component="span"
-                                  sx={{ fontFamily: "'Noto Sans Mono', monospace;", fontWeight: 600 }}
-                              >
-                                  {ephemeralPrivateKey}
-                              </Typography>
-                          </code>
-                      )}
+              <Typography
+                  sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "20px",
+                  }}
+              >
+              ephemeral_private_key:
+                  {ephemeralPrivateKey && (
+                      <code>
+                          <Typography
+                              component="span"
+                              sx={{ fontFamily: "'Noto Sans Mono', monospace;", fontWeight: 600 }}
+                          >
+                              {ephemeralPrivateKey}
+                          </Typography>
+                      </code>
+                  )}
               </Typography>
               <Typography
                   sx={{
@@ -1054,6 +1054,40 @@ ${JSON.stringify(decodedJwt, null, 2)}`}
                       </code>
                   )}
               </Typography>
+              <Box>
+                  <Button
+                      variant="contained"
+                      disabled={!zkLoginId}
+                      onClick={() => {
+                          const fetchData = async () => {
+                              try {
+                                  // Replace with your specific localhost URL and endpoint
+                                  const response = await fetch('http://localhost:8000');
+
+                                  if (!response.ok) {
+                                      throw new Error(`HTTP error! status: ${response.status}`);
+                                  }
+                                  const result = await response.json(); // Parse the JSON response
+                                  // setData(result); // Store the result in the 'data' state variable
+                                  // setError(null);
+                                  console.log("Request successful:", result)
+                                  setZkLoginUserAddress(result.walletAddress)
+                              } catch (err) {
+                                  // setError(err.message);
+                                  // setData(null);
+                                  console.log("Error: ", err.message)
+                              } finally {
+                                  // setLoading(false); // Stop loading regardless of success or failure
+                                  console.log("Set loading false")
+                              }
+                          };
+
+                          fetchData(); // Call the async function
+                      }}
+                  >
+                      Generate user wallet address
+                  </Button>
+              </Box>
               {/*<Typography>
                   <LoadingButton
                       variant="contained"
