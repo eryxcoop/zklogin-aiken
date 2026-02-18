@@ -1,6 +1,7 @@
 import {jwtDecode} from "jwt-decode";
 import {base64url} from "jose";
 
+// The google public key can be obtained from https://www.googleapis.com/oauth2/v3/certs
 export function google_public_key() {
     return {
         "keys": [{
