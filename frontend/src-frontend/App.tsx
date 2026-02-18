@@ -101,6 +101,7 @@ function App() {
   //Generate User's Cardano Address
   const [zkLoginId, setZkLoginId] = useState("");
   const [zkLoginUserAddress, setZkLoginUserAddress] = useState("");
+  const [copied, setCopied] = useState(false);
 
   //Fetch ZK Proof (Groth16)
   const [extendedEphemeralPublicKey, setExtendedEphemeralPublicKey] =
@@ -317,6 +318,13 @@ function App() {
       setEphemeralPublicKey(publicKeyString);
       setEphemeralPrivateKey(privateKeyString);
   }
+
+    const handleCopy = async () => {
+        const formattedJson = JSON.stringify(inputZkLoginJson, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2)
+        await navigator.clipboard.writeText(formattedJson);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+    };
 
   return (
     <Box>
@@ -958,14 +966,32 @@ ${JSON.stringify(decodedJwt, null, 2)}`}
               </Box>
               input_zkLogin.json:
               {ephemeralPublicKey && (
-                  <SyntaxHighlighter
-                      wrapLongLines
-                      language="json"
-                      style={oneDark}
-                      customStyle={{height: '300px', overflow: 'auto'}}
-                  >
-                  {JSON.stringify(inputZkLoginJson, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2)}
-                </SyntaxHighlighter>
+                  <div style={{position: "relative"}}>
+                      <button
+                          onClick={handleCopy}
+                          style={{
+                              position: "absolute",
+                              top: "8px",
+                              right: "8px",
+                              zIndex: 10,
+                              padding: "8px 8px",
+                              cursor: "pointer",
+                              color: "white",
+                              fontSize: "2em",
+                              border: "2px solid white",
+                              backgroundColor: "black"
+                          }}
+                      >
+                          {copied ? "Copied!" : "Copy"}
+                      </button>
+                      <SyntaxHighlighter
+                          wrapLongLines
+                          language="json"
+                          style={oneDark}
+                          customStyle={{height: '300px', overflow: 'auto'}}>
+                          {JSON.stringify(inputZkLoginJson, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2)}
+                      </SyntaxHighlighter>
+                  </div>
               )}
               <Typography
                   sx={{
