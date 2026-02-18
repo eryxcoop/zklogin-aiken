@@ -11,3 +11,4 @@ circuit_inputs/input_zkLogin.json
 /build/witness.wtns
 /build/zkLogin_js/witness_calculator.js
 /build/zkLogin_js/zkLogin.wasm
+**/ceremony.ptau
