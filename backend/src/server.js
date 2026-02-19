@@ -1,6 +1,6 @@
 // Import the built-in http module
-const { exec } = require("child_process");
-const http = require("http");
+import { exec } from "child_process";
+import http from "http";
 
 const host = 'localhost';
 const port = 8000;
