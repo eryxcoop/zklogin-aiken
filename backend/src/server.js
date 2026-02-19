@@ -1,6 +1,7 @@
 // Import the built-in http module
-import { exec } from "child_process";
 import http from "http";
+import {ZKLOGIN_ID} from "../deployment/transactionData.ts";
+import {main} from "../deployment/addressDerivation.ts";
 
 const host = 'localhost';
 const port = 8000;
@@ -27,31 +28,30 @@ const requestListener = function (req, res) {
     };
 
     console.log("About to execute external script");
-    exec("node backend/create-wallet-on-chain.cjs", (error, stdout, stderr) => {
-        if (error) {
-            console.log("Execution of script failed");
-            responseObject = {
-                message: stderr,
-                execution_result_code: error,
-                status: 'error',
-                walletAddress: ''
-            };
-        } else {
+
+    if (req.method === "GET") {
+        try {
+            main(ZKLOGIN_ID);
             console.log("Execution of script succeeded");
             responseObject = {
                 message: 'Wallet created successfully.',
                 execution_result_code: 0,
                 status: 'success',
-                walletAddress: stdout
+                walletAddress: ''
+            };
+        } catch(error) {
+            console.log("Execution of script failed");
+            responseObject = {
+                message: error,
+                execution_result_code: error,
+                status: 'error',
+                walletAddress: ''
             };
         }
-
-        console.log("Responding with:", responseObject);
-
         const statusCode = responseObject.status === "error" ? 422 : 200; // 422 Unprocessable Content. The request was well-formed (i.e., syntactically correct) but could not be processed.
-        res.writeHead(statusCode, { "Content-Type": "application/json" });
+        res.writeHead(statusCode, {"Content-Type": "application/json"});
         res.end(JSON.stringify(responseObject));
-    })
+    }
 };
 
 // Create the server with our request listener
