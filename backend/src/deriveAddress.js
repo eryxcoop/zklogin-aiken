@@ -1,4 +1,4 @@
-import {derivateAddress} from "../deployment/addressDerivation.js";
+import {derivateAddress} from "../deployment/addressDerivation.ts";
 
 export function handleDeriveAddressAction(searchParams, res) {
     try {
