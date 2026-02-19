@@ -43,7 +43,7 @@ To try the new features introduced in the milestone 2 of the Catalyst proposal (
 * Run ```npx tsx deployment/addressDerivation.ts```. This will generate your zkLogin address based on the zkLoginId you provided in the previous step.
 * The next step is to send funds to your zkLoginAddress. To do it, you want to make sure that the sponsorWallet has enough funds to make the transaction. The address can be found in `deployment/sponsorWalletCredentials.ts`. You can check the balance of the sponsorWallet in [cardanoscan preprod](https://preprod.cardanoscan.io/) or [cardanoscan preview](https://preview.cardanoscan.io/) depending on which network you chose for the Blockfrost project.
   * If the balance is not enough, you can fund the sponsorWallet by sending funds from the [cardano faucet](https://docs.cardano.org/cardano-testnets/tools/faucet). Check the `ADA_TO_SEND_TO_SCRIPT` constant in `deployment/transactionData.ts` to calculate the minimum amount needed (remember that are fees involved).
-* Run ```npx tsx deployment/lockWithDatum.ts```. This will send funds to your zkLoginAddress and you should wait for the transaction to take impact (check for the generated address in [cardanoscan](https://preprod.cardanoscan.io/)).
+* Run ```npx tsx deployment/lockWithDatum.ts```. This will send funds to your zkLoginAddress and you should wait for the transaction to take impact (as before, you can check for the generated address in Cardanoscan).
 * Run ```npx tsx deployment/spend.ts```. This will unlock funds from your zkLoginAddress into another address (which you can pick by changing the ```txOut``` in the ```spend.ts``` file).
 
 ## For developers only
