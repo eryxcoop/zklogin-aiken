@@ -57,6 +57,8 @@ const requestListener = function (req, res) {
         const statusCode = responseObject.status === "error" ? 422 : 200; // 422 Unprocessable Content. The request was well-formed (i.e., syntactically correct) but could not be processed.
         res.writeHead(statusCode, {"Content-Type": "application/json"});
         res.end(JSON.stringify(responseObject));
+    } else {
+        throw Error("Unknown combination of request method and path name")
     }
 };
 
