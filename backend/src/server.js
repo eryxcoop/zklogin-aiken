@@ -3,6 +3,8 @@ import http from "http";
 import {ZKLOGIN_ID} from "../deployment/transactionData.ts";
 import {derivateAddress} from "../deployment/addressDerivation.ts";
 
+const DERIVE_ADDRESS_PATHNAME = "/deriveAddress"
+
 const host = 'localhost';
 const port = 8000;
 
@@ -27,10 +29,14 @@ const requestListener = function (req, res) {
         walletAddress: ''
     };
 
-    if (req.method === "GET") {
+    const url = new URL(req.url, `http://${host}:${port}`);
+    const method = req.method;
+    const searchParams = url.searchParams;
+    const pathname = url.pathname;
+
+    if (method === "GET" && pathname === DERIVE_ADDRESS_PATHNAME) {
         try {
-            const url = new URL(req.url, `http://${host}:${port}`);
-            const zkLoginId = url.searchParams.get("zkLoginId");
+            const zkLoginId = searchParams.get("zkLoginId");
             const derivedAddress = derivateAddress(BigInt(zkLoginId));
             console.log("Execution of script succeeded");
             responseObject = {

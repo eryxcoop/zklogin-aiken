@@ -1063,7 +1063,7 @@ ${JSON.stringify(decodedJwt, null, 2)}`}
                               try {
                                   const params = new URLSearchParams();
                                   params.append("zkLoginId", zkLoginId);
-                                  const response = await fetch(`http://localhost:8000?${params}`);
+                                  const response = await fetch(`http://localhost:8000/deriveAddress?${params}`);
 
                                   if (!response.ok) {
                                       throw new Error(`HTTP error! status: ${response.status}`);
