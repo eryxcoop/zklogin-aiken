@@ -27,25 +27,25 @@ const requestListener = function (req, res) {
         walletAddress: ''
     };
 
-    console.log("About to execute external script");
-
     if (req.method === "GET") {
         try {
-            derivateAddress(ZKLOGIN_ID);
+            const url = new URL(req.url, `http://${host}:${port}`);
+            const zkLoginId = url.searchParams.get("zkLoginId");
+            const derivedAddress = derivateAddress(BigInt(zkLoginId));
             console.log("Execution of script succeeded");
             responseObject = {
                 message: 'Wallet created successfully.',
                 execution_result_code: 0,
                 status: 'success',
-                walletAddress: ''
+                walletAddress: derivedAddress
             };
         } catch(error) {
             console.log("Execution of script failed");
             responseObject = {
-                message: error,
+                message: error.message,
                 execution_result_code: error,
                 status: 'error',
-                walletAddress: ''
+                walletAddress: '----'
             };
         }
         const statusCode = responseObject.status === "error" ? 422 : 200; // 422 Unprocessable Content. The request was well-formed (i.e., syntactically correct) but could not be processed.
