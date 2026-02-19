@@ -3,10 +3,10 @@ import {applyParamsToScript} from "@meshsdk/core-csl";
 import {serializePlutusScript} from "@meshsdk/core";
 import {ZKLOGIN_ID} from "./transactionData"
 
-export function deriveScriptAddress(parsedJson, validatorScriptIndex: number) {
+export function deriveScriptAddress(parsedJson, validatorScriptIndex: number, zkloginid: bigint) {
     const parameterized_script = applyParamsToScript(
         parsedJson.validators[validatorScriptIndex].compiledCode,
-        [ZKLOGIN_ID]
+        [zkloginid]
     );
     const scriptAddr = serializePlutusScript(
         {code: parameterized_script, version: "V3"}
@@ -20,7 +20,7 @@ async function main() {
 
     const jsonString = readFileSync(compiledContractPath, 'utf-8');
     const parsedJson = JSON.parse(jsonString);
-    const scriptAddr = deriveScriptAddress(parsedJson, validatorScriptIndex);
+    const scriptAddr = deriveScriptAddress(parsedJson, validatorScriptIndex, ZKLOGIN_ID);
     console.log(scriptAddr);
     return 0;
 }
