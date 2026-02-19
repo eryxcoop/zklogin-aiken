@@ -24,7 +24,7 @@ To try the new features introduced in the milestone 2 of the Catalyst proposal (
 
 #### Option 1: Run the Aiken test
 * Go to the ```backend``` directory and run ```npm install```. 
-* Run ```aiken-zk prove aiken circuits/zkLogin.circom verification_key.zkey circuit_inputs/input_zkLogin.json proof.ak```. If you installed ```aiken-zk``` and all its dependencies correctly, you should find a ```proof.ak``` in the ```backend``` directory. This file contains a Groth16 zk proof formatted ready for an aiken test!  
+* Run ```aiken-zk prove aiken circuits/zk_login.circom verification_key.zkey circuit_inputs/input_zkLogin.json proof.ak```. If you installed ```aiken-zk``` and all its dependencies correctly, you should find a ```proof.ak``` in the ```backend``` directory. This file contains a Groth16 zk proof formatted ready for an aiken test!  
 * Open the ```validators/zk_login.ak``` file and paste the contents of ```proof.ak``` in the ```test_example()``` method, replacing the previous one. Also, in the function ```fn test_proof_is_valid(proof: Proof) -> Bool``` of the same file, you should replace the values of:
   * ```zkLoginId```: found in the step 5 of the frontend
   * ```max_epoch```: at this point should be in the ```input_zkLogin.json``` file
@@ -34,7 +34,7 @@ To try the new features introduced in the milestone 2 of the Catalyst proposal (
 #### Option 2: Deploy a real transaction
 * Go to the ```backend``` directory and run ```npm install``` if you haven't already.
 * In the ```backend``` directory run ```aiken build```. This should generate a ```plutus.json``` file in the ```backend``` directory.
-* Run ```aiken-zk prove meshjs circuits/zkLogin.circom verification_key.zkey circuit_inputs/input_zkLogin.json deployment/zk_redeemer.ts```. This will generate a file in ```backend/deployment/zk_redeemer.ts``` with an integrated zk proof.
+* Run ```aiken-zk prove meshjs circuits/zk_login.circom verification_key.zkey circuit_inputs/input_zkLogin.json deployment/zk_redeemer.ts```. This will generate a file in ```backend/deployment/zk_redeemer.ts``` with an integrated zk proof.
 * Create the ```.env``` file with your own Blockfrost key (check the `.env.example` for reference). Create or look for it in https://blockfrost.io.
 * Fill your own data in ```deployment/transactionData.ts```. The fields are:
   * ```zkLoginId```: found in the step 5 of the frontend

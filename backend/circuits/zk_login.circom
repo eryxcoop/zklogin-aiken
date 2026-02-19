@@ -1,6 +1,6 @@
 pragma circom 2.2.3;
 include "nonce.circom";
-include "zkLoginId.circom";
+include "zk_login_id.circom";
 include "feature_inclusion_in_jwt_payload.circom";
 include "verify_signature_is_valid_for_header_dot_payload.circom";
 

@@ -1,6 +1,6 @@
 pragma circom 2.2.3;
 include "nonce.circom";
-include "zkLoginId.circom";
+include "zk_login_id.circom";
 include "feature_inclusion_in_jwt_payload.circom";
 
 // JWT que es una tira de bits. Se interpreta en ascii. Entonces es una array de 8bits

@@ -70,7 +70,7 @@ describe("Circuit test", function () {
     }, 1000000);
 
     it("can validate the main circuit with session data", async () => {
-        const circuit = await wasm_tester(path.join(__dirname, "../circuits/zkLoginWithoutSignatureVerification.circom"), {prime: "bls12381"});
+        const circuit = await wasm_tester(path.join(__dirname, "../circuits/zk_login_without_signature_verification.circom"), {prime: "bls12381"});
         const input = session_data();
         const witness = await circuit.calculateWitness(input, true);
 
