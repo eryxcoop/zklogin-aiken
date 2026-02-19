@@ -12,4 +12,3 @@ circuit_inputs/input_zkLogin.json
 /build/zkLogin_js/witness_calculator.js
 /build/zkLogin_js/zkLogin.wasm
 **/ceremony.ptau
-**/compile-proof-verify.sh
