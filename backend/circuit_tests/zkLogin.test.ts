@@ -7,7 +7,7 @@ import {
     string_to_bit_array,
     verifySignatureCircuitInputs,
     a_bigint_to_limbs
-} from './testDataForACompleteFlowOfZkLogin.js'
+} from './testDataForACompleteFlowOfZkLogin.ts'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
