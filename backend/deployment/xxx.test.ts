@@ -1,4 +1,5 @@
-import {derivateAddress} from './addressDerivation'
+import { describe, it } from 'node:test';
+import {derivateAddress} from './addressDerivation.ts'
 
 describe("Circuit test", function () {
 

@@ -1,3 +1,4 @@
+import { describe, it } from 'node:test';
 import {wasm as wasm_tester} from "circom_tester";
 import {fileURLToPath} from 'url';
 import path from 'path';
@@ -6,7 +7,7 @@ import {
     string_to_bit_array,
     verifySignatureCircuitInputs,
     a_bigint_to_limbs
-} from './testDataForACompleteFlowOfZkLogin'
+} from './testDataForACompleteFlowOfZkLogin.js'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

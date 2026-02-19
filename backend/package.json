@@ -6,7 +6,7 @@
   "license": "ISC",
   "type": "module",
   "scripts": {
-    "test": "jest"
+    "test": "node --test"
   },
   "dependencies": {
     "@emurgo/cardano-serialization-lib-nodejs": "^15.0.3",
@@ -26,8 +26,5 @@
     "tsx": "^4.19.3"
   },
   "devDependencies": {
-    "@types/jest": "^30.0.0",
-    "jest": "^30.2.0",
-    "ts-jest": "^29.4.6"
   }
 }
