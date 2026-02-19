@@ -45,3 +45,12 @@ To try the new features introduced in the milestone 2 of the Catalyst proposal (
   * If the balance is not enough, you can fund the sponsorWallet by sending funds from the [cardano faucet](https://docs.cardano.org/cardano-testnets/tools/faucet). Check the `ADA_TO_SEND_TO_SCRIPT` constant in `deployment/transactionData.ts` to calculate the minimum amount needed (remember that are fees involved).
 * Run ```npx tsx deployment/lockWithDatum.ts```. This will send funds to your zkLoginAddress and you should wait for the transaction to take impact (check for the generated address in [cardanoscan](https://preprod.cardanoscan.io/)).
 * Run ```npx tsx deployment/spend.ts```. This will unlock funds from your zkLoginAddress into another address (which you can pick by changing the ```txOut``` in the ```spend.ts``` file).
+
+## For developers only
+
+### Generating a new verification key
+* Download `pot23_final_21.ptau` from https://github.com/p0tion-tools/cardano-ppot. Move the file to `backend/ceremony.ptau`.
+* Go to `backend/circuits`. Run `./compile-proof-verify.sh -c zk_login.circom unused_parameter ../backend/ceremony.ptau`.
+* Go to `backend/curve_compress` and run `node compressedVerificationKey.cjs ../circuits/build/verification_key.json`.
+* Manually copy each value of the output into `zk_login.ak` (under `SnarkVerificationKey`).
+* Replace `backend/verification_key.zkey` with the new one found in `circuits/build/zk_login_final.zkey`.

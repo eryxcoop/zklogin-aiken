@@ -5,10 +5,6 @@ plutus.json
 .env
 deployment/zk_redeemer.ts
 circuit_inputs/input_zkLogin.json
-/build/zkLogin_js/generate_witness.js
-/build/proof.json
-/build/public.json
-/build/witness.wtns
-/build/zkLogin_js/witness_calculator.js
-/build/zkLogin_js/zkLogin.wasm
+**/build/**
+!**/build/package.json
 **/ceremony.ptau
