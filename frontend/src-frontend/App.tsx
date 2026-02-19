@@ -1061,8 +1061,9 @@ ${JSON.stringify(decodedJwt, null, 2)}`}
                       onClick={() => {
                           const fetchData = async () => {
                               try {
-                                  // Replace with your specific localhost URL and endpoint
-                                  const response = await fetch('http://localhost:8000');
+                                  const params = new URLSearchParams();
+                                  params.append("zkLoginId", zkLoginId);
+                                  const response = await fetch(`http://localhost:8000?${params}`);
 
                                   if (!response.ok) {
                                       throw new Error(`HTTP error! status: ${response.status}`);
@@ -1082,7 +1083,7 @@ ${JSON.stringify(decodedJwt, null, 2)}`}
                               }
                           };
 
-                          fetchData(); // Call the async function
+                          fetchData();
                       }}
                   >
                       Generate user wallet address

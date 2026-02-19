@@ -3,7 +3,7 @@ import {applyParamsToScript} from "@meshsdk/core-csl";
 import {serializePlutusScript} from "@meshsdk/core";
 import {ZKLOGIN_ID} from "./transactionData.ts"
 
-export async function main(zkloginid: bigint) {
+export async function derivateAddress(zkloginid: bigint) {
     const compiledContractPath = "./plutus.json";
     const validatorScriptIndex = 0;
 
@@ -22,4 +22,4 @@ export async function main(zkloginid: bigint) {
     return 0;
 }
 
-main(ZKLOGIN_ID);
+derivateAddress(ZKLOGIN_ID);

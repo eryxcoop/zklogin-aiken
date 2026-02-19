@@ -1,7 +1,7 @@
 // Import the built-in http module
 import http from "http";
 import {ZKLOGIN_ID} from "../deployment/transactionData.ts";
-import {main} from "../deployment/addressDerivation.ts";
+import {derivateAddress} from "../deployment/addressDerivation.ts";
 
 const host = 'localhost';
 const port = 8000;
@@ -31,7 +31,7 @@ const requestListener = function (req, res) {
 
     if (req.method === "GET") {
         try {
-            main(ZKLOGIN_ID);
+            derivateAddress(ZKLOGIN_ID);
             console.log("Execution of script succeeded");
             responseObject = {
                 message: 'Wallet created successfully.',
