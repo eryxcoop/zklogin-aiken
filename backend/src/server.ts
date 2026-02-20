@@ -1,6 +1,6 @@
 // Import the built-in http module
-import http from "http";
-import {handleDeriveAddressAction} from "./deriveAddress.js";
+import * as http from "http";
+import {handleDeriveAddressAction} from "./handleDeriveAddressAction.ts";
 
 const DERIVE_ADDRESS_PATHNAME = "/deriveAddress"
 const GENERATE_PROOF_PATHNAME = "/deriveAddress"

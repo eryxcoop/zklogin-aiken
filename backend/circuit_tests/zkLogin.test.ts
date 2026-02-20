@@ -1,7 +1,5 @@
-import { describe, it } from 'node:test';
+import {describe, it} from 'node:test';
 import {wasm as wasm_tester} from "circom_tester";
-import {fileURLToPath} from 'url';
-import path from 'path';
 import {
     session_data,
     string_to_bit_array,
@@ -9,14 +7,11 @@ import {
     a_bigint_to_limbs
 } from './testDataForACompleteFlowOfZkLogin.ts'
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 describe("Circuit test", function () {
 
     it("verifies jwt signature using RS256", async () => {
-        const circuit = await wasm_tester(path.join(__dirname, "../circuits/verify_signature_is_valid_for_header_dot_payload.circom"),
-            { templateParams: [4920] }
+        const circuit = await wasm_tester("circuits/verify_signature_is_valid_for_header_dot_payload.circom",
+            {templateParams: [4920]}
         );
 
         const witness = await circuit.calculateWitness(verifySignatureCircuitInputs(), true);
@@ -24,8 +19,8 @@ describe("Circuit test", function () {
     }, 1000000);
 
     it("verifies jwt signature using RS256 with another JWT size", async () => {
-        const circuit = await wasm_tester(path.join(__dirname, "../circuits/verify_signature_is_valid_for_header_dot_payload.circom"),
-            { templateParams: [1024] }
+        const circuit = await wasm_tester("circuits/verify_signature_is_valid_for_header_dot_payload.circom",
+            {templateParams: [1024]}
         );
 
         const headerDotPayload = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTc3MDEyOTA4OX0";
@@ -47,7 +42,7 @@ describe("Circuit test", function () {
     }, 1000000);
 
     it("can converter a bigint zero into 256 limbs of 1 bit (256bits)", async () => {
-        const circuit_converter = await wasm_tester(path.join(__dirname, "test_converter_256_bits_to_n_field_elements.circom"));
+        const circuit_converter = await wasm_tester("circuit_tests/test_converter_256_bits_to_n_field_elements.circom");
 
         const inputBits = a_bigint_to_limbs(256, 1, BigInt("0x0000000000000000000000000000000000000000000000000000000000000000"));
         const witness = await circuit_converter.calculateWitness({
@@ -58,7 +53,7 @@ describe("Circuit test", function () {
     }, 1000000);
 
     it("can converter a bigint zero into 256 limbs of 1 bit (256bits) xxx", async () => {
-        const circuit_converter = await wasm_tester(path.join(__dirname, "test_converter_256_bits_to_n_field_elements.circom"));
+        const circuit_converter = await wasm_tester("circuit_tests/test_converter_256_bits_to_n_field_elements.circom");
 
         const oneTailedWith127Zeroes = 2n ** 127n;
         let input = oneTailedWith127Zeroes * (2n ** 128n) + oneTailedWith127Zeroes;
@@ -71,7 +66,7 @@ describe("Circuit test", function () {
     }, 1000000);
 
     it("can validate the main circuit with session data", async () => {
-        const circuit = await wasm_tester(path.join(__dirname, "../circuits/zk_login_without_signature_verification.circom"), {prime: "bls12381"});
+        const circuit = await wasm_tester("circuits/zk_login_without_signature_verification.circom", {prime: "bls12381"});
         const input = session_data();
         const witness = await circuit.calculateWitness(input, true);
 
@@ -79,8 +74,8 @@ describe("Circuit test", function () {
     }, 1000000);
 
     it("can validate the main circuit with session data and signature data", async () => {
-        const circuit = await wasm_tester(path.join(__dirname, "../circuits/zk_login.circom"), {prime: "bls12381"});
-        const circuitInputs = { ...session_data(), ...verifySignatureCircuitInputs() };
+        const circuit = await wasm_tester("circuits/zk_login.circom", {prime: "bls12381"});
+        const circuitInputs = {...session_data(), ...verifySignatureCircuitInputs()};
         const witness = await circuit.calculateWitness(circuitInputs, true);
 
         await circuit.checkConstraints(witness);
@@ -89,11 +84,14 @@ describe("Circuit test", function () {
     it("convert byte array to bit array", async () => {
         const byte_array_to_convert = [128, 129];
         const expected_bit_array = [1, 0, 0, 0, 0, 0, 0, 0].concat([1, 0, 0, 0, 0, 0, 0, 1]);
-        const circuit = await wasm_tester(path.join(__dirname, "convert_byte_array_to_bit_array.circom"), {prime: "bls12381", templateParams: [byte_array_to_convert.length]});
-        const circuitInputs = { byte_array: byte_array_to_convert };
+        const circuit = await wasm_tester("circuit_tests/convert_byte_array_to_bit_array.circom", {
+            prime: "bls12381",
+            templateParams: [byte_array_to_convert.length]
+        });
+        const circuitInputs = {byte_array: byte_array_to_convert};
         const witness = await circuit.calculateWitness(circuitInputs, true);
 
-        await circuit.assertOut(witness, {bit_array : expected_bit_array});
+        await circuit.assertOut(witness, {bit_array: expected_bit_array});
         await circuit.checkConstraints(witness);
     }, 1000000)
 });

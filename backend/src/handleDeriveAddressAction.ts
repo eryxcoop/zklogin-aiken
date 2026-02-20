@@ -1,11 +1,12 @@
-import {derivateAddress} from "../deployment/addressDerivation.ts";
+import {deriveAddress} from "../deployment/deriveAddress.ts";
 
 export function handleDeriveAddressAction(searchParams, res) {
+    let responseObject;
     try {
         const zkLoginId = searchParams.get("zkLoginId");
-        const derivedAddress = derivateAddress(BigInt(zkLoginId));
+        const derivedAddress = deriveAddress(BigInt(zkLoginId));
         console.log("Execution of script succeeded");
-        const responseObject = {
+        responseObject = {
             message: 'Wallet created successfully.',
             execution_result_code: 0,
             status: 'success',
@@ -13,7 +14,7 @@ export function handleDeriveAddressAction(searchParams, res) {
         };
     } catch (error) {
         console.log("Execution of script failed");
-        const responseObject = {
+        responseObject = {
             message: error.message,
             execution_result_code: error,
             status: 'error',

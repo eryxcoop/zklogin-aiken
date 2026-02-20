@@ -3,7 +3,7 @@ import {applyParamsToScript} from "@meshsdk/core-csl";
 import {serializePlutusScript} from "@meshsdk/core";
 import {ZKLOGIN_ID} from "./transactionData.ts"
 
-export function derivateAddress(zkloginid: bigint) {
+export function deriveAddress(zkloginid: bigint) {
     const compiledContractPath = "./plutus.json";
     const validatorScriptIndex = 0;
 
@@ -20,4 +20,4 @@ export function derivateAddress(zkloginid: bigint) {
     return scriptAddr
 }
 
-derivateAddress(ZKLOGIN_ID);
+deriveAddress(ZKLOGIN_ID);
