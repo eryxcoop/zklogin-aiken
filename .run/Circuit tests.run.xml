@@ -5,11 +5,8 @@
     <language value="TYPE_SCRIPT" />
     <typescript-loader value="TSX" />
     <envs />
-    <scope-kind value="SUITE" />
+    <scope-kind value="TEST_FILE" />
     <test-file value="$PROJECT_DIR$/backend/circuit_tests/zkLogin.test.ts" />
-    <test-names>
-      <test-name value="Circuit test" />
-    </test-names>
     <method v="2" />
   </configuration>
 </component>
