@@ -1,7 +1,7 @@
 pragma circom 2.0.2;
 
 function isNegative(x) {
-    // half babyjubjub field size
+    // half babyjubjub field size.
     return x > 10944121435919637611123202872628637544274182200208017171849102093287904247808 ? 1 : 0;
 }
 
