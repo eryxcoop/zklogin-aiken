@@ -1,7 +1,13 @@
 {
   "compilerOptions": {
+    // This allows to import files with an explicit .ts extension and not throw a warning.
+    // Without explicit mention of the .ts extension the imported file is not found.
     "allowImportingTsExtensions": true,
-    "target": "es2022", // To support bigint literals, like 1n or 230897102987498027439n
-    "moduleResolution": "nodenext" // It has something to do with a problem importing wasm_tester
-  },
+
+    // To support bigint literals, like 1n or 230897102987498027439n,
+    "target": "es2022",
+
+    // It has something to do with a problem importing wasm_tester,
+    "moduleResolution": "nodenext"
+  }
 }
