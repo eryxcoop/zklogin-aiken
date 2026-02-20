@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Derive address tests" type="NodeJsTestRunner">
     <node-interpreter value="project" />
-    <working-dir value="$PROJECT_DIR$/backend/deployment" />
+    <working-dir value="$PROJECT_DIR$/backend" />
     <language value="TYPE_SCRIPT" />
     <typescript-loader value="TSX" />
     <envs />
