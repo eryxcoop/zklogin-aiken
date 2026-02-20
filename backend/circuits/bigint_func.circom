@@ -188,13 +188,13 @@ function long_scalar_mult(n, k, a, b) {
 function long_div(n, k, m, a, b){
     var out[2][100];
 
-    var remainder[200];
+    var remainder[100];
     for (var i = 0; i < m + k; i++) {
         remainder[i] = a[i];
     }
 
-    var mult[200];
-    var dividend[200];
+    var mult[100];
+    var dividend[100];
     for (var i = m; i >= 0; i--) {
         if (i == m) {
             dividend[k] = 0;
@@ -210,7 +210,7 @@ function long_div(n, k, m, a, b){
         out[0][i] = short_div(n, k, dividend, b);
 
         var mult_shift[100] = long_scalar_mult(n, k, out[0][i], b);
-        var subtrahend[200];
+        var subtrahend[100];
         for (var j = 0; j < m + k; j++) {
             subtrahend[j] = 0;
         }
@@ -262,9 +262,9 @@ function short_div(n, k, a, b) {
    var scale = (1 << n) \ (1 + b[k - 1]);
 
    // k + 2 registers now
-   var norm_a[200] = long_scalar_mult(n, k + 1, scale, a);
+   var norm_a[100] = long_scalar_mult(n, k + 1, scale, a);
    // k + 1 registers now
-   var norm_b[200] = long_scalar_mult(n, k, scale, b);
+   var norm_b[100] = long_scalar_mult(n, k, scale, b);
 
    var ret;
    if (norm_b[k] != 0) {

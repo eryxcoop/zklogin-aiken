@@ -89,7 +89,6 @@ describe("Circuit test", function () {
     it("convert byte array to bit array", async () => {
         const byte_array_to_convert = [128, 129];
         const expected_bit_array = [1, 0, 0, 0, 0, 0, 0, 0].concat([1, 0, 0, 0, 0, 0, 0, 1]);
-        console.log(expected_bit_array)
         const circuit = await wasm_tester(path.join(__dirname, "convert_byte_array_to_bit_array.circom"), {prime: "bls12381", templateParams: [byte_array_to_convert.length]});
         const circuitInputs = { byte_array: byte_array_to_convert };
         const witness = await circuit.calculateWitness(circuitInputs, true);

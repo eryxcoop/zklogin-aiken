@@ -17,8 +17,6 @@ export function derivateAddress(zkloginid: bigint) {
     const scriptAddr = serializePlutusScript(
         {code: parameterized_script, version: "V3"}
     ).address;
-
-    console.log(scriptAddr);
     return scriptAddr
 }
 
