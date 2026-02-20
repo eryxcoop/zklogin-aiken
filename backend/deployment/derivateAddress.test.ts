@@ -1,5 +1,5 @@
 import { describe, it } from 'node:test';
-import {derivateAddress} from './addressDerivation.ts'
+import {derivateAddress} from './derivateAddress.ts'
 
 describe("Circuit test", function () {
 
