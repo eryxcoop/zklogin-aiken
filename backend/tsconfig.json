@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
     "allowImportingTsExtensions": true,
+    "target": "es2022",
+    "moduleResolution": "nodenext"
   },
 }
