@@ -1,7 +1,6 @@
 import {readFileSync} from "node:fs";
 import {applyParamsToScript} from "@meshsdk/core-csl";
 import {serializePlutusScript} from "@meshsdk/core";
-import {ZKLOGIN_ID} from "./transactionData.ts"
 
 export function deriveAddress(zkloginid: bigint) {
     const compiledContractPath = "./plutus.json";
@@ -27,5 +26,3 @@ export function deriveAddress(zkloginid: bigint) {
     ).address;
     return scriptAddr
 }
-
-deriveAddress(ZKLOGIN_ID);
