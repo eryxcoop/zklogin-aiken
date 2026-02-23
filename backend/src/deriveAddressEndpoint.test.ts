@@ -26,6 +26,10 @@ describe("Derive address endpoint tests", () => {
 
     function assertResponseIs200(response: any) {
         assert.equal(response.status, 200);
+        assert.equal(response.body['message'], "Wallet created successfully.");
+        assert.equal(response.body['execution_result_code'], 0);
+        assert.equal(response.body['status'], 'success');
+        assert.equal(response.body['walletAddress'], 'addr_test1wz85pmuldpc0km0rcdjcu8c8a2c0rvcklut6puhhq0wu9ygvfat33');
     }
 
     it("xxx", () => {
