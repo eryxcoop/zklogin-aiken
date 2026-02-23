@@ -468,27 +468,6 @@ function App() {
         )}
       </Box>
 
-      {zkLoginUserAddress && (
-        <Stack direction="row" spacing={1} sx={{ mt: "24px" }}>
-          <Typography>
-            <code>
-              <Typography
-                component="span"
-                sx={{
-                  fontFamily: "'Noto Sans Mono', monospace;",
-                  fontWeight: 600,
-                }}
-              >
-                {zkLoginUserAddress}
-              </Typography>
-            </code>
-          </Typography>
-            <Typography>
-              Balance: yet to implement
-            </Typography>
-        </Stack>
-      )}
-
       <Box
         sx={{
           mt: "24px",
@@ -1089,6 +1068,28 @@ ${JSON.stringify(decodedJwt, null, 2)}`}
                       Generate user wallet address
                   </Button>
               </Box>
+
+              {zkLoginUserAddress && (
+                  <Stack direction="row" spacing={1} sx={{ mt: "24px" }}>
+                      <Typography>
+                          <code>
+                              <Typography
+                                  component="span"
+                                  sx={{
+                                      fontFamily: "'Noto Sans Mono', monospace;",
+                                      fontWeight: 600,
+                                  }}
+                              >
+                                  {zkLoginUserAddress}
+                              </Typography>
+                          </code>
+                      </Typography>
+                      <Typography>
+                          Balance: yet to implement
+                      </Typography>
+                  </Stack>
+              )}
+
               {/*<Typography>
                   <LoadingButton
                       variant="contained"
