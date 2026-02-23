@@ -21,8 +21,7 @@ describe("Derive address endpoint tests", () => {
             };
         };
         let response = new Response();
-        handleDeriveAddressAction(searchParams, response);
-        return response;
+        return handleDeriveAddressAction(searchParams, response);
     }
 
     function assertResponseIs200(response: any) {

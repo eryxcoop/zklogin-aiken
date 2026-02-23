@@ -12,6 +12,10 @@ export function handleDeriveAddressAction(searchParams, res) {
             status: 'success',
             walletAddress: derivedAddress
         };
+        return {
+            status: 200,
+            body: responseObject,
+        };
     } catch (error) {
         console.log("Execution of script failed");
         responseObject = {
@@ -20,8 +24,9 @@ export function handleDeriveAddressAction(searchParams, res) {
             status: 'error',
             walletAddress: '----'
         };
+        return {
+            status: 422,
+            body: responseObject,
+        };
     }
-    const statusCode = responseObject.status === "error" ? 422 : 200; // 422 Unprocessable Content. The request was well-formed (i.e., syntactically correct) but could not be processed.
-    res.writeHead(statusCode, {"Content-Type": "application/json"});
-    res.end(JSON.stringify(responseObject));
 }

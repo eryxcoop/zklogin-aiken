@@ -29,7 +29,9 @@ const requestListener = function (req, res) {
     const pathname = url.pathname;
 
     if (method === "GET" && pathname === DERIVE_ADDRESS_PATHNAME) {
-        handleDeriveAddressAction(searchParams, res);
+        const response = handleDeriveAddressAction(searchParams, res);
+        res.writeHead(response.status, {"Content-Type": "application/json"});
+        res.end(JSON.stringify(response.body));
     } else if (method === "POST" && pathname === GENERATE_PROOF_PATHNAME) {
 
     } else {
