@@ -29,8 +29,10 @@ describe("Derive address endpoint tests", () => {
         assert.equal(response.status, 200);
     }
 
-    it.skip("xxx", () => {
-        const request = {};
+    it("xxx", () => {
+        const request = {
+            url: '/deriveAddress?zkLoginId=21140065873708661981141523561235886173184262775540053915030560953831497869414',
+        };
 
         // Call endpoint
         const actualResponse = callEndpoint(request);
