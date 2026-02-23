@@ -8,31 +8,41 @@ const GENERATE_PROOF_PATHNAME = "/deriveAddress"
 const host = 'localhost';
 const port = 8000;
 
-// Request listener: handles every incoming HTTP request
-const requestListener = function (req, res) {
+function setCORSHeaders(res) {
     // Set CORS headers to allow requests from localhost:5173
     res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173"); // Allow localhost:5173
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS"); // Allow specific methods
     res.setHeader("Access-Control-Allow-Headers", "Content-Type"); // Allow Content-Type header
+}
 
-    // Handle preflight OPTIONS request
-    if (req.method === "OPTIONS") {
-        res.writeHead(200);
-        res.end();
-        console.log("Options request processed");
+function handleCORS(res) {
+    res.writeHead(200);
+    res.end();
+    console.log("Options request processed");
+}
+
+function urlFromRequest(host, port, req) {
+    const url = new URL(req.url, `http://${host}:${port}`);
+    return url;
+}
+
+// Request listener: handles every incoming HTTP request
+const requestListener = function (nodeServerRequest, nodeServerResponse) {
+    // Handle CORS
+    setCORSHeaders(nodeServerResponse);
+    if (nodeServerRequest.method === "OPTIONS") {
+        handleCORS(nodeServerResponse);
         return;
     }
 
-    const url = new URL(req.url, `http://${host}:${port}`);
-    const method = req.method;
-    const searchParams = url.searchParams;
-    const pathname = url.pathname;
+    const url = urlFromRequest(host, port, nodeServerRequest);
 
-    if (method === "GET" && pathname === DERIVE_ADDRESS_PATHNAME) {
+    if (nodeServerRequest.method === "GET" && url.pathname === DERIVE_ADDRESS_PATHNAME) {
+        const searchParams = url.searchParams;
         const response = handleDeriveAddressAction(searchParams);
-        res.writeHead(response.status, {"Content-Type": "application/json"});
-        res.end(JSON.stringify(response.body));
-    } else if (method === "POST" && pathname === GENERATE_PROOF_PATHNAME) {
+        nodeServerResponse.writeHead(response.status, {"Content-Type": "application/json"});
+        nodeServerResponse.end(JSON.stringify(response.body));
+    } else if (nodeServerRequest.method === "POST" && url.pathname === GENERATE_PROOF_PATHNAME) {
 
     } else {
         throw Error("Unknown combination of request method and path name")
