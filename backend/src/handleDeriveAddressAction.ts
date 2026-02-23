@@ -1,6 +1,6 @@
 import {deriveAddress} from "../deployment/deriveAddress.ts";
 
-export function handleDeriveAddressAction(searchParams, res) {
+export function handleDeriveAddressAction(searchParams) {
     let responseObject;
     try {
         const zkLoginId = searchParams.get("zkLoginId");
