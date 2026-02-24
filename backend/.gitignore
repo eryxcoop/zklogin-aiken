@@ -8,3 +8,5 @@ circuit_inputs/input_zkLogin.json
 **/build/**
 !**/build/package.json
 **/ceremony.ptau
+deployment/test_data/**
+!deployment/test_data/.gitkeep
