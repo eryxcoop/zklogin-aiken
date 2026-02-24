@@ -1,12 +1,18 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
-export async function generateProof(inputZkLogin: Record<string, unknown>, inputZkLoginFileName) {
-    const proofDir = path.dirname(inputZkLoginFileName);
-    const inputZkLoginFileContent = JSON.stringify(inputZkLogin, null, 2);
+export async function generateProof(inputZkLoginData: Record<string, unknown>, proofFile) {
 
+    // Create file with json data
+    const proofDir = path.dirname(proofFile);
+    const inputZkLoginFileContent = JSON.stringify(inputZkLoginData, null, 2);
     await fs.mkdir(proofDir, {recursive: true});
-    await fs.writeFile(inputZkLoginFileName, inputZkLoginFileContent, 'utf8');
+    await fs.writeFile(proofFile, inputZkLoginFileContent, 'utf8');
 
-    return inputZkLoginFileName;
+    // Invoke external tool to create proof
+
+    // Move proof file to expected location
+    //await fs.rename(proofFile, proofFile);
+
+    return proofFile;
 }
