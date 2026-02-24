@@ -27,14 +27,14 @@ describe("Generate proof tests", function () {
     });
 
     it("happy path", async () => {
-        const expectedProofPath = 'deployment/test_data/zk_redeemer.ts';
-        const inputZkLogin = { proof: 'abc123', maxEpoch: 123 };
-        const proofPath = await generateProof(inputZkLogin, expectedProofPath);
+        const expectedInputZkLogin = 'deployment/test_data/input_zkLogin.json';
+        const inputZkLoginData = { proof: 'abc123', maxEpoch: 123 };
+        const proofPath = await generateProof(inputZkLoginData, expectedInputZkLogin);
 
-        assert.equal(proofPath, expectedProofPath);
+        assert.equal(proofPath, expectedInputZkLogin);
         assert.ok(await checkFileExists(proofPath));
 
         const proofContent = await fs.readFile(proofPath, 'utf8');
-        assert.deepEqual(JSON.parse(proofContent), inputZkLogin);
+        assert.deepEqual(JSON.parse(proofContent), inputZkLoginData);
     });
 });
