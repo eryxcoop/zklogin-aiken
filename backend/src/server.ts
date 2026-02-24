@@ -48,7 +48,7 @@ const requestListener = function (nodeServerRequest, nodeServerResponse) {
         nodeServerResponse.writeHead(response.status, {"Content-Type": "application/json"});
         nodeServerResponse.end(JSON.stringify(response.body));
     } else {
-        throw Error("Unknown combination of request method and path name")
+        throw Error(`Unknown combination of request method (${nodeServerRequest.method}) and path name (${url.pathname})`)
     }
 };
 
