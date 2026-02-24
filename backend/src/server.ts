@@ -1,9 +1,10 @@
 // Import the built-in http module
 import * as http from "http";
-import {handleDeriveAddressAction} from "./handleDeriveAddressAction.ts";
+import {handleDeriveAddressEndpoint} from "./handleDeriveAddressEndpoint.ts";
+import {handleGenerateProofEndpoint} from "./handleGenerateProofEndpoint.ts";
 
 const DERIVE_ADDRESS_PATHNAME = "/deriveAddress"
-const GENERATE_PROOF_PATHNAME = "/deriveAddress"
+const GENERATE_PROOF_PATHNAME = "/generateProof"
 
 const host = 'localhost';
 const port = 8000;
@@ -39,11 +40,13 @@ const requestListener = function (nodeServerRequest, nodeServerResponse) {
 
     if (nodeServerRequest.method === "GET" && url.pathname === DERIVE_ADDRESS_PATHNAME) {
         const searchParams = url.searchParams;
-        const response = handleDeriveAddressAction(searchParams);
+        const response = handleDeriveAddressEndpoint(searchParams);
         nodeServerResponse.writeHead(response.status, {"Content-Type": "application/json"});
         nodeServerResponse.end(JSON.stringify(response.body));
     } else if (nodeServerRequest.method === "POST" && url.pathname === GENERATE_PROOF_PATHNAME) {
-
+        const response = handleGenerateProofEndpoint(request);
+        nodeServerResponse.writeHead(response.status, {"Content-Type": "application/json"});
+        nodeServerResponse.end(JSON.stringify(response.body));
     } else {
         throw Error("Unknown combination of request method and path name")
     }

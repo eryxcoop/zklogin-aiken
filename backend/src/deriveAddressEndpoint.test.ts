@@ -1,7 +1,7 @@
 import {describe, it} from 'node:test';
 import {deriveAddress} from '../deployment/deriveAddress.ts'
 import assert from 'node:assert/strict';
-import {handleDeriveAddressAction} from "./handleDeriveAddressAction.ts";
+import {handleDeriveAddressEndpoint} from "./handleDeriveAddressEndpoint.ts";
 
 
 describe("Derive address endpoint tests", () => {
@@ -12,7 +12,7 @@ describe("Derive address endpoint tests", () => {
         const url = new URL(request.url, `http://${host}:${port}`);
         const searchParams = url.searchParams;
 
-        return handleDeriveAddressAction(searchParams);
+        return handleDeriveAddressEndpoint(searchParams);
     }
 
     function assertResponseIs200(response: any) {
