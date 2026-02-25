@@ -1,10 +1,11 @@
 import {describe, it} from 'node:test';
 import {wasm as wasm_tester} from "circom_tester";
 import {
-    session_data,
+    session_data_without_signature_verification_data,
     string_to_bit_array,
     verifySignatureCircuitInputs,
-    a_bigint_to_limbs
+    a_bigint_to_limbs,
+    circuitInputs as mergedSessionDataWithSignatureVerificationData
 } from './testDataForACompleteFlowOfZkLogin.ts'
 
 describe("Circuit test", function () {
@@ -67,7 +68,7 @@ describe("Circuit test", function () {
 
     it("can validate the main circuit with session data", async () => {
         const circuit = await wasm_tester("circuits/zk_login_without_signature_verification.circom", {prime: "bls12381"});
-        const input = session_data();
+        const input = session_data_without_signature_verification_data();
         const witness = await circuit.calculateWitness(input, true);
 
         await circuit.checkConstraints(witness);
@@ -75,7 +76,7 @@ describe("Circuit test", function () {
 
     it("can validate the main circuit with session data and signature data", async () => {
         const circuit = await wasm_tester("circuits/zk_login.circom", {prime: "bls12381"});
-        const circuitInputs = {...session_data(), ...verifySignatureCircuitInputs()};
+        const circuitInputs = mergedSessionDataWithSignatureVerificationData();
         const witness = await circuit.calculateWitness(circuitInputs, true);
 
         await circuit.checkConstraints(witness);

@@ -64,7 +64,7 @@ function ephemeral_private_key() {
     return "67cc6ccf81d981a0cfde5214b9609a4c59aae94f775dd0cca5adcdd67396d267";
 }
 
-export function session_data() {
+export function session_data_without_signature_verification_data() {
     return {
         "nonce": "34739653940406343420017127027297608784054948105845934869119037571030413102577",
         "eph_pk_high": "196990631791862443712883730551705387608",
@@ -127,4 +127,8 @@ export function verifySignatureCircuitInputs() {
         "signature": signature_array,
         "public_key_modulus": public_key_modulus_array,
     };
+}
+
+export function circuitInputs() {
+    return {...session_data_without_signature_verification_data(), ...verifySignatureCircuitInputs()};
 }
