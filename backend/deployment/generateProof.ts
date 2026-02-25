@@ -7,8 +7,18 @@ function executeExternalToolToCreateProof(inputZkLoginFilePath, proofFilePath) {
     execSync(toolExecutionCommandLine, {encoding: 'utf8'});
 }
 
+// We must provide a replacer function to handle BigInt values because JSON.stringify does not support it by default.
+function replacerForBigints() {
+    return (key, value) => {
+        if (typeof value === 'bigint') {
+            return value.toString(); // Convert BigInt to string
+        }
+        return value; // Return other values unchanged
+    };
+}
+
 async function createCircuitParametersFileForExternalTool(inputZkLoginData: Record<string, unknown>, temporaryWorkingDirectoryPath: string, inputZkLoginFilePath) {
-    const inputZkLoginFileContent = JSON.stringify(inputZkLoginData, null, 2);
+    const inputZkLoginFileContent = JSON.stringify(inputZkLoginData, replacerForBigints(), 2);
     await fs.mkdir(temporaryWorkingDirectoryPath, {recursive: true});
     await fs.writeFile(inputZkLoginFilePath, inputZkLoginFileContent, 'utf8');
 }

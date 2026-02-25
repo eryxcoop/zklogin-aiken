@@ -1,6 +1,6 @@
 import {before, describe, it} from 'node:test';
 import {generateProof} from './generateProof.ts'
-import {session_data} from '../tests/xxxx.ts';
+import {circuitInputs} from '../tests/testDataForACompleteFlowOfZkLogin.ts';
 import assert from 'node:assert/strict';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
@@ -35,7 +35,7 @@ describe("Generate proof tests", function () {
     });
 
     it("happy path", async () => {
-        const inputZkLoginData = session_data();
+        const inputZkLoginData = circuitInputs();
         const temporaryWorkingDirectoryPath = 'deployment/test_data';
         const requestedProofFile = path.join(temporaryWorkingDirectoryPath, 'zk_redeemer.ts');
 

@@ -6,7 +6,7 @@ import {
     verifySignatureCircuitInputs,
     a_bigint_to_limbs,
     circuitInputs as mergedSessionDataWithSignatureVerificationData
-} from './testDataForACompleteFlowOfZkLogin.ts'
+} from '../tests/testDataForACompleteFlowOfZkLogin.ts'
 
 describe("Circuit test", function () {
 
