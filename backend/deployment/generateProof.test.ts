@@ -30,13 +30,16 @@ describe("Generate proof tests", function () {
         const inputZkLoginData = { proof: 'abc123', maxEpoch: 123 };
         const requestedProofFile = 'deployment/test_data/zk_redeemer.ts';
 
-        const generatedProofPath = await generateProof(inputZkLoginData, requestedProofFile);
+        const inputZkLoginDataTempFile = await generateProof(inputZkLoginData, 'deployment/test_data', requestedProofFile);
 
         const expectedProofFile = 'deployment/test_data/zk_redeemer.ts';
         const expectedProofContent = 'dummy content';
-        assert.equal(generatedProofPath, expectedProofFile);
-        assert.ok(await checkFileExists(generatedProofPath));
-        const proofContent = await fs.readFile(generatedProofPath, 'utf8');
+
+        assert.ok(await checkFileExists(requestedProofFile));
+
+        assert.ok(await checkFileExists(inputZkLoginDataTempFile));
+
+        const proofContent = await fs.readFile(requestedProofFile, 'utf8');
         assert.deepEqual(proofContent, expectedProofContent);
     });
 });
