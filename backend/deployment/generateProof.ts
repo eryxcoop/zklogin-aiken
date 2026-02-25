@@ -1,7 +1,8 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
+import {execSync} from 'node:child_process';
 
-export async function generateProof(inputZkLoginData: Record<string, unknown>, temporaryWorkingDirectoryPath: string, proofFile) {
+export async function generateProof(inputZkLoginData: Record<string, unknown>, temporaryWorkingDirectoryPath: string, proofFilePath) {
 
     // Determine path where to create file with circuit parameters
     // Create file with json data
@@ -12,13 +13,8 @@ export async function generateProof(inputZkLoginData: Record<string, unknown>, t
 
     // Invoke external tool to create proof
     // const toolGeneratedProofFile = ???
-    const toolExecutionCommandLine = 'aiken-zk prove meshjs circuits/zk_login.circom verification_key.zkey circuit_inputs/input_zkLogin.json deployment/zk_redeemer.ts';
-
-    // Move proof file to expected location
-    //await fs.rename(toolGeneratedProofFile, proofFile);
-    const proofDir = path.dirname(proofFile);
-    await fs.mkdir(proofDir, {recursive: true});
-    await fs.writeFile(proofFile, 'dummy content', 'utf8');
+    const toolExecutionCommandLine = `aiken-zk prove meshjs circuits/zk_login.circom verification_key.zkey ${inputZkLoginFilePath} ${proofFilePath}`;
+    execSync(toolExecutionCommandLine, {encoding: 'utf8'});
 
     return inputZkLoginFilePath;
 }
