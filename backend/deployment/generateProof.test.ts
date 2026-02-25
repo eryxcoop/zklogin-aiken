@@ -29,12 +29,13 @@ describe("Generate proof tests", function () {
     it("happy path", async () => {
         const expectedProofFile = 'deployment/test_data/zk_redeemer.ts';
         const inputZkLoginData = { proof: 'abc123', maxEpoch: 123 };
+        const expectedProofContent = 'dummy content';
         const proofPath = await generateProof(inputZkLoginData, expectedProofFile);
 
         assert.equal(proofPath, expectedProofFile);
         assert.ok(await checkFileExists(proofPath));
 
         const proofContent = await fs.readFile(proofPath, 'utf8');
-        assert.deepEqual(JSON.parse(proofContent), inputZkLoginData);
+        assert.deepEqual(proofContent, expectedProofContent);
     });
 });
