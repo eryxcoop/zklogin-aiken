@@ -13,10 +13,10 @@ async function checkFileExists(filePath) {
     }
 }
 
-async function assertProofFileIsValid(requestedProofFile: string) {
-    const expectedProofContent = /import \{MConStr\} from "@meshsdk\/common";\nimport \{Data, mConStr0\} from "@meshsdk\/core";\n\ntype Proof = MConStr<any, string\[\]>;\n\ntype ZKRedeemer = MConStr<any, Data\[\] \| Proof\[\]>;\n\nfunction mProof\(piA: string, piB: string, piC: string\): Proof \{\n    if \(piA\.length != 96 \|\| piB\.length != 192 \|\| piC\.length != 96\) \{\n        throw new Error\("Wrong proof"\);\n    \}\n\n    return mConStr0\(\[piA, piB, piC\]\);\n\}\n\nexport function mZKRedeemer\(redeemer: Data\): ZKRedeemer \{\n    return mConStr0\(\[redeemer, proofs\(\)\]\);\n\}\n\nfunction proofs\(\): Proof\[\] \{\n    return \[\n\t\tmProof\(\n\t\t\t"[0-9a-f]{96}",\n\t\t\t"[0-9a-f]{192}",\n\t\t\t"[0-9a-f]{96}",\n\t\t\),\n    \];\n\}\n/;
-    const proofContent = await fs.readFile(requestedProofFile, 'utf8');
-    assert.match(proofContent, expectedProofContent);
+async function assertProofFileIsValid(proofFileToValidatePath: string) {
+    const expectedProof = /import \{MConStr\} from "@meshsdk\/common";\nimport \{Data, mConStr0\} from "@meshsdk\/core";\n\ntype Proof = MConStr<any, string\[\]>;\n\ntype ZKRedeemer = MConStr<any, Data\[\] \| Proof\[\]>;\n\nfunction mProof\(piA: string, piB: string, piC: string\): Proof \{\n    if \(piA\.length != 96 \|\| piB\.length != 192 \|\| piC\.length != 96\) \{\n        throw new Error\("Wrong proof"\);\n    \}\n\n    return mConStr0\(\[piA, piB, piC\]\);\n\}\n\nexport function mZKRedeemer\(redeemer: Data\): ZKRedeemer \{\n    return mConStr0\(\[redeemer, proofs\(\)\]\);\n\}\n\nfunction proofs\(\): Proof\[\] \{\n    return \[\n\t\tmProof\(\n\t\t\t"[0-9a-f]{96}",\n\t\t\t"[0-9a-f]{192}",\n\t\t\t"[0-9a-f]{96}",\n\t\t\),\n    \];\n\}\n/;
+    const proofContent = await fs.readFile(proofFileToValidatePath, 'utf8');
+    assert.match(proofContent, expectedProof);
 }
 
 describe("Generate proof tests", function () {
