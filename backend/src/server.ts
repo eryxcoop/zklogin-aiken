@@ -27,8 +27,31 @@ function urlFromRequest(host, port, req) {
     return url;
 }
 
+async function convertNodeServerRequestToRequest(nodeServerRequest) {
+    const body: Record<string, unknown> = await new Promise((resolve, reject) => {
+        let data = '';
+        nodeServerRequest.on('data', chunk => {
+            data += chunk;
+        });
+        nodeServerRequest.on('end', () => {
+            try {
+                resolve(JSON.parse(data));
+            } catch (error) {
+                reject(error);
+            }
+        });
+        nodeServerRequest.on('error', reject);
+    });
+    return {
+        url: nodeServerRequest.url,
+        method: nodeServerRequest.method,
+        headers: nodeServerRequest.headers,
+        body: body,
+    }
+}
+
 // Request listener: handles every incoming HTTP request
-const requestListener = function (nodeServerRequest, nodeServerResponse) {
+const requestListener = async function (nodeServerRequest, nodeServerResponse) {
     // Handle CORS
     setCORSHeaders(nodeServerResponse);
     if (nodeServerRequest.method === "OPTIONS") {
@@ -44,7 +67,8 @@ const requestListener = function (nodeServerRequest, nodeServerResponse) {
         nodeServerResponse.writeHead(response.status, {"Content-Type": "application/json"});
         nodeServerResponse.end(JSON.stringify(response.body));
     } else if (nodeServerRequest.method === "POST" && url.pathname === GENERATE_PROOF_PATHNAME) {
-        const response = handleGenerateProofEndpoint(request);
+        const request = await convertNodeServerRequestToRequest(nodeServerRequest);
+        const response = await handleGenerateProofEndpoint(request);
         nodeServerResponse.writeHead(response.status, {"Content-Type": "application/json"});
         nodeServerResponse.end(JSON.stringify(response.body));
     } else {

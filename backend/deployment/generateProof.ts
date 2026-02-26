@@ -23,7 +23,7 @@ async function createCircuitParametersFileForExternalTool(inputZkLoginData: Reco
     await fs.writeFile(inputZkLoginFilePath, inputZkLoginFileContent, 'utf8');
 }
 
-export async function generateProof(inputZkLoginData: Record<string, unknown>, temporaryWorkingDirectoryPath: string, proofFilePath) {
+export async function generateProof(inputZkLoginData: Record<string, unknown>, temporaryWorkingDirectoryPath: string, proofFilePath: any) {
     const inputZkLoginFilePath = path.join(temporaryWorkingDirectoryPath, `input_zkLogin_${Date.now()}.json`);
     await createCircuitParametersFileForExternalTool(inputZkLoginData, temporaryWorkingDirectoryPath, inputZkLoginFilePath);
     executeExternalToolToCreateProof(inputZkLoginFilePath, proofFilePath);

@@ -1,71 +1,57 @@
-import { LoadingButton } from "@mui/lab";
+import {LoadingButton} from "@mui/lab";
 import {
-  Alert,
-  Box,
-  Button,
-  ButtonGroup,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Stack,
-  Step,
-  StepLabel,
-  Stepper, TextField,
-  Typography,
+    Alert,
+    Box,
+    Button,
+    ButtonGroup,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    Stack,
+    Step,
+    StepLabel,
+    Stepper,
+    TextField,
+    Typography,
 } from "@mui/material";
-import { fromB64 } from "@mysten/bcs";
-import { SuiClient } from "@mysten/sui.js/client";
-import { SerializedSignature } from "@mysten/sui.js/cryptography";
-import { Ed25519Keypair } from "@mysten/sui.js/keypairs/ed25519";
-import { TransactionBlock } from "@mysten/sui.js/transactions";
-import { MIST_PER_SUI } from "@mysten/sui.js/utils";
-import {
-  genAddressSeed,
-  generateRandomness,
-  getExtendedEphemeralPublicKey,
-  getZkLoginSignature,
-} from "@mysten/zklogin";
+import {fromB64} from "@mysten/bcs";
+import {SuiClient} from "@mysten/sui.js/client";
+import {SerializedSignature} from "@mysten/sui.js/cryptography";
+import {Ed25519Keypair} from "@mysten/sui.js/keypairs/ed25519";
+import {TransactionBlock} from "@mysten/sui.js/transactions";
+import {MIST_PER_SUI} from "@mysten/sui.js/utils";
+import {genAddressSeed, generateRandomness, getZkLoginSignature,} from "@mysten/zklogin";
 import axios from "axios";
-import { JwtPayload, jwtDecode } from "jwt-decode";
-import { enqueueSnackbar } from "notistack";
+import {jwtDecode, JwtPayload} from "jwt-decode";
+import {enqueueSnackbar} from "notistack";
 import queryString from "query-string";
-import { useEffect, useMemo, useState } from "react";
-import { Trans, useTranslation } from "react-i18next";
-import { useLocation, useNavigate } from "react-router-dom";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import {useEffect, useMemo, useState} from "react";
+import {Trans, useTranslation} from "react-i18next";
+import {useLocation, useNavigate} from "react-router-dom";
+import {Prism as SyntaxHighlighter} from "react-syntax-highlighter";
+import {oneDark} from "react-syntax-highlighter/dist/esm/styles/prism";
 import "./App.css";
 import GoogleLogo from "./assets/google.svg";
+import {BUILD_ZKLOGIN_SIGNATURE, GENERATE_NONCE,} from "./code_example";
 import {
-  AXIOS_ZKPROOF,
-  BUILD_ZKLOGIN_SIGNATURE,
-  GENERATE_NONCE,
-} from "./code_example";
-import {
-  CLIENT_ID,
-  FULLNODE_URL,
-  KEY_PAIR_SESSION_STORAGE_KEY,
-  MAX_EPOCH_LOCAL_STORAGE_KEY,
-  RANDOMNESS_SESSION_STORAGE_KEY,
-  REDIRECT_URI,
-  STEPS_LABELS_TRANS_KEY,
-  // SUI_DEVNET_FAUCET,
-  SUI_PROVER_DEV_ENDPOINT,
-  USER_SALT_LOCAL_STORAGE_KEY,
+    CLIENT_ID,
+    FULLNODE_URL,
+    KEY_PAIR_SESSION_STORAGE_KEY,
+    MAX_EPOCH_LOCAL_STORAGE_KEY,
+    PROVER_ENDPOINT,
+    RANDOMNESS_SESSION_STORAGE_KEY,
+    REDIRECT_URI,
+    STEPS_LABELS_TRANS_KEY,
+    USER_SALT_LOCAL_STORAGE_KEY,
 } from "./constant";
-import { base, gray } from "./theme/colors";
+import {base, gray} from "./theme/colors";
 import {generateNonce, toBigIntBE} from "./aux/nonce.ts";
 import {computeZkLoginId} from "./aux/zkLoginId.ts";
 import {base64url} from "jose";
 import SignatureData from "./aux/signatureData.ts";
 import {base64ToBigInt} from "./aux/base64toBigInt.ts";
-
-export type PartialZkLoginSignature = Omit<
-  Parameters<typeof getZkLoginSignature>["0"]["inputs"],
-  "addressSeed"
->;
 
 const suiClient = new SuiClient({ url: FULLNODE_URL });
 
@@ -106,7 +92,7 @@ function App() {
   //Fetch ZK Proof (Groth16)
   const [extendedEphemeralPublicKey, setExtendedEphemeralPublicKey] =
       useState("");
-  const [zkProof, setZkProof] = useState<PartialZkLoginSignature>();
+  const [zkProof, setZkProof] = useState<string>();
   const [fetchingZKProof, setFetchingZKProof] = useState(false);
 
   //Assemble zkLogin signature and submit the transaction
@@ -1127,87 +1113,27 @@ address = H(aiken_validator)
                 mb: "12px !important",
               }}
             >
-              {t("51e8ceeb")}
+              {t("STEP_6_GENERATE_PROOF")}
             </Typography>
-            <Typography>{t("446760ac")}</Typography>
-            <Typography>{t("c5c9e603")}</Typography>
-            <SyntaxHighlighter
-              wrapLongLines
-              language="typescript"
-              style={oneDark}
-            >
-              {`import { getExtendedEphemeralPublicKey } from "@mysten/zklogin";
-              
- const extendedEphemeralPublicKey = getExtendedEphemeralPublicKey(
-   ephemeralKeyPair.getPublicKey()
- );`}
-            </SyntaxHighlighter>
-            <Box>
-              <Button
-                variant="contained"
-                onClick={() => {
-                  if (!ephemeralKeyPair) {
-                    return;
-                  }
-                  const extendedEphemeralPublicKey =
-                    getExtendedEphemeralPublicKey(
-                      ephemeralKeyPair.getPublicKey()
-                    );
-
-                  setExtendedEphemeralPublicKey(extendedEphemeralPublicKey);
-                }}
-              >
-                {t("71c429d2")}
-              </Button>
-              <Typography
-                sx={{
-                  mt: "12px",
-                }}
-              >
-                extendedEphemeralPublicKey:
-                {extendedEphemeralPublicKey && (
-                  <code>{extendedEphemeralPublicKey}</code>
-                )}
-              </Typography>
-            </Box>
-            <Typography>{t(`16ebd660`)}</Typography>
-            <SyntaxHighlighter
-              wrapLongLines
-              language="typescript"
-              style={oneDark}
-            >
-              {AXIOS_ZKPROOF}
-            </SyntaxHighlighter>
             <LoadingButton
               loading={fetchingZKProof}
               variant="contained"
               disabled={
-                !oauthParams?.id_token ||
-                !extendedEphemeralPublicKey ||
-                !maxEpoch ||
-                !randomness ||
-                !userSalt
+                  Object.keys(inputZkLoginJson).length === 0
               }
               onClick={async () => {
                 try {
                   setFetchingZKProof(true);
-                  const zkProofResult = await axios.post(
-                    SUI_PROVER_DEV_ENDPOINT,
-                    {
-                      jwt: oauthParams?.id_token as string,
-                      extendedEphemeralPublicKey: extendedEphemeralPublicKey,
-                      maxEpoch: maxEpoch,
-                      jwtRandomness: randomness,
-                      salt: userSalt,
-                      keyClaimName: "sub",
-                    },
+                  const response = await axios.post(
+                      PROVER_ENDPOINT,
+                      JSON.stringify(inputZkLoginJson, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2),
                     {
                       headers: {
                         "Content-Type": "application/json",
                       },
                     }
                   );
-                  setZkProof(zkProofResult.data as PartialZkLoginSignature);
+                  setZkProof(JSON.stringify(response.data));
                   enqueueSnackbar("Successfully obtain ZK Proof", {
                     variant: "success",
                   });
@@ -1225,7 +1151,7 @@ address = H(aiken_validator)
                 }
               }}
             >
-              {t("33893c96")}
+              {t('GENERATE_PROOF_BUTTON')}
             </LoadingButton>
             {zkProof && (
               <SyntaxHighlighter
@@ -1233,7 +1159,7 @@ address = H(aiken_validator)
                 language="typescript"
                 style={oneDark}
               >
-                {JSON.stringify(zkProof, null, 2)}
+                {zkProof}
               </SyntaxHighlighter>
             )}
           </Stack>

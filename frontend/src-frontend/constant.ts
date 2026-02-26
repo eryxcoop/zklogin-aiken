@@ -7,7 +7,7 @@ export const REDIRECT_URI = "http://localhost:5173";
 
 export const SUI_DEVNET_FAUCET = 'https://faucet.devnet.sui.io/gas'
 
-export const SUI_PROVER_DEV_ENDPOINT = 'https://prover-dev.mystenlabs.com/v1'
+export const PROVER_ENDPOINT = 'http://localhost:8000/generateProof'
 
 export const KEY_PAIR_SESSION_STORAGE_KEY = "demo_ephemeral_key_pair";
 

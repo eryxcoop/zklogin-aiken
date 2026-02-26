@@ -1,28 +1,28 @@
 import {describe, it} from 'node:test';
-import assert from 'node:assert/strict';
-import {handleGenerateProofEndpoint} from "./handleGenerateProofEndpoint";
-import {circuitInputs} from "../tests/testDataForACompleteFlowOfZkLogin";
+import * as assert from 'node:assert/strict';
+import {handleGenerateProofEndpoint} from "./handleGenerateProofEndpoint.ts";
+import {circuitInputs} from "../tests/testDataForACompleteFlowOfZkLogin.ts";
 
 describe("Generate proof endpoint tests", () => {
     function sessionDataJson() {
         return circuitInputs();
     }
 
-    function callEndpoint(request: any): void {
-        return handleGenerateProofEndpoint(request.body);
+    async function callEndpoint(request: any) {
+        return await handleGenerateProofEndpoint(request);
     }
 
     function assertResponseIs200(response: any) {
         assert.equal(response.status, 200);
     }
 
-    it("answers successfully when correct parameters are passed", () => {
+    it("answers successfully when correct parameters are passed", async () => {
         const request = {
             url: '/generateProof',
-            body: sessionDataJson()
+            body: sessionDataJson(),
         };
 
-        const actualResponse = callEndpoint(request);
+        const actualResponse = await callEndpoint(Promise.resolve(request));
 
         assertResponseIs200(actualResponse);
     });
