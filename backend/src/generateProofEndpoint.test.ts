@@ -22,7 +22,7 @@ describe("Generate proof endpoint tests", () => {
             body: sessionDataJson(),
         };
 
-        const actualResponse = await callEndpoint(Promise.resolve(request));
+        const actualResponse = await callEndpoint(request);
 
         assertResponseIs200(actualResponse);
     });
