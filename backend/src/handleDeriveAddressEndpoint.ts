@@ -5,7 +5,7 @@ export function handleDeriveAddressEndpoint(searchParams) {
     try {
         const zkLoginId = searchParams.get("zkLoginId");
         const derivedAddress = deriveAddress(BigInt(zkLoginId));
-        console.log("Execution of script succeeded");
+        console.log("Derivation of address succeeded");
         responseObject = {
             message: 'Wallet created successfully.',
             execution_result_code: 0,
@@ -17,7 +17,7 @@ export function handleDeriveAddressEndpoint(searchParams) {
             body: responseObject,
         };
     } catch (error) {
-        console.log("Execution of script failed");
+        console.log("Derivation of address failed");
         responseObject = {
             message: error.message,
             execution_result_code: error,

@@ -19,12 +19,10 @@ function setCORSHeaders(res) {
 function handleCORS(res) {
     res.writeHead(200);
     res.end();
-    console.log("Options request processed");
 }
 
-function urlFromRequest(host, port, req) {
-    const url = new URL(req.url, `http://${host}:${port}`);
-    return url;
+function urlFromRequest(host, port, request) {
+    return new URL(request.url, `http://${host}:${port}`);
 }
 
 async function convertNodeServerRequestToRequest(nodeServerRequest) {
@@ -67,10 +65,12 @@ const requestListener = async function (nodeServerRequest, nodeServerResponse) {
         nodeServerResponse.writeHead(response.status, {"Content-Type": "application/json"});
         nodeServerResponse.end(JSON.stringify(response.body));
     } else if (nodeServerRequest.method === "POST" && url.pathname === GENERATE_PROOF_PATHNAME) {
+        process.stdout.write("Received request to generate proof... ");
         const request = await convertNodeServerRequestToRequest(nodeServerRequest);
         const response = await handleGenerateProofEndpoint(request);
         nodeServerResponse.writeHead(response.status, {"Content-Type": "application/json"});
         nodeServerResponse.end(JSON.stringify(response.body));
+        process.stdout.write("done.\n");
     } else {
         throw Error(`Unknown combination of request method (${nodeServerRequest.method}) and path name (${url.pathname})`)
     }
