@@ -16,6 +16,10 @@ describe("Generate proof endpoint tests", () => {
         assert.equal(response.status, 200);
     }
 
+    function assertResponseHasField(fieldName: string, actualResponse: any) {
+        assert.ok(Object.hasOwn(actualResponse, fieldName))
+    }
+
     it("answers successfully when correct parameters are passed", async () => {
         const request = {
             url: '/generateProof',
@@ -25,5 +29,7 @@ describe("Generate proof endpoint tests", () => {
         const actualResponse = await callEndpoint(request);
 
         assertResponseIs200(actualResponse);
+        //assertResponseHasField("proofPath", actualResponse);
+        //assertResponseHasField("proofContent", actualResponse);
     });
 });
