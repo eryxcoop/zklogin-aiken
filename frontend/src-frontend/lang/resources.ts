@@ -45,7 +45,7 @@ export const resources = {
       '2fb333f5': "Step 5: Generate User zkLoginId",
       e05797f4: "The user's zkLoginId is determined by <1>sub</1>,<1>iss</1>,<1>aud</1> and <1>user_salt</1> together. For the same JWT, <1>sub</1>, <1>iss</1>, and <1>aud</1> will not change with each login.",
       c9bbf457: 'Generate zkLoginId',
-      'STEP_6_GENERATE_PROOF': 'Step 6: Generate ZK Proof',
+      'STEP_6_GENERATE_PROOF': 'Step 6: Generate ZK Proof (this step may take a while)',
       '446760ac': 'This is the proof (ZK Proof) for the ephemeral key pair, used to demonstrate the validity of the ephemeral key pair.',
       c5c9e603: '1. First, generate the extended ephemeral public key as input for the ZKP.',
       '71c429d2': 'Generate the extended ephemeral public key',
