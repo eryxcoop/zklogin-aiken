@@ -45,6 +45,7 @@ import {
     REDIRECT_URI,
     STEPS_LABELS_TRANS_KEY,
     USER_SALT_LOCAL_STORAGE_KEY,
+    ZK_SESSION_PROOF_LOCAL_STORAGE_KEY,
 } from "./constant";
 import {base, gray} from "./theme/colors";
 import {generateNonce, toBigIntBE} from "./aux/nonce.ts";
@@ -149,6 +150,11 @@ function App() {
 
     if (maxEpoch) {
       setMaxEpoch(Number(maxEpoch));
+    }
+
+    const zkProof = window.localStorage.getItem(ZK_SESSION_PROOF_LOCAL_STORAGE_KEY);
+    if (zkProof) {
+      setZkProof(zkProof);
     }
   }, []);
 
@@ -1134,6 +1140,7 @@ address = H(aiken_validator)
                               }
                           );
                           setZkProof(response.data['proofContent']);
+                          window.localStorage.setItem(ZK_SESSION_PROOF_LOCAL_STORAGE_KEY, response.data['proofContent']);
                           enqueueSnackbar("Successfully obtain ZK Proof", {
                               variant: "success",
                           });
