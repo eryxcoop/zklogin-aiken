@@ -92,7 +92,7 @@ function App() {
   //Fetch ZK Proof (Groth16)
   const [extendedEphemeralPublicKey, setExtendedEphemeralPublicKey] =
       useState("");
-  const [zkProof, setZkProof] = useState<string>();
+  const [zkProof, setZkProof] = useState<string>('');
   const [fetchingZKProof, setFetchingZKProof] = useState(false);
 
   //Assemble zkLogin signature and submit the transaction
@@ -1122,33 +1122,39 @@ address = H(aiken_validator)
                   Object.keys(inputZkLoginJson).length === 0
               }
               onClick={async () => {
-                try {
-                  setFetchingZKProof(true);
-                  const response = await axios.post(
-                      PROVER_ENDPOINT,
-                      JSON.stringify(inputZkLoginJson, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2),
-                    {
-                      headers: {
-                        "Content-Type": "application/json",
-                      },
-                    }
-                  );
-                  setZkProof(JSON.stringify(response.data));
-                  enqueueSnackbar("Successfully obtain ZK Proof", {
-                    variant: "success",
-                  });
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                } catch (error: any) {
-                  console.error(error);
-                  enqueueSnackbar(
-                    String(error?.response?.data?.message || error),
-                    {
-                      variant: "error",
-                    }
-                  );
-                } finally {
-                  setFetchingZKProof(false);
-                }
+                  if (zkProof === '') {
+                      try {
+                          setFetchingZKProof(true);
+                          const response = await axios.post(
+                              PROVER_ENDPOINT,
+                              JSON.stringify(inputZkLoginJson, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2),
+                              {
+                                  headers: {
+                                      "Content-Type": "application/json",
+                                  },
+                              }
+                          );
+                          setZkProof(response.data['proofContent']);
+                          enqueueSnackbar("Successfully obtain ZK Proof", {
+                              variant: "success",
+                          });
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      } catch (error: any) {
+                          console.error(error);
+                          enqueueSnackbar(
+                              String(error?.response?.data?.message || error),
+                              {
+                                  variant: "error",
+                              }
+                          );
+                      } finally {
+                          setFetchingZKProof(false);
+                      }
+                  } else {
+                      enqueueSnackbar("Reusing ZK Proof", {
+                          variant: "success",
+                      });
+                  }
               }}
             >
               {t('GENERATE_PROOF_BUTTON')}
