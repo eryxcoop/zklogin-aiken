@@ -1,6 +1,6 @@
 import {before, describe, it} from 'node:test';
 import {generateProof} from './generateProof.ts'
-import {circuitInputs} from '../tests/testDataForACompleteFlowOfZkLogin.ts';
+import {circuitInputs} from '../tests_common_code/testDataForACompleteFlowOfZkLogin.ts';
 import * as assert from 'node:assert/strict';
 import * as fs from 'node:fs/promises';
 import * as fss from 'node:fs';

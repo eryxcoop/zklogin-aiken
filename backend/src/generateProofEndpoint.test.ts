@@ -1,7 +1,7 @@
 import {describe, it} from 'node:test';
 import * as assert from 'node:assert/strict';
 import {handleGenerateProofEndpoint} from "./handleGenerateProofEndpoint.ts";
-import {circuitInputs} from "../tests/testDataForACompleteFlowOfZkLogin.ts";
+import {circuitInputs} from "../tests_common_code/testDataForACompleteFlowOfZkLogin.ts";
 import {execSync} from "node:child_process";
 import * as fss from "node:fs";
 
