@@ -37,7 +37,7 @@ import GoogleLogo from "./assets/google.svg";
 import {BUILD_ZKLOGIN_SIGNATURE, GENERATE_NONCE,} from "./code_example";
 import {
     CLIENT_ID,
-    FULLNODE_URL,
+    FULLNODE_URL, FUNDING_ENDPOINT,
     KEY_PAIR_SESSION_STORAGE_KEY,
     MAX_EPOCH_LOCAL_STORAGE_KEY,
     PROVER_ENDPOINT,
@@ -45,6 +45,7 @@ import {
     REDIRECT_URI,
     STEPS_LABELS_TRANS_KEY,
     USER_SALT_LOCAL_STORAGE_KEY,
+    ZK_SESSION_PROOF_LOCAL_STORAGE_KEY,
 } from "./constant";
 import {base, gray} from "./theme/colors";
 import {generateNonce, toBigIntBE} from "./aux/nonce.ts";
@@ -97,7 +98,6 @@ function App() {
 
   //Assemble zkLogin signature and submit the transaction
   const [executingTxn, setExecutingTxn] = useState(false);
-  const [executeDigest, setExecuteDigest] = useState("");
 
   //Generate user Cardano address
   const [inputZkLoginJson, setInputZkLoginJson] = useState({});
@@ -150,6 +150,11 @@ function App() {
 
     if (maxEpoch) {
       setMaxEpoch(Number(maxEpoch));
+    }
+
+    const zkProof = window.localStorage.getItem(ZK_SESSION_PROOF_LOCAL_STORAGE_KEY);
+    if (zkProof) {
+      setZkProof(zkProof);
     }
   }, []);
 
@@ -1135,6 +1140,7 @@ address = H(aiken_validator)
                               }
                           );
                           setZkProof(response.data['proofContent']);
+                          window.localStorage.setItem(ZK_SESSION_PROOF_LOCAL_STORAGE_KEY, response.data['proofContent']);
                           enqueueSnackbar("Successfully obtain ZK Proof", {
                               variant: "success",
                           });
@@ -1206,66 +1212,42 @@ address = H(aiken_validator)
                     ) {
                       return;
                     }
-                    setExecutingTxn(true);
-                    const txb = new TransactionBlock();
-
-                    const [coin] = txb.splitCoins(txb.gas, [MIST_PER_SUI * 1n]);
-                    txb.transferObjects(
-                      [coin],
-                      "0xfa0f8542f256e669694624aa3ee7bfbde5af54641646a3a05924cf9e329a8a36"
-                    );
-                    txb.setSender(zkLoginUserAddress);
-
-                    const { bytes, signature: userSignature } = await txb.sign({
-                      client: suiClient,
-                      signer: ephemeralKeyPair, // This must be the same ephemeral key pair used in the ZKP request
-                    });
-                    if (!decodedJwt?.sub || !decodedJwt.aud) {
-                      return;
-                    }
-
-                    const addressSeed: string = genAddressSeed(
-                      BigInt(userSalt),
-                      "sub",
-                      decodedJwt.sub,
-                      decodedJwt.aud as string
-                    ).toString();
-
-                    const zkLoginSignature: SerializedSignature =
-                      getZkLoginSignature({
-                        inputs: {
-                          ...zkProof,
-                          addressSeed,
-                        },
-                        maxEpoch,
-                        userSignature,
-                      });
-
-                    const executeRes = await suiClient.executeTransactionBlock({
-                      transactionBlock: bytes,
-                      signature: zkLoginSignature,
-                    });
-
                     enqueueSnackbar(
-                      `Execution successful: ${executeRes.digest}`,
+                      `Started giving funds to zk login address`,
                       {
                         variant: "success",
                       }
                     );
-                    setExecuteDigest(executeRes.digest);
-                  } catch (error) {
-                    console.error(error);
-                    enqueueSnackbar(String(error), {
-                      variant: "error",
-                    });
+
+                      setExecutingTxn(true);
+                      const response = await axios.post(
+                          FUNDING_ENDPOINT,
+                          JSON.stringify({'zkLoginAddress': zkLoginUserAddress}, null, 2),
+                          {
+                              headers: {
+                                  "Content-Type": "application/json",
+                              },
+                          }
+                      );
+                      enqueueSnackbar("Finished giving funds to zk login address", {
+                          variant: "success",
+                      });
+                  } catch (error: any) {
+                      console.error(error);
+                      enqueueSnackbar(
+                          String(error?.response?.data?.message || error),
+                          {
+                              variant: "error",
+                          }
+                      );
                   } finally {
-                    setExecutingTxn(false);
+                      setExecutingTxn(false);
                   }
                 }}
               >
                 Execute Transaction Block
               </LoadingButton>
-              {executeDigest && (
+              {/*executeDigest && (
                 <Alert severity="success" sx={{ mt: "12px" }}>
                   Execution successful:{" "}
                   <Typography
@@ -1283,7 +1265,7 @@ address = H(aiken_validator)
                     </a>
                   </Typography>
                 </Alert>
-              )}
+              )*/}
             </div>
           </Box>
         )}
