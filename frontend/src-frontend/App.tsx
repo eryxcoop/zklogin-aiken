@@ -37,7 +37,7 @@ import GoogleLogo from "./assets/google.svg";
 import {BUILD_ZKLOGIN_SIGNATURE, GENERATE_NONCE,} from "./code_example";
 import {
     CLIENT_ID,
-    FULLNODE_URL,
+    FULLNODE_URL, FUNDING_ENDPOINT,
     KEY_PAIR_SESSION_STORAGE_KEY,
     MAX_EPOCH_LOCAL_STORAGE_KEY,
     PROVER_ENDPOINT,
@@ -1212,21 +1212,36 @@ address = H(aiken_validator)
                     ) {
                       return;
                     }
-                    setExecutingTxn(true);
-
                     enqueueSnackbar(
-                      `Execution successful: ${executeRes.digest}`,
+                      `Started giving funds to zk login address`,
                       {
                         variant: "success",
                       }
                     );
-                  } catch (error) {
-                    console.error(error);
-                    enqueueSnackbar(String(error), {
-                      variant: "error",
-                    });
+
+                      setExecutingTxn(true);
+                      const response = await axios.post(
+                          FUNDING_ENDPOINT,
+                          JSON.stringify({'zkLoginAddress': zkLoginUserAddress}, null, 2),
+                          {
+                              headers: {
+                                  "Content-Type": "application/json",
+                              },
+                          }
+                      );
+                      enqueueSnackbar("Finished giving funds to zk login address", {
+                          variant: "success",
+                      });
+                  } catch (error: any) {
+                      console.error(error);
+                      enqueueSnackbar(
+                          String(error?.response?.data?.message || error),
+                          {
+                              variant: "error",
+                          }
+                      );
                   } finally {
-                    setExecutingTxn(false);
+                      setExecutingTxn(false);
                   }
                 }}
               >

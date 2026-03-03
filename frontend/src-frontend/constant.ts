@@ -11,6 +11,8 @@ export const SUI_DEVNET_FAUCET = 'https://faucet.devnet.sui.io/gas'
 
 export const PROVER_ENDPOINT = 'http://localhost:8000/generateProof'
 
+export const FUNDING_ENDPOINT = 'http://localhost:8000/fundWithFaucet';
+
 export const KEY_PAIR_SESSION_STORAGE_KEY = "demo_ephemeral_key_pair";
 
 export const USER_SALT_LOCAL_STORAGE_KEY = "demo_user_salt_key_pair";
