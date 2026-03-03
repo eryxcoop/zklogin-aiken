@@ -17,8 +17,8 @@ export async function lockTxWithDatum(scriptAddr) {
         .complete();
     const signedTx = await sponsorWallet.signTx(unsignedTx);
     const deployedTxHash = await sponsorWallet.submitTx(signedTx);
-
     console.log(`${ADA_TO_SEND_TO_SCRIPT} tADA locked into the contract at Tx ID: ${deployedTxHash}`);
+    return deployedTxHash;
 }
 
 // lockTxWithDatum()
