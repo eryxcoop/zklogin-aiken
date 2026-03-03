@@ -1,42 +1,18 @@
-export const BUILD_ZKLOGIN_SIGNATURE = `const txb = new TransactionBlock();
-
-// Transfer 1 SUI to 0xfa0f...8a36.
-const [coin] = txb.splitCoins(txb.gas,[MIST_PER_SUI * 1n]);
-txb.transferObjects(
-  [coin],
-  "0xfa0f8542f256e669694624aa3ee7bfbde5af54641646a3a05924cf9e329a8a36"
-);
-txb.setSender(zkLoginUserAddress);
-
-const { bytes, signature: userSignature } = await txb.sign({
-  client,
-  signer: ephemeralKeyPair
-});
-
-// Generate addressSeed using userSalt, sub, and aud (JWT Payload)
-// as parameters for obtaining zkLoginSignature
-const addressSeed: string = genAddressSeed(
-  BigInt(userSalt),
-  "sub",
-  decodedJwt.sub,
-  decodedJwt.aud
-).toString();
-
-// partialZkLoginSignature()
-const zkLoginSignature: SerializedSignature = getZkLoginSignature({
-  inputs: {
-    ...partialZkLoginSignature,
-    addressSeed,
-  },
-  maxEpoch,
-  userSignature,
-});
-
-// Execute transaction
-suiClient.executeTransactionBlock({
-  transactionBlock: bytes,
-  signature: zkLoginSignature,
-});
+export const BUILD_ZKLOGIN_SIGNATURE = `async function lockTxWithDatum() {
+    const {scriptAddr} = getScript();
+    const lockTxBuilder = getTxBuilder();
+    const unsignedTx = await lockTxBuilder
+        .txOut(scriptAddr, [{
+            unit: "lovelace",
+            quantity: LOVELACE_TO_SEND_TO_SCRIPT
+        }])
+        .txOutInlineDatumValue(mConStr0([]))
+        .changeAddress(SPONSOR_WALLET_ADDR)
+        .selectUtxosFrom(await sponsorWallet.getUtxos())
+        .complete();
+    const signedTx = await sponsorWallet.signTx(unsignedTx);
+    const deployedTxHash = await sponsorWallet.submitTx(signedTx);
+}
 `
 
 export const AXIOS_ZKPROOF = `const zkProofResult = await axios.post(

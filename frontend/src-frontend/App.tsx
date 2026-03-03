@@ -97,7 +97,6 @@ function App() {
 
   //Assemble zkLogin signature and submit the transaction
   const [executingTxn, setExecutingTxn] = useState(false);
-  const [executeDigest, setExecuteDigest] = useState("");
 
   //Generate user Cardano address
   const [inputZkLoginJson, setInputZkLoginJson] = useState({});
@@ -1207,44 +1206,6 @@ address = H(aiken_validator)
                       return;
                     }
                     setExecutingTxn(true);
-                    const txb = new TransactionBlock();
-
-                    const [coin] = txb.splitCoins(txb.gas, [MIST_PER_SUI * 1n]);
-                    txb.transferObjects(
-                      [coin],
-                      "0xfa0f8542f256e669694624aa3ee7bfbde5af54641646a3a05924cf9e329a8a36"
-                    );
-                    txb.setSender(zkLoginUserAddress);
-
-                    const { bytes, signature: userSignature } = await txb.sign({
-                      client: suiClient,
-                      signer: ephemeralKeyPair, // This must be the same ephemeral key pair used in the ZKP request
-                    });
-                    if (!decodedJwt?.sub || !decodedJwt.aud) {
-                      return;
-                    }
-
-                    const addressSeed: string = genAddressSeed(
-                      BigInt(userSalt),
-                      "sub",
-                      decodedJwt.sub,
-                      decodedJwt.aud as string
-                    ).toString();
-
-                    const zkLoginSignature: SerializedSignature =
-                      getZkLoginSignature({
-                        inputs: {
-                          ...zkProof,
-                          addressSeed,
-                        },
-                        maxEpoch,
-                        userSignature,
-                      });
-
-                    const executeRes = await suiClient.executeTransactionBlock({
-                      transactionBlock: bytes,
-                      signature: zkLoginSignature,
-                    });
 
                     enqueueSnackbar(
                       `Execution successful: ${executeRes.digest}`,
@@ -1252,7 +1213,6 @@ address = H(aiken_validator)
                         variant: "success",
                       }
                     );
-                    setExecuteDigest(executeRes.digest);
                   } catch (error) {
                     console.error(error);
                     enqueueSnackbar(String(error), {
@@ -1265,7 +1225,7 @@ address = H(aiken_validator)
               >
                 Execute Transaction Block
               </LoadingButton>
-              {executeDigest && (
+              {/*executeDigest && (
                 <Alert severity="success" sx={{ mt: "12px" }}>
                   Execution successful:{" "}
                   <Typography
@@ -1283,7 +1243,7 @@ address = H(aiken_validator)
                     </a>
                   </Typography>
                 </Alert>
-              )}
+              )*/}
             </div>
           </Box>
         )}
