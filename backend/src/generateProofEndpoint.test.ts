@@ -17,7 +17,7 @@ describe("Generate proof endpoint tests", () => {
     }
 
     function assertResponseHasField(fieldName: string, actualResponse: any) {
-        assert.ok(Object.hasOwn(actualResponse, fieldName))
+        assert.ok(Object.hasOwn(actualResponse.body, fieldName))
     }
 
     it("answers successfully when correct parameters are passed", async () => {
@@ -29,7 +29,7 @@ describe("Generate proof endpoint tests", () => {
         const actualResponse = await callEndpoint(request);
 
         assertResponseIs200(actualResponse);
-        //assertResponseHasField("proofPath", actualResponse);
-        //assertResponseHasField("proofContent", actualResponse);
+        assertResponseHasField("proofPath", actualResponse);
+        assertResponseHasField("proofContent", actualResponse);
     });
 });

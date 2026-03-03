@@ -1,5 +1,6 @@
 import {generateProof} from "../deployment/generateProof.ts";
 import {execSync} from "node:child_process";
+import * as fs from 'node:fs/promises';
 
 export async function handleGenerateProofEndpoint(request) {
     try {
@@ -14,12 +15,14 @@ export async function handleGenerateProofEndpoint(request) {
             proofFilePath
         );
 
+        const proofContent = await fs.readFile(proofFilePath, 'utf8');
+
         return {
             status: 200,
             body: {
                 'message': 'Proof generated successfully.',
                 'proofPath': proofPath,
-                //'proofContent':
+                'proofContent': proofContent
             }
         }
     } catch (error) {
