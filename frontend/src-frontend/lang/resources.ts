@@ -8,7 +8,7 @@ export const resources = {
       '8b72e7cd': 'Generate Salt',
       '66f6b490': 'Generate user Cardano address',
       af802c7a: 'Generate ZK Proof',
-      c649dd70: 'Assemble zkLogin signature',
+      c649dd70: 'Send funds to zkLogin address',
       '47b83f4e': ' From OpenID Provider',
       fb399be8: 'Needed for assembling zkLogin signature later',
       '0a710e64': 'User address determined by JWT and Salt together',
