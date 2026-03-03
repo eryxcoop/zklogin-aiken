@@ -1,9 +1,9 @@
-import {generateProof} from "../deployment/generateProof.ts";
-import {execSync} from "node:child_process";
-import * as fs from 'node:fs/promises';
+import {lockTxWithDatum} from "../deployment/lockWithDatum.ts";
 
 export async function handleFundAddressEndpoint(request) {
     try {
+        const scriptAddr = request.body['zkLoginAddress'];
+        lockTxWithDatum(scriptAddr);
 
         return {
             status: 200,

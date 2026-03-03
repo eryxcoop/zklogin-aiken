@@ -1,9 +1,10 @@
-import {BlockfrostProvider, MeshTxBuilder, MeshWallet, serializePlutusScript, UTxO, Network} from "@meshsdk/core";
+import {BlockfrostProvider, MeshTxBuilder, MeshWallet, serializePlutusScript} from "@meshsdk/core";
+import type {UTxO, Network} from "@meshsdk/core";
 import {applyParamsToScript} from "@meshsdk/core-csl";
-import blueprint from "../plutus.json";
-import { ZKLOGIN_ID } from "./transactionData";
+import blueprint from "../plutus.json" with { type: "json" };
+import { ZKLOGIN_ID } from "./transactionData.ts";
 import "dotenv/config";
-import {SPONSOR_WALLET_SK} from "./sponsorWalletCredentials";
+import {SPONSOR_WALLET_SK} from "./sponsorWalletCredentials.ts";
 
 const blockfrostKey = process.env.BLOCKFROST_PROJECT_ID;
 export const blockchainProvider = new BlockfrostProvider(blockfrostKey);
