@@ -43,7 +43,7 @@ import {
     PROVER_ENDPOINT,
     RANDOMNESS_SESSION_STORAGE_KEY,
     REDIRECT_URI,
-    STEPS_LABELS_TRANS_KEY,
+    STEPS_LABELS_TRANS_KEY, TRANSFER_ENDPOINT,
     USER_SALT_LOCAL_STORAGE_KEY,
     ZK_SESSION_PROOF_LOCAL_STORAGE_KEY,
 } from "./constant";
@@ -106,6 +106,8 @@ function App() {
 
   // Send funds
   const [sendingFundsSpinner, setSendingFundsSpinner] = useState(false);
+  const [destinationAddress, setDestinationAddress] = useState<string>();
+  const [amountToTransfer, setAmountToTransfer] = useState<string>();
 
   // Change language
   useEffect(() => {
@@ -1280,12 +1282,16 @@ address = H(aiken_validator)
                   </Typography>
                   <Stack spacing={2}>
                       <TextField
+                          value={destinationAddress}
+                          onChange={(e)=>setDestinationAddress(e.target.value)}
                           label="Destination Address"
                           variant="outlined"
                           fullWidth
                           placeholder="Enter destination address"
                       />
                       <TextField
+                          value={amountToTransfer}
+                          onChange={(e)=>setAmountToTransfer(e.target.value)}
                           label="Amount (ADA)"
                           variant="outlined"
                           type="number"
@@ -1298,9 +1304,18 @@ address = H(aiken_validator)
                           onClick={async () => {
                               try {
                                   setSendingFundsSpinner(true);
-                                  // Dummy code - button processing simulation
-                                  await new Promise(resolve => setTimeout(resolve, 2000));
-                                  enqueueSnackbar("Transfer simulated successfully", {
+
+                                  const response = await axios.post(
+                                      TRANSFER_ENDPOINT,
+                                      JSON.stringify({'destinationAddress': destinationAddress, 'amount': amountToTransfer}),
+                                      {
+                                          headers: {
+                                              "Content-Type": "application/json",
+                                          },
+                                      }
+                                  );
+
+                                  enqueueSnackbar("Transfer occurred successfully", {
                                       variant: "success",
                                   });
                               } catch (error: any) {
