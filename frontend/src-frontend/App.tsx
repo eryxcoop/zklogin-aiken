@@ -173,6 +173,8 @@ function App() {
       case 5:
         return !zkProof;
       case 6:
+        return false;
+      case 7:
         return true;
       default:
         break;
@@ -443,7 +445,7 @@ function App() {
         >
           Back
         </Button>
-        {activeStep !== 6 && (
+        {activeStep !== 7 && (
           <Button
             sx={{
               ml: "12px",
@@ -1260,6 +1262,14 @@ address = H(aiken_validator)
               )*/}
             </div>
           </Box>
+        )}
+        {/* Step 8 */}
+        {activeStep === 7 && (
+            <Box>
+                <Typography variant="h6">
+                Step 8
+                </Typography>
+            </Box>
         )}
       </Box>
     </Box>
