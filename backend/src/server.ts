@@ -3,10 +3,12 @@ import * as http from "http";
 import {handleDeriveAddressEndpoint} from "./handleDeriveAddressEndpoint.ts";
 import {handleGenerateProofEndpoint} from "./handleGenerateProofEndpoint.ts";
 import {handleFundAddressEndpoint} from "./handleFundAddressEndpoint.ts";
+import {handleTransferFundsEndpoint} from "./handleTransferFundsEndpoint.ts";
 
 const DERIVE_ADDRESS_PATHNAME = "/deriveAddress"
 const GENERATE_PROOF_PATHNAME = "/generateProof"
 const FUND_ADDRESS_PATHNAME = "/fundWithFaucet"
+const TRANSFER_FUNDS_PATHNAME = "/transfer"
 
 const host = 'localhost';
 const port = 8000;
@@ -78,6 +80,13 @@ const requestListener = async function (nodeServerRequest, nodeServerResponse) {
         // TODO: Sacar codigo repetido de request y response
         const request = await convertNodeServerRequestToRequest(nodeServerRequest);
         const response = await handleFundAddressEndpoint(request);
+        nodeServerResponse.writeHead(response.status, {"Content-Type": "application/json"});
+        nodeServerResponse.end(JSON.stringify(response.body));
+        process.stdout.write("done.\n");
+    } else if (nodeServerRequest.method === "POST" && url.pathname === TRANSFER_FUNDS_PATHNAME) {
+        process.stdout.write("Received request to transfer funds... ");
+        const request = await convertNodeServerRequestToRequest(nodeServerRequest);
+        const response = await handleTransferFundsEndpoint(request);
         nodeServerResponse.writeHead(response.status, {"Content-Type": "application/json"});
         nodeServerResponse.end(JSON.stringify(response.body));
         process.stdout.write("done.\n");
