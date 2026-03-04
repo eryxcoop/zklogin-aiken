@@ -8,7 +8,7 @@ export const resources = {
       '8b72e7cd': 'Generate Salt',
       '66f6b490': 'Generate user Cardano address',
       af802c7a: 'Generate ZK Proof',
-      c649dd70: 'Assemble zkLogin signature',
+      c649dd70: 'Send funds to zkLogin address',
       '47b83f4e': ' From OpenID Provider',
       fb399be8: 'Needed for assembling zkLogin signature later',
       '0a710e64': 'User address determined by JWT and Salt together',
@@ -51,7 +51,7 @@ export const resources = {
       '71c429d2': 'Generate the extended ephemeral public key',
       '16ebd660': 'Use the generated extended ephemeral public key (extendedEphemeralPublicKey) to generate ZK Proof. We provide a backend service (or you can run a Docker).',
       'GENERATE_PROOF_BUTTON': 'Generate ZK Proof',
-      acf1b947: 'Step 7: Assemble zkLogin signature and submit the transaction',
+      acf1b947: 'Step 7: Send funds to zkLogin address',
       d58c9e1e: 'Each ZK Proof is associated with an ephemeral key pair. Stored in the appropriate location, it can be reused as proof to sign any number of transactions until the ephemeral key pair expires.',
       '6591b962': 'Before executing the transaction, please recharge zkLogin with a small amount of ADA as the gas fee for initiating the transaction.'
     },

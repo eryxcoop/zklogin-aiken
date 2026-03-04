@@ -96,8 +96,8 @@ function App() {
   const [zkProof, setZkProof] = useState<string>('');
   const [fetchingZKProof, setFetchingZKProof] = useState(false);
 
-  //Assemble zkLogin signature and submit the transaction
-  const [executingTxn, setExecutingTxn] = useState(false);
+  //Send funds to zk login address
+  const [sendingFundsToAddress, setSendingFundsToAddress] = useState(false);
 
   //Generate user Cardano address
   const [inputZkLoginJson, setInputZkLoginJson] = useState({});
@@ -207,7 +207,7 @@ function App() {
     setRandomness("");
     setActiveStep(0);
     setFetchingZKProof(false);
-    setExecutingTxn(false);
+    setSendingFundsToAddress(false);
     setExecuteDigest("");
   };
 
@@ -1199,19 +1199,11 @@ address = H(aiken_validator)
             </SyntaxHighlighter>
             <div className="card">
               <LoadingButton
-                loading={executingTxn}
+                loading={sendingFundsToAddress}
                 variant="contained"
-                disabled={!decodedJwt}
+                disabled={!zkLoginUserAddress}
                 onClick={async () => {
                   try {
-                    if (
-                      !ephemeralKeyPair ||
-                      !zkProof ||
-                      !decodedJwt ||
-                      !userSalt
-                    ) {
-                      return;
-                    }
                     enqueueSnackbar(
                       `Started giving funds to zk login address`,
                       {
@@ -1219,7 +1211,7 @@ address = H(aiken_validator)
                       }
                     );
 
-                      setExecutingTxn(true);
+                      setSendingFundsToAddress(true);
                       const response = await axios.post(
                           FUNDING_ENDPOINT,
                           JSON.stringify({'zkLoginAddress': zkLoginUserAddress}, null, 2),
@@ -1241,7 +1233,7 @@ address = H(aiken_validator)
                           }
                       );
                   } finally {
-                      setExecutingTxn(false);
+                      setSendingFundsToAddress(false);
                   }
                 }}
               >
