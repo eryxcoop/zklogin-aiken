@@ -18,14 +18,14 @@ import {blockchainProvider, getScriptBackend, getTxBuilder, networkFromBlockfros
 export async function transfer(
     destinationAddress,
     amount_to_spend,
-    zkLoginId,
+    zkLoginId: bigint,
     ephemeralPublicKey,
     ephemeralPrivateKey,
     maxEpoch
 ) {
 
     const {scriptCbor, scriptAddr} = getScriptBackend(zkLoginId);
-    console.log("Sending ADA to address ", scriptAddr)
+    console.log("Sending ADA to address ", destinationAddress, " from address ", scriptAddr)
 
     // --- Obtain public and private keys --- //
 

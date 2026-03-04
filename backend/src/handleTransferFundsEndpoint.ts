@@ -11,8 +11,8 @@ export async function handleTransferFundsEndpoint(request) {
 
         const transactionHash = await transfer(
             destinationAddress,
-            amountToTransfer,
-            zkLoginId,
+            Number(amountToTransfer)*1000000,
+            BigInt(zkLoginId),
             ephemeralPublicKey,
             ephemeralPrivateKey,
             maxEpoch
