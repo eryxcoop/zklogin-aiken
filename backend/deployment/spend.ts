@@ -10,7 +10,7 @@ import {
 } from "@emurgo/cardano-serialization-lib-nodejs";
 import "dotenv/config";
 import {blake2b} from "blakejs";
-import {mZKRedeemer} from "./zk_redeemer";
+import {mZKRedeemer} from "../generated_proofs/zk_redeemer.ts";
 import {
     sponsorWallet,
     blockchainProvider,
@@ -18,9 +18,16 @@ import {
     networkFromBlockfrostKey,
     getScriptBackend
 } from "./common.ts"
-import {MAX_EPOCH, EPH_PUBLIC_KEY_HEX, EPH_PRIVATE_KEY_HEX} from "./transactionData.ts"
+// import {MAX_EPOCH, EPH_PUBLIC_KEY_HEX, EPH_PRIVATE_KEY_HEX} from "./transactionData.ts"
 
-export async function transfer(destinationAddress, amount_to_spend, zkLoginId) {
+export async function transfer(
+    destinationAddress,
+    amount_to_spend,
+    zkLoginId,
+    ephemeralPublicKey,
+    ephemeralPrivateKey,
+    maxEpoch
+) {
 
     const {scriptCbor, scriptAddr} = getScriptBackend(zkLoginId);
     console.log("Sending ADA to address ", scriptAddr)
