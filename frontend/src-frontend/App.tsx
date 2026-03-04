@@ -104,6 +104,9 @@ function App() {
   const [ephemeralPublicKey, setEphemeralPublicKey] = useState("");
   const [ephemeralPrivateKey, setEphemeralPrivateKey] = useState("");
 
+  // Send funds
+  const [sendingFundsSpinner, setSendingFundsSpinner] = useState(false);
+
   // Change language
   useEffect(() => {
     i18n.changeLanguage(lang);
@@ -1263,14 +1266,61 @@ address = H(aiken_validator)
             </div>
           </Box>
         )}
-        {/* Step 8 */}
-        {activeStep === 7 && (
-            <Box>
-                <Typography variant="h6">
-                Step 8
-                </Typography>
-            </Box>
-        )}
+          {/* Step 8 */}
+          {activeStep === 7 && (
+              <Box>
+                  <Typography
+                      sx={{
+                          fontSize: "1.25rem",
+                          fontWeight: 600,
+                          mb: "12px !important",
+                      }}
+                  >
+                      {t("STEP_8_TRANSFER_FUNDS")}
+                  </Typography>
+                  <Stack spacing={2}>
+                      <TextField
+                          label="Destination Address"
+                          variant="outlined"
+                          fullWidth
+                          placeholder="Enter destination address"
+                      />
+                      <TextField
+                          label="Amount (ADA)"
+                          variant="outlined"
+                          type="number"
+                          fullWidth
+                          placeholder="Enter amount to transfer"
+                      />
+                      <LoadingButton
+                          loading={sendingFundsSpinner}
+                          variant="contained"
+                          onClick={async () => {
+                              try {
+                                  setSendingFundsSpinner(true);
+                                  // Dummy code - button processing simulation
+                                  await new Promise(resolve => setTimeout(resolve, 2000));
+                                  enqueueSnackbar("Transfer simulated successfully", {
+                                      variant: "success",
+                                  });
+                              } catch (error: any) {
+                                  console.error(error);
+                                  enqueueSnackbar(
+                                      String(error?.message || error),
+                                      {
+                                          variant: "error",
+                                      }
+                                  );
+                              } finally {
+                                  setSendingFundsSpinner(false);
+                              }
+                          }}
+                      >
+                          Transfer
+                      </LoadingButton>
+                  </Stack>
+              </Box>
+          )}
       </Box>
     </Box>
   );
