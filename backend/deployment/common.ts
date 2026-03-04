@@ -15,6 +15,19 @@ export function networkFromBlockfrostKey(): Network{
     if (blockfrostKey.startsWith("preview")) return "preview";
 }
 
+export function getScriptBackend(zkLoginId: bigint) {
+    const scriptCbor = applyParamsToScript(
+        blueprint.validators[0].compiledCode,
+        [zkLoginId]
+    );
+
+    const scriptAddr = serializePlutusScript(
+        {code: scriptCbor, version: "V3"},
+    ).address;
+
+    return {scriptCbor, scriptAddr};
+}
+
 export function getScript() {
     const scriptCbor = applyParamsToScript(
         blueprint.validators[0].compiledCode,
