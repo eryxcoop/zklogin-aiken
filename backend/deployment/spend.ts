@@ -11,12 +11,18 @@ import {
 import "dotenv/config";
 import {blake2b} from "blakejs";
 import {mZKRedeemer} from "./zk_redeemer";
-import {sponsorWallet, blockchainProvider, getScript, getTxBuilder, networkFromBlockfrostKey} from "./common"
+import {
+    sponsorWallet,
+    blockchainProvider,
+    getTxBuilder,
+    networkFromBlockfrostKey,
+    getScriptBackend
+} from "./common"
 import {MAX_EPOCH, EPH_PUBLIC_KEY_HEX, EPH_PRIVATE_KEY_HEX} from "./transactionData"
 
-async function main() {
+export async function transfer(destinationAddress, amount_to_spend, zkLoginId) {
 
-    const {scriptCbor, scriptAddr} = getScript();
+    const {scriptCbor, scriptAddr} = getScriptBackend(zkLoginId);
     console.log("Sending ADA to address ", scriptAddr)
 
     // --- Obtain public and private keys --- //
@@ -49,7 +55,6 @@ async function main() {
     let redeemer = mConStr0([MAX_EPOCH, Buffer.from(eph_public_key_bytes).toString("hex")]);
     let zk_redeemer = mZKRedeemer(redeemer);
 
-    let amount_to_spend = 1000000
     let fee_cap = 2000000
     let return_quantity = (Number(inputScriptUTxOWithDatum.output.amount[0].quantity) - amount_to_spend - fee_cap).toString();
 
@@ -76,7 +81,7 @@ async function main() {
             collateral.output.address
         )
         .invalidHereafter(Number(max_epoch_slot))
-        .txOut(scriptAddr, [{
+        .txOut(destinationAddress, [{
             unit: "lovelace",
             quantity: amount_to_spend.toString()
         }])
@@ -125,6 +130,8 @@ async function main() {
     const signedTxHex = signedTx.to_hex();
     const response = await sponsorWallet.submitTx(signedTxHex);
     console.log("Tx hash:", response);
+
+    return response;
 }
 
-main()
+// main()

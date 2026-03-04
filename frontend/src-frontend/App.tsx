@@ -1307,7 +1307,11 @@ address = H(aiken_validator)
 
                                   const response = await axios.post(
                                       TRANSFER_ENDPOINT,
-                                      JSON.stringify({'destinationAddress': destinationAddress, 'amount': amountToTransfer}),
+                                      JSON.stringify({
+                                          'destinationAddress': destinationAddress,
+                                          'amount': amountToTransfer,
+                                          'zkLoginId': zkLoginId,
+                                      }),
                                       {
                                           headers: {
                                               "Content-Type": "application/json",
