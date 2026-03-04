@@ -17,8 +17,8 @@ import {
     getTxBuilder,
     networkFromBlockfrostKey,
     getScriptBackend
-} from "./common"
-import {MAX_EPOCH, EPH_PUBLIC_KEY_HEX, EPH_PRIVATE_KEY_HEX} from "./transactionData"
+} from "./common.ts"
+import {MAX_EPOCH, EPH_PUBLIC_KEY_HEX, EPH_PRIVATE_KEY_HEX} from "./transactionData.ts"
 
 export async function transfer(destinationAddress, amount_to_spend, zkLoginId) {
 
