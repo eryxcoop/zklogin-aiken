@@ -1098,9 +1098,6 @@ ${JSON.stringify(decodedJwt, null, 2)}`}
                               </Typography>
                           </code>
                       </Typography>
-                      <Typography>
-                          Balance: yet to implement
-                      </Typography>
                   </Stack>
               )}
 
