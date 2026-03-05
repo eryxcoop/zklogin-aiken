@@ -1,5 +1,5 @@
 # zkLogin 
-This repo contains an implementation of the zkLogin protocol in the cardano blockchain. The key contributions are the Aiken source code that regulates the fund spending of the zkLogin addresses and the Circom circuits that verify the autenticity of the owner. 
+This repo contains an implementation of the zkLogin protocol in the cardano blockchain. The key contributions are the Aiken source code that regulates the fund spending of the zkLogin addresses and the Circom circuits that verify the autenticity of the owner, but this repo also contains a frontend that allows any user with a Google account to easily test the implementation. 
 
 ## Dependencies
 * ```npm```
@@ -8,47 +8,29 @@ This repo contains an implementation of the zkLogin protocol in the cardano bloc
 * ```git lfs``` (https://git-lfs.com/)
 * ```snarkjs``` **globally** (also a dependency of aiken-zk)
 
-## Note
-Most of the flow in the next section is going to be automated in the milestone 3 so that the user can interact only with the frontend. 
 
-## User flow for the 2nd milestone 
-To try the new features introduced in the milestone 2 of the Catalyst proposal (https://milestones.projectcatalyst.io/projects/1400130/milestones/2) you should follow the next steps:
+## User flow for the 3rd milestone 
+To try the new features introduced in the milestone 3 of the Catalyst proposal (https://milestones.projectcatalyst.io/projects/1400130/milestones/3) you should follow the next steps:
+
+Note: all of this has been tested on the preview network. 
 
 * Run ```git lfs pull```, if it fails, install git lfs (listed in the dependencies).
 * Go to the ```frontend``` directory and run ```npm install```.
 * Run ```npm run dev```. This will start a server that will let you enter the application flow (most likely in http://localhost:5173/).
-* Follow the steps 1-5 for generating the temporal credentials for the zkLogin Access. If at any point you want to reset the flow, just click the red button in the top right corner that says "Reset LocalState".
-* After having generated the session data in step 5, you should move to the backend now. Go to the ```backend``` directory and run ```npm install```. 
-* Create a new file called ```circuit_inputs/input_zkLogin.json``` and copy ```input_zkLogin.json``` value from step 5.
+* Go to the ```backend``` directory and run ```npm install```.
 * Install ```aiken-zk``` (listed in dependencies) if you haven't already.
+* Follow the steps 1-5 for generating the temporal credentials for the zkLogin Access and your zkLogin address. At this point you will have your own zkLogin address! You can retrieve it anytime as long as you store the salt from step 4. 
+* If at any point you want to reset the flow, just click the red button in the top right corner that says "Reset LocalState".
+* Moving on to **step 6**, press the "Generate ZK Proof" button to request the backend to generate the proof. This task is expensive and may take some time (no more than 2 minutes). When it's done, you can see the resulting proof on the screen and move to the next step. This proof will be useful to sign all the transactions in the current zkLogin session (until the expiration time is reached). 
+* The **step 7** is a "custom faucet" created specifically for zkLogin due to a mesh.js limitation: the UTxOs that a zkLogin address spend must have a datum. This is not a Cardano limitation, but for now it's important that any UTxO sent to a zkLogin address has a datum, even if it's empty. By pressing "Execute Transaction Block" you will receive 50 ADA in the zkLogin address. Check it out in CardanoScan before moving to the next step. 
+* Finally, **step 8** lets you send ADA to any address from your zkLogin address. After you've done it, you should see the hash of the last transaction.
 
-#### Option 1: Run the Aiken test
-* Go to the ```backend``` directory and run ```npm install```. 
-* Run ```aiken-zk prove aiken circuits/zk_login.circom verification_key.zkey circuit_inputs/input_zkLogin.json proof.ak```. If you installed ```aiken-zk``` and all its dependencies correctly, you should find a ```proof.ak``` in the ```backend``` directory. This file contains a Groth16 zk proof formatted ready for an aiken test!  
-* Open the ```validators/zk_login.ak``` file and paste the contents of ```proof.ak``` in the ```test_example()``` method, replacing the previous one. Also, in the function ```fn test_proof_is_valid(proof: Proof) -> Bool``` of the same file, you should replace the values of:
-  * ```zkLoginId```: found in the step 5 of the frontend
-  * ```max_epoch```: at this point should be in the ```input_zkLogin.json``` file
-  * ```ephemeral_public_key```: data from step 5 of the frontend. It should be a hexadecimal number.
-* Run ```aiken check```. If everything went as expected, you should have the test passing!
 
-#### Option 2: Deploy a real transaction
-* Go to the ```backend``` directory and run ```npm install``` if you haven't already.
-* In the ```backend``` directory run ```aiken build```. This should generate a ```plutus.json``` file in the ```backend``` directory.
-* Run ```aiken-zk prove meshjs circuits/zk_login.circom verification_key.zkey circuit_inputs/input_zkLogin.json deployment/zk_redeemer.ts```. This will generate a file in ```backend/deployment/zk_redeemer.ts``` with an integrated zk proof.
-* Create the ```.env``` file with your own Blockfrost key (check the `.env.example` for reference). Create or look for it in https://blockfrost.io.
-* Fill your own data in ```deployment/transactionData.ts```. The fields are:
-  * ```zkLoginId```: found in the step 5 of the frontend
-  * ```max_epoch```: at this point should be in the ```input_zkLogin.json``` file
-  * ```ephemeral_public_key``` and ```ephemeral_private_key```: data from step 5 of the frontend. They should be both hexadecimal numbers.
-* Run ```npx tsx deployment/runDeriveAddress.ts```. This will generate your zkLogin address based on the zkLoginId you provided in the previous step.
-* The next step is to send funds to your zkLoginAddress. To do it, you want to make sure that the sponsorWallet has enough funds to make the transaction. The address can be found in `deployment/sponsorWalletCredentials.ts`. You can check the balance of the sponsorWallet in [cardanoscan preprod](https://preprod.cardanoscan.io/) or [cardanoscan preview](https://preview.cardanoscan.io/) depending on which network you chose for the Blockfrost project.
-  * If the balance is not enough, you can fund the sponsorWallet by sending funds from the [cardano faucet](https://docs.cardano.org/cardano-testnets/tools/faucet). Check the `ADA_TO_SEND_TO_SCRIPT` constant in `deployment/transactionData.ts` to calculate the minimum amount needed (remember that are fees involved).
-* Run ```npx tsx deployment/lockWithDatum.ts```. This will send funds to your zkLoginAddress and you should wait for the transaction to take impact (as before, you can check for the generated address in Cardanoscan).
-* Run ```npx tsx deployment/spend.ts```. This will unlock funds from your zkLoginAddress into another address (which you can pick by changing the ```txOut``` in the ```spend.ts``` file).
+## Running the tests
+* Go to the `backend` directory and run `npm run test`
 
-## For developers only
 
-### Generating a new verification key
+## For developers only: generating a new verification key
 * Download `pot23_final_21.ptau` from https://github.com/p0tion-tools/cardano-ppot. Move the file to `backend/ceremony.ptau`.
 * Go to `backend/circuits`. Run `./compile-proof-verify.sh -c zk_login.circom unused_parameter ../backend/ceremony.ptau`.
 * Go to `backend/curve_compress` and run `node compressedVerificationKey.cjs ../circuits/build/verification_key.json`.
