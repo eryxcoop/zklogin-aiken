@@ -1,9 +1,15 @@
 import {lockTxWithDatum} from "../deployment/lockWithDatum.ts";
 
-export async function handleFundAddressEndpoint(request) {
+export async function handleFundAddressEndpoint(request, alternativeEndpointLogic: any = null) {
     try {
         const scriptAddr = request.body['zkLoginAddress'];
-        const transactionHash = await lockTxWithDatum(scriptAddr);
+
+        let transactionHash: string;
+        if (alternativeEndpointLogic !== null) {
+            transactionHash = alternativeEndpointLogic(scriptAddr);
+        } else {
+            transactionHash = await lockTxWithDatum(scriptAddr);
+        }
 
         return {
             status: 200,
