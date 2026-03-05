@@ -89,7 +89,6 @@ const requestListener = async function (nodeServerRequest, nodeServerResponse) {
         const response = await handleTransferFundsEndpoint(request);
         nodeServerResponse.writeHead(response.status, {"Content-Type": "application/json"});
         nodeServerResponse.end(JSON.stringify(response.body));
-        process.stdout.write("done.\n");
     } else {
         throw Error(`Unknown combination of request method (${nodeServerRequest.method}) and path name (${url.pathname})`)
     }

@@ -106,6 +106,7 @@ function App() {
   const [sendingFundsSpinner, setSendingFundsSpinner] = useState(false);
   const [destinationAddress, setDestinationAddress] = useState<string>();
   const [amountToTransfer, setAmountToTransfer] = useState<string>();
+  const [lastTransactionHash, setLastTransactionHash] = useState<string>();
 
   // Change language
   useEffect(() => {
@@ -1338,11 +1339,13 @@ address = H(aiken_validator)
                                           },
                                       }
                                   );
-                                  console.log(response)
-                                    if (response )
-                                  enqueueSnackbar("Transfer occurred successfully", {
-                                      variant: "success",
-                                  });
+
+                                    if (response.status == 200){
+                                        enqueueSnackbar("Transfer occurred successfully", {
+                                            variant: "success",
+                                        });
+                                        setLastTransactionHash(response.data["transactionHash"]);
+                                    }
                               } catch (error: any) {
                                   console.error(error);
                                   enqueueSnackbar(
@@ -1358,9 +1361,9 @@ address = H(aiken_validator)
                       >
                           Transfer
                       </LoadingButton>
-                      <Typography>
-                          Hola
-                      </Typography>
+                      {lastTransactionHash && <Typography>
+                          Last Tx hash: {lastTransactionHash}
+                      </Typography>}
                   </Stack>
               </Box>
           )}
