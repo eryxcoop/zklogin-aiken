@@ -1,12 +1,8 @@
 import {describe, it} from 'node:test';
 import * as assert from 'node:assert/strict';
-import {circuitInputs} from "../tests_common_code/testDataForACompleteFlowOfZkLogin.ts";
 import {handleFundAddressEndpoint} from "./handleFundAddressEndpoint.ts";
 
 describe("Fund address endpoint tests", () => {
-    function sessionDataJson() {
-        return circuitInputs();
-    }
 
     function assertResponseIs200(response: any) {
         assert.equal(response.status, 200);
