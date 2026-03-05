@@ -1,20 +1,12 @@
 import {describe, it} from 'node:test';
-import * as assert from 'node:assert/strict';
 import {handleFundAddressEndpoint} from "./handleFundAddressEndpoint.ts";
+import {
+    assertResponseHasField,
+    assertResponseIs200,
+    assertResponseIs500
+} from "../tests_common_code/responseAssertions.ts";
 
 describe("Fund address endpoint tests", () => {
-
-    function assertResponseIs200(response: any) {
-        assert.equal(response.status, 200);
-    }
-
-    function assertResponseIs500(response: any) {
-        assert.equal(response.status, 500);
-    }
-
-    function assertResponseHasField(fieldName: string, actualResponse: any) {
-        assert.ok(Object.hasOwn(actualResponse.body, fieldName))
-    }
 
     function endpointLogicThatExecutesSuccessfully(_scriptAddr) {
         return 'a valid transaction hash';

@@ -1,6 +1,9 @@
 import {describe, it} from 'node:test';
-import * as assert from 'node:assert/strict';
 import {handleDeriveAddressEndpoint} from "./handleDeriveAddressEndpoint.ts";
+import {
+    assertFieldHasValue,
+    assertResponseIs200,
+} from "../tests_common_code/responseAssertions.ts";
 
 
 describe("Derive address endpoint tests", () => {
@@ -14,14 +17,6 @@ describe("Derive address endpoint tests", () => {
         return handleDeriveAddressEndpoint(searchParams);
     }
 
-    function assertResponseIs200(response: any) {
-        assert.equal(response.status, 200);
-        assert.equal(response.body['message'], "Wallet created successfully.");
-        assert.equal(response.body['execution_result_code'], 0);
-        assert.equal(response.body['status'], 'success');
-        assert.equal(response.body['walletAddress'], 'addr_test1wz85pmuldpc0km0rcdjcu8c8a2c0rvcklut6puhhq0wu9ygvfat33');
-    }
-
     it("answers successfully when correct parameters are passed", () => {
         const request = {
             url: '/deriveAddress?zkLoginId=21140065873708661981141523561235886173184262775540053915030560953831497869414',
@@ -29,6 +24,10 @@ describe("Derive address endpoint tests", () => {
 
         const actualResponse = callEndpoint(request);
 
-        assertResponseIs200(actualResponse)
+        assertResponseIs200(actualResponse);
+        assertFieldHasValue(actualResponse, 'message', 'Wallet created successfully.');
+        assertFieldHasValue(actualResponse, 'execution_result_code', 0);
+        assertFieldHasValue(actualResponse, 'status', 'success');
+        assertFieldHasValue(actualResponse, 'walletAddress', 'addr_test1wz85pmuldpc0km0rcdjcu8c8a2c0rvcklut6puhhq0wu9ygvfat33');
     });
 });
