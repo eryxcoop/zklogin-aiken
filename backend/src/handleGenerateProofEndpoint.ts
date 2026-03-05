@@ -4,7 +4,7 @@ import * as fs from 'node:fs/promises';
 
 export async function handleGenerateProofEndpoint(request, generateProofAction = null) {
     try {
-        let proofFilePath = 'generated_proofs/zk_redeemer.ts';
+        let proofFilePath = 'generated_proofs/proof.json';
         if (generateProofAction === null) {
             generateProofAction = (toolExecutionCommandLine) => {
                 execSync(toolExecutionCommandLine, {encoding: 'utf8'});
@@ -19,13 +19,14 @@ export async function handleGenerateProofEndpoint(request, generateProofAction =
         );
 
         const proofContent = await fs.readFile(proofFilePath, 'utf8');
+        const proofJson = JSON.parse(proofContent)
 
         return {
             status: 200,
             body: {
                 'message': 'Proof generated successfully.',
                 'proofPath': proofPath,
-                'proofContent': proofContent
+                'proofContent': proofJson
             }
         }
     } catch (error) {

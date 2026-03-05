@@ -32,7 +32,7 @@ describe("Generate proof endpoint tests", () => {
             };
         } else {
             generateRealProofAction = (_toolExecutionCommandLine) => {
-                const outputProofFilePath = 'generated_proofs/zk_redeemer.ts';
+                const outputProofFilePath = 'generated_proofs/proof.json';
                 writeProofInFile(outputProofFilePath);
             };
         }

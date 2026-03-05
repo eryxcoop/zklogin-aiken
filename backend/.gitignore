@@ -3,7 +3,6 @@ me.addr
 me.sk
 plutus.json
 .env
-deployment/zk_redeemer.ts
 circuit_inputs/input_zkLogin.json
 **/build/**
 !**/build/package.json

@@ -91,9 +91,7 @@ function App() {
   const [copied, setCopied] = useState(false);
 
   //Fetch ZK Proof (Groth16)
-  const [extendedEphemeralPublicKey, setExtendedEphemeralPublicKey] =
-      useState("");
-  const [zkProof, setZkProof] = useState<string>('');
+  const [zkProof, setZkProof] = useState<object>(undefined);
   const [fetchingZKProof, setFetchingZKProof] = useState(false);
 
   //Send funds to zk login address
@@ -157,9 +155,10 @@ function App() {
       setMaxEpoch(Number(maxEpoch));
     }
 
-    const zkProof = window.localStorage.getItem(ZK_SESSION_PROOF_LOCAL_STORAGE_KEY);
-    if (zkProof) {
-      setZkProof(zkProof);
+    const zkProofString = window.localStorage.getItem(ZK_SESSION_PROOF_LOCAL_STORAGE_KEY);
+    if (zkProofString) {
+        const zkProof = JSON.parse(zkProofString)
+        setZkProof(zkProof);
     }
   }, []);
 
@@ -176,7 +175,7 @@ function App() {
       case 4:
         return !zkLoginUserAddress;
       case 5:
-        return !zkProof;
+          return zkProof === undefined;
       case 6:
         return false;
       case 7:
@@ -209,13 +208,11 @@ function App() {
     setUserSalt(undefined);
     setTextSalt(undefined);
     setZkProof(undefined);
-    setExtendedEphemeralPublicKey("");
     setMaxEpoch(0);
     setRandomness("");
     setActiveStep(0);
     setFetchingZKProof(false);
     setSendingFundsToAddress(false);
-    setExecuteDigest("");
   };
 
   const resetLocalState = () => {
@@ -1134,7 +1131,7 @@ address = H(aiken_validator)
                   Object.keys(inputZkLoginJson).length === 0
               }
               onClick={async () => {
-                  if (zkProof === '') {
+                  if (zkProof === undefined) {
                       try {
                           setFetchingZKProof(true);
                           const response = await axios.post(
@@ -1146,8 +1143,9 @@ address = H(aiken_validator)
                                   },
                               }
                           );
-                          setZkProof(response.data['proofContent']);
-                          window.localStorage.setItem(ZK_SESSION_PROOF_LOCAL_STORAGE_KEY, response.data['proofContent']);
+                          const proof = response.data['proofContent'];
+                          setZkProof(proof);
+                          window.localStorage.setItem(ZK_SESSION_PROOF_LOCAL_STORAGE_KEY, JSON.stringify(proof));
                           enqueueSnackbar("Successfully obtain ZK Proof", {
                               variant: "success",
                           });
@@ -1172,13 +1170,13 @@ address = H(aiken_validator)
             >
               {t('GENERATE_PROOF_BUTTON')}
             </LoadingButton>
-            {zkProof && (
+            {zkProof !== undefined && (
               <SyntaxHighlighter
                 wrapLongLines
                 language="typescript"
                 style={oneDark}
               >
-                {zkProof}
+                {JSON.stringify(zkProof, null, 2)}
               </SyntaxHighlighter>
             )}
           </Stack>

@@ -10,7 +10,7 @@ import {
 } from "@emurgo/cardano-serialization-lib-nodejs";
 import "dotenv/config";
 import {blake2b} from "blakejs";
-import {mZKRedeemer} from "../generated_proofs/zk_redeemer.ts";
+import {mZKRedeemer} from "./zk_redeemer.ts";
 import {blockchainProvider, getScriptBackend, getTxBuilder, networkFromBlockfrostKey, sponsorWallet} from "./common.ts"
 
 // import {MAX_EPOCH, EPH_PUBLIC_KEY_HEX, EPH_PRIVATE_KEY_HEX} from "./transactionData.ts"
