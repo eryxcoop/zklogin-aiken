@@ -982,7 +982,9 @@ ${JSON.stringify(decodedJwt, null, 2)}`}
                           language="json"
                           style={oneDark}
                           customStyle={{height: '300px', overflow: 'auto'}}>
-                          {JSON.stringify(inputZkLoginJson, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2)}
+                          {
+                              JSON.stringify(inputZkLoginJson, (_, v) => typeof v === 'bigint' ? v.toString() : v, 2).slice(0, 1000)
+                          }
                       </SyntaxHighlighter>
                   </div>
               )}
@@ -1097,9 +1099,6 @@ ${JSON.stringify(decodedJwt, null, 2)}`}
                                   {zkLoginUserAddress}
                               </Typography>
                           </code>
-                      </Typography>
-                      <Typography>
-                          Balance: yet to implement
                       </Typography>
                   </Stack>
               )}
