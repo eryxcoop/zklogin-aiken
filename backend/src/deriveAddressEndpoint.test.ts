@@ -1,11 +1,10 @@
 import {describe, it} from 'node:test';
-import {deriveAddress} from '../deployment/deriveAddress.ts'
-import assert from 'node:assert/strict';
+import * as assert from 'node:assert/strict';
 import {handleDeriveAddressEndpoint} from "./handleDeriveAddressEndpoint.ts";
 
 
 describe("Derive address endpoint tests", () => {
-    function callEndpoint(request: any): void {
+    function callEndpoint(request: any): { status: number; body: any } {
         const host = 'localhost';
         const port = 8000;
 
