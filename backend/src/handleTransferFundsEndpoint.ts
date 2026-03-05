@@ -10,15 +10,6 @@ export async function handleTransferFundsEndpoint(request) {
         const maxEpoch = request.body['maxEpoch'];
         const zkProof = request.body['zkProof'];
 
-        console.log("destinationAddress", destinationAddress)
-        console.log("amountToTransfer", amountToTransfer)
-        console.log("zkLoginId", zkLoginId)
-        console.log("ephemeralPublicKey", ephemeralPublicKey)
-        console.log("ephemeralPrivateKey", ephemeralPrivateKey)
-        console.log("maxEpoch", maxEpoch)
-        console.log("zkProof", zkProof)
-
-
         const transactionHash = await transfer(
             destinationAddress,
             Number(amountToTransfer)*1000000,
