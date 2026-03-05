@@ -1,6 +1,5 @@
 import {describe, it} from 'node:test';
-import {deriveAddress} from '../deployment/deriveAddress.ts'
-import assert from 'node:assert/strict';
+import * as assert from 'node:assert/strict';
 import {handleDeriveAddressEndpoint} from "./handleDeriveAddressEndpoint.ts";
 
 
