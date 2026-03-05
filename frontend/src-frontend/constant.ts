@@ -26,3 +26,6 @@ export const STEPS_DESC = ['ephemeralKeyPair', '47b83f4e', 'fb399be8', '0a710e64
 export const ZK_SESSION_PROOF_LOCAL_STORAGE_KEY = 'zk_session_proof';
 
 export const ZK_LOGIN_ID_LOCAL_STORAGE_KEY = 'zk_login_id_local_storage_key';
+
+export const EPH_PUBLIC_KEY_LOCAL_STORAGE_KEY = 'eph_public_key_local_storage_key';
+export const EPH_PRIVATE_KEY_LOCAL_STORAGE_KEY = 'eph_private_key_local_storage_key';

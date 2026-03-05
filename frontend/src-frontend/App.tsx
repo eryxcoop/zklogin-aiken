@@ -36,7 +36,7 @@ import "./App.css";
 import GoogleLogo from "./assets/google.svg";
 import {FAUCET_SCRIPT, GENERATE_NONCE,} from "./code_example";
 import {
-    CLIENT_ID,
+    CLIENT_ID, EPH_PRIVATE_KEY_LOCAL_STORAGE_KEY, EPH_PUBLIC_KEY_LOCAL_STORAGE_KEY,
     FULLNODE_URL, FUNDING_ENDPOINT,
     KEY_PAIR_SESSION_STORAGE_KEY,
     MAX_EPOCH_LOCAL_STORAGE_KEY,
@@ -159,6 +159,12 @@ function App() {
     if (zkLoginId_) {
         setZkLoginId(zkLoginId_)
     }
+
+    const eph_public_key = window.localStorage.getItem(EPH_PUBLIC_KEY_LOCAL_STORAGE_KEY);
+    if (eph_public_key) setEphemeralPublicKey(eph_public_key)
+
+    const eph_private_key = window.localStorage.getItem(EPH_PRIVATE_KEY_LOCAL_STORAGE_KEY);
+    if (eph_private_key) setEphemeralPublicKey(eph_private_key)
 
     const zkProofString = window.localStorage.getItem(ZK_SESSION_PROOF_LOCAL_STORAGE_KEY);
     if (zkProofString) {
@@ -317,6 +323,9 @@ function App() {
       setInputZkLoginJson(inputZkLogin);
       setEphemeralPublicKey(publicKeyString);
       setEphemeralPrivateKey(privateKeyString);
+
+      window.localStorage.setItem(EPH_PUBLIC_KEY_LOCAL_STORAGE_KEY, publicKeyString);
+      window.localStorage.setItem(EPH_PRIVATE_KEY_LOCAL_STORAGE_KEY, privateKeyString);
   }
 
     const handleCopy = async () => {
