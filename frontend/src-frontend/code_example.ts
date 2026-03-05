@@ -1,4 +1,4 @@
-export const BUILD_ZKLOGIN_SIGNATURE = `async function lockTxWithDatum() {
+export const FAUCET_SCRIPT = `async function lockTxWithDatum() {
     const {scriptAddr} = getScript();
     const lockTxBuilder = getTxBuilder();
     const unsignedTx = await lockTxBuilder

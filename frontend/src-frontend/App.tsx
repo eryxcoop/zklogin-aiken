@@ -34,7 +34,7 @@ import {Prism as SyntaxHighlighter} from "react-syntax-highlighter";
 import {oneDark} from "react-syntax-highlighter/dist/esm/styles/prism";
 import "./App.css";
 import GoogleLogo from "./assets/google.svg";
-import {BUILD_ZKLOGIN_SIGNATURE, GENERATE_NONCE,} from "./code_example";
+import {FAUCET_SCRIPT, GENERATE_NONCE,} from "./code_example";
 import {
     CLIENT_ID,
     FULLNODE_URL, FUNDING_ENDPOINT,
@@ -1200,7 +1200,7 @@ address = H(aiken_validator)
               language="typescript"
               style={oneDark}
             >
-              {BUILD_ZKLOGIN_SIGNATURE}
+              {FAUCET_SCRIPT}
             </SyntaxHighlighter>
             <div className="card">
               <LoadingButton
