@@ -1,4 +1,5 @@
 import {mConStr0, resolveSlotNo} from "@meshsdk/core";
+import type {UTxO} from "@meshsdk/core";
 
 import {
     PrivateKey,
@@ -12,6 +13,8 @@ import "dotenv/config";
 import {blake2b} from "blakejs";
 import {mZKRedeemer} from "./zk_redeemer.ts";
 import {blockchainProvider, getScriptBackend, getTxBuilder, networkFromBlockfrostKey, sponsorWallet} from "./common.ts"
+
+const MAXIMUM_ASSUMED_FEE = 2000000
 
 export async function transfer(
     destinationAddress,
@@ -41,22 +44,19 @@ export async function transfer(
         throw Error("No UTxOs with datum found");
     }
 
-    const inputScriptUTxOWithDatum = scriptUtxosWithDatum[0];
-    // console.log("inputScriptUTxOWithDatum: ",JSON.stringify(inputScriptUTxOWithDatum, null, 2));
+    debugger
+    const inputScriptUTxOWithDatum = pickSourceUTxO(scriptUtxosWithDatum, amount_to_spend);
 
     let collaterals = await sponsorWallet.getCollateral();
     const collateral = collaterals[0];
 
     let max_epoch_POSIX_time = new Date(maxEpoch);
-    // console.log("max_epoch_POSIX_time", max_epoch_POSIX_time.getTime())
     const max_epoch_slot = resolveSlotNo(networkFromBlockfrostKey(), max_epoch_POSIX_time.getTime());
-    // console.log("max_epoch_slot", max_epoch_slot)
 
     let redeemer = mConStr0([maxEpoch, Buffer.from(eph_public_key_bytes).toString("hex")]);
     let zk_redeemer = mZKRedeemer(redeemer, zkProof);
 
-    let fee_cap = 2000000
-    let return_quantity = (Number(inputScriptUTxOWithDatum.output.amount[0].quantity) - amount_to_spend - fee_cap).toString();
+    let return_quantity = (Number(inputScriptUTxOWithDatum.output.amount[0].quantity) - amount_to_spend - MAXIMUM_ASSUMED_FEE).toString();
 
     const txBuilder = getTxBuilder();
     await txBuilder
@@ -123,8 +123,6 @@ export async function transfer(
         unsignedTx.auxiliary_data()
     );
 
-    // console.log(signedTx.to_json());
-
     // --- Submit transaction --- //
     console.log("The transaction is being submited")
     const signedTxHex = signedTx.to_hex();
@@ -134,4 +132,20 @@ export async function transfer(
     return response;
 }
 
-// main()
+const reminder = (utxo: UTxO, amountToSpend: number) => {
+    return Number(utxo.output.amount[0].quantity) - amountToSpend - MAXIMUM_ASSUMED_FEE
+}
+
+// This utxo picking algorithm chooses the utxo with just enough funds to fulfill the transaction.
+// If none exists, throws an error
+function pickSourceUTxO(scriptUtxosWithDatum: UTxO[], amount: number) {
+    const base = scriptUtxosWithDatum.find(utxo => reminder(utxo, amount) >= 0);
+    if (base === undefined) {
+        throw Error("There isn't a single UTxO with enough funds to spend this much ADA");
+    }
+
+    return scriptUtxosWithDatum.reduce((min: UTxO, current: UTxO) => {
+        return (reminder(current, amount) >= 0 && (reminder(current, amount) < reminder(min, amount))) ? current : min
+    });
+}
+
