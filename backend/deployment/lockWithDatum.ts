@@ -20,5 +20,3 @@ export async function lockTxWithDatum(scriptAddr) {
     console.log(`${ADA_TO_SEND_TO_SCRIPT} tADA locked into the contract at Tx ID: ${deployedTxHash}`);
     return deployedTxHash;
 }
-
-// lockTxWithDatum()
