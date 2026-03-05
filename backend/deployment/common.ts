@@ -7,6 +7,7 @@ import "dotenv/config";
 import {SPONSOR_WALLET_SK} from "./sponsorWalletCredentials.ts";
 
 const blockfrostKey = process.env.BLOCKFROST_PROJECT_ID;
+if (!blockfrostKey) throw new Error("BLOCKFROST_PROJECT_ID is not set. Check that you have set it in your .env file");
 export const blockchainProvider = new BlockfrostProvider(blockfrostKey);
 
 export function networkFromBlockfrostKey(): Network{
