@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import {deriveAddress} from './deriveAddress.ts'
-import assert from 'node:assert/strict';
+import * as assert from 'node:assert/strict';
 
 describe("Derive address tests", function () {
 
