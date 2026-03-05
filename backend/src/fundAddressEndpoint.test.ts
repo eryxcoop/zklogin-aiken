@@ -12,7 +12,7 @@ describe("Fund address endpoint tests", () => {
         assert.ok(Object.hasOwn(actualResponse.body, fieldName))
     }
 
-    function endpointLogicThatExecutesSuccessfully(scriptAddr) {
+    function endpointLogicThatExecutesSuccessfully(_scriptAddr) {
         return 'a valid transaction hash';
     }
 
