@@ -44,7 +44,7 @@ import {
     RANDOMNESS_SESSION_STORAGE_KEY,
     REDIRECT_URI,
     STEPS_LABELS_TRANS_KEY, TRANSFER_ENDPOINT,
-    USER_SALT_LOCAL_STORAGE_KEY,
+    USER_SALT_LOCAL_STORAGE_KEY, ZK_LOGIN_ID_LOCAL_STORAGE_KEY,
     ZK_SESSION_PROOF_LOCAL_STORAGE_KEY,
 } from "./constant";
 import {base, gray} from "./theme/colors";
@@ -153,6 +153,11 @@ function App() {
 
     if (maxEpoch) {
       setMaxEpoch(Number(maxEpoch));
+    }
+
+    const zkLoginId_ = window.localStorage.getItem(ZK_LOGIN_ID_LOCAL_STORAGE_KEY);
+    if (zkLoginId_) {
+        setZkLoginId(zkLoginId_)
     }
 
     const zkProofString = window.localStorage.getItem(ZK_SESSION_PROOF_LOCAL_STORAGE_KEY);
@@ -902,6 +907,10 @@ ${JSON.stringify(decodedJwt, null, 2)}`}
                   console.log("salt", userSalt)
                   const zkLoginId_ = computeZkLoginId(jwtString, userSalt)
                   setZkLoginId(zkLoginId_)
+                    window.localStorage.setItem(
+                        ZK_LOGIN_ID_LOCAL_STORAGE_KEY,
+                        String(zkLoginId_)
+                    );
                 }}
               >
                 {t("c9bbf457")}
@@ -1320,7 +1329,8 @@ address = H(aiken_validator)
                                           },
                                       }
                                   );
-
+                                  console.log(response)
+                                    if (response )
                                   enqueueSnackbar("Transfer occurred successfully", {
                                       variant: "success",
                                   });
@@ -1339,6 +1349,9 @@ address = H(aiken_validator)
                       >
                           Transfer
                       </LoadingButton>
+                      <Typography>
+                          Hola
+                      </Typography>
                   </Stack>
               </Box>
           )}
