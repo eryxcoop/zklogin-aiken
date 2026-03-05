@@ -38,8 +38,7 @@ export async function transfer(
         (utxo)=> utxo.output.plutusData !== undefined && utxo.output.dataHash !== undefined );
 
     if (scriptUtxosWithDatum.length === 0) {
-        console.error("No UTxOs with datum found");
-        return 1;
+        throw Error("No UTxOs with datum found");
     }
 
     const inputScriptUTxOWithDatum = scriptUtxosWithDatum[0];
