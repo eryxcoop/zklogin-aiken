@@ -3,7 +3,7 @@ import * as path from 'node:path';
 import {execSync} from 'node:child_process';
 
 function executeExternalToolToCreateProof(runClosure, inputZkLoginFilePath, proofFilePath) {
-    const toolExecutionCommandLine = `aiken-zk prove meshjs circuits/zk_login.circom verification_key.zkey ${inputZkLoginFilePath} ${proofFilePath}`;
+    const toolExecutionCommandLine = `aiken-zk prove json circuits/zk_login.circom verification_key.zkey ${inputZkLoginFilePath} ${proofFilePath}`;
     runClosure(toolExecutionCommandLine);
 }
 
