@@ -5,7 +5,7 @@ import {handleDeriveAddressEndpoint} from "./handleDeriveAddressEndpoint.ts";
 
 
 describe("Derive address endpoint tests", () => {
-    function callEndpoint(request: any): void {
+    function callEndpoint(request: any): { status: number; body: any } {
         const host = 'localhost';
         const port = 8000;
 
