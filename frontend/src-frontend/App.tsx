@@ -1311,7 +1311,8 @@ address = H(aiken_validator)
                                           zkLoginId,
                                           ephemeralPublicKey,
                                           ephemeralPrivateKey,
-                                          maxEpoch
+                                          maxEpoch,
+                                          zkProof
                                       }),
                                       {
                                           headers: {

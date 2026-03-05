@@ -13,15 +13,14 @@ import {blake2b} from "blakejs";
 import {mZKRedeemer} from "./zk_redeemer.ts";
 import {blockchainProvider, getScriptBackend, getTxBuilder, networkFromBlockfrostKey, sponsorWallet} from "./common.ts"
 
-// import {MAX_EPOCH, EPH_PUBLIC_KEY_HEX, EPH_PRIVATE_KEY_HEX} from "./transactionData.ts"
-
 export async function transfer(
     destinationAddress,
     amount_to_spend,
     zkLoginId: bigint,
     ephemeralPublicKey,
     ephemeralPrivateKey,
-    maxEpoch
+    maxEpoch,
+    zkProof
 ) {
 
     const {scriptCbor, scriptAddr} = getScriptBackend(zkLoginId);
@@ -55,7 +54,7 @@ export async function transfer(
     // console.log("max_epoch_slot", max_epoch_slot)
 
     let redeemer = mConStr0([maxEpoch, Buffer.from(eph_public_key_bytes).toString("hex")]);
-    let zk_redeemer = mZKRedeemer(redeemer);
+    let zk_redeemer = mZKRedeemer(redeemer, zkProof);
 
     let fee_cap = 2000000
     let return_quantity = (Number(inputScriptUTxOWithDatum.output.amount[0].quantity) - amount_to_spend - fee_cap).toString();

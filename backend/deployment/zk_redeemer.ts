@@ -8,8 +8,8 @@ function mProof(piA: string, piB: string, piC: string): Proof {
     }
     return mConStr0([piA, piB, piC]);
 }
-export function mZKRedeemer(redeemer: Data, piA: string, piB: string, piC: string): ZKRedeemer {
-    return mConStr0([redeemer, proofs(piA, piB, piC)]);
+export function mZKRedeemer(redeemer: Data, zkProof: object): ZKRedeemer {
+    return mConStr0([redeemer, proofs(zkProof["piA"], zkProof["piB"], zkProof["piC"])]);
 }
 function proofs(piA: string, piB: string, piC: string): Proof[] {
     return [

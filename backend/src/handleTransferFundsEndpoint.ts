@@ -8,6 +8,7 @@ export async function handleTransferFundsEndpoint(request) {
         const ephemeralPublicKey = request.body['ephemeralPublicKey'];
         const ephemeralPrivateKey = request.body['ephemeralPrivateKey'];
         const maxEpoch = request.body['maxEpoch'];
+        const zkProof = request.body['zkProof'];
 
         const transactionHash = await transfer(
             destinationAddress,
@@ -15,13 +16,14 @@ export async function handleTransferFundsEndpoint(request) {
             BigInt(zkLoginId),
             ephemeralPublicKey,
             ephemeralPrivateKey,
-            maxEpoch
+            maxEpoch,
+            zkProof
         );
 
         return {
             status: 200,
             body: {
-                'message': 'Funds transfer mocked',
+                'message': 'Funds transfer successful',
                 'transactionHash': transactionHash
             }
         }
