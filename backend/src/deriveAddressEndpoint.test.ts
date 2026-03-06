@@ -29,5 +29,6 @@ describe("Derive address endpoint tests", () => {
         assertFieldHasValue(actualResponse, 'execution_result_code', 0);
         assertFieldHasValue(actualResponse, 'status', 'success');
         assertFieldHasValue(actualResponse, 'walletAddress', 'addr_test1wz85pmuldpc0km0rcdjcu8c8a2c0rvcklut6puhhq0wu9ygvfat33');
+        assertFieldHasValue(actualResponse, 'walletAddressInHex', '708f40ef9f6870fb6de3c3658e1f07eab0f1b316ff17a0f2f703ddc291');
     });
 });
