@@ -1,0 +1,98 @@
+import {describe, it} from 'node:test';
+import {wasm as wasm_tester} from "circom_tester";
+import {
+    session_data_without_signature_verification_data,
+    string_to_bit_array,
+    verifySignatureCircuitInputs,
+    a_bigint_to_limbs,
+    circuitInputs as mergedSessionDataWithSignatureVerificationData
+} from '../tests_common_code/testDataForACompleteFlowOfZkLogin.ts'
+
+describe("Circuit test", function () {
+
+    it("verifies jwt signature using RS256", async () => {
+        const circuit = await wasm_tester("circuits/verify_signature_is_valid_for_header_dot_payload.circom",
+            {templateParams: [4920]}
+        );
+
+        const witness = await circuit.calculateWitness(verifySignatureCircuitInputs(), true);
+        await circuit.checkConstraints(witness);
+    });
+
+    it("verifies jwt signature using RS256 with another JWT size", async () => {
+        const circuit = await wasm_tester("circuits/verify_signature_is_valid_for_header_dot_payload.circom",
+            {templateParams: [1024]}
+        );
+
+        const headerDotPayload = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTc3MDEyOTA4OX0";
+        const headerDotPayloadBitArray = string_to_bit_array(headerDotPayload);
+        let public_key_modulus = BigInt("0xBB5494D4B7D52CF1C2A333311F6328E2580E11E3F3366D2D46078B7B357A7DF02DD20BA75532F0EE89CB467AEAD3F2335BBC9647B424AE604BEE34CA127E6EFAA2A16F029F06CB48B3E6CC636664A75F209D3C4A2F1A12DAD15CCC690F2CF822CEC92E7A63208519E259AA0B7327A191DDEAA86125BD6FD50CBE406964E0D272D5923468F73FB8D11433B95684F00900166C59CE8C37C7E54960A763CA4909D224FDC024B40D14D7BB6EBD576EB855FFF78EFADE75988A46483094BF71340C315C5834C7F5C5C34D3951655122476070A5938E904FD9D3F0559E16582FBD68655DF86CA7D68D022DE95FE2B1231A85DB00012002A786531ADC2256E35DF6DC9B");
+        let public_key_exponent = BigInt(65537);
+        let signature = BigInt("5145559121648581779772074153094490247393445260452952141482684307469231428748548144983684147091020528283748226457169802377763197677906082875379043113855634752062186025818864488745257351456651783340753505130064101035830740199094856463226782725519549056338442963660265485420759911223585393698016426247702101842926601471191270412325619723591911258864004588065914607780968553021546595631752559089255150912010385265002613684225837756637514982674733376021179464774090472654689419916992370827091889421252937825753980860643068000942650360058170396691631601029310791359435532906100455010378178799578875298407393407890159548193");
+        // hashed data. decimal
+        let public_key_exponent_array = a_bigint_to_limbs(32, 64, public_key_exponent);
+        let signature_array = a_bigint_to_limbs(32, 64, signature);
+        let public_key_modulus_array = a_bigint_to_limbs(32, 64, public_key_modulus);
+        const witness = await circuit.calculateWitness({
+            "headerDotPayloadBitArray": headerDotPayloadBitArray,
+            "public_key_exponent": public_key_exponent_array,
+            "signature": signature_array,
+            "public_key_modulus": public_key_modulus_array,
+        }, true);
+        await circuit.checkConstraints(witness);
+    });
+
+    it("can converter a bigint zero into 256 limbs of 1 bit (256bits)", async () => {
+        const circuit_converter = await wasm_tester("circuit_tests/test_converter_256_bits_to_n_field_elements.circom");
+
+        const inputBits = a_bigint_to_limbs(256, 1, BigInt("0x0000000000000000000000000000000000000000000000000000000000000000"));
+        const witness = await circuit_converter.calculateWitness({
+            "inputBits": inputBits, "outputLimbs": [0, 0]
+        }, true);
+        // await circuit.assertOut(witness, {hash : F.toObject(res2)});
+        await circuit_converter.checkConstraints(witness);
+    });
+
+    it("can converter a bigint zero into 256 limbs of 1 bit (256bits) xxx", async () => {
+        const circuit_converter = await wasm_tester("circuit_tests/test_converter_256_bits_to_n_field_elements.circom");
+
+        const oneTailedWith127Zeroes = 2n ** 127n;
+        let input = oneTailedWith127Zeroes * (2n ** 128n) + oneTailedWith127Zeroes;
+        const witness = await circuit_converter.calculateWitness({
+            "inputBits": a_bigint_to_limbs(256, 1, input).reverse(),
+            "outputLimbs": a_bigint_to_limbs(2, 128, input).reverse()
+        }, true);
+        // await circuit.assertOut(witness, {hash : F.toObject(res2)});
+        await circuit_converter.checkConstraints(witness);
+    });
+
+    it("can validate the main circuit with session data", async () => {
+        const circuit = await wasm_tester("circuits/zk_login_without_signature_verification.circom", {prime: "bls12381"});
+        const input = session_data_without_signature_verification_data();
+        const witness = await circuit.calculateWitness(input, true);
+
+        await circuit.checkConstraints(witness);
+    });
+
+    it("can validate the main circuit with session data and signature data", async () => {
+        const circuit = await wasm_tester("circuits/zk_login.circom", {prime: "bls12381"});
+        const circuitInputs = mergedSessionDataWithSignatureVerificationData();
+        const witness = await circuit.calculateWitness(circuitInputs, true);
+
+        await circuit.checkConstraints(witness);
+    });
+
+    it("convert byte array to bit array", async () => {
+        const byte_array_to_convert = [128, 129];
+        const expected_bit_array = [1, 0, 0, 0, 0, 0, 0, 0].concat([1, 0, 0, 0, 0, 0, 0, 1]);
+        const circuit = await wasm_tester("circuit_tests/convert_byte_array_to_bit_array.circom", {
+            prime: "bls12381",
+            templateParams: [byte_array_to_convert.length]
+        });
+        const circuitInputs = {byte_array: byte_array_to_convert};
+        const witness = await circuit.calculateWitness(circuitInputs, true);
+
+        await circuit.assertOut(witness, {bit_array: expected_bit_array});
+        await circuit.checkConstraints(witness);
+    })
+});
