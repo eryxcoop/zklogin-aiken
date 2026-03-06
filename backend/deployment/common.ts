@@ -1,7 +1,7 @@
+import type {Network, UTxO} from "@meshsdk/core";
 import {BlockfrostProvider, MeshTxBuilder, MeshWallet, serializePlutusScript} from "@meshsdk/core";
-import type {UTxO, Network} from "@meshsdk/core";
 import {applyParamsToScript} from "@meshsdk/core-csl";
-import blueprint from "../plutus.json" with { type: "json" };
+import blueprint from "../plutus.json" with {type: "json"};
 import "dotenv/config";
 import {SPONSOR_WALLET_SK} from "./sponsorWalletCredentials.ts";
 
@@ -33,18 +33,6 @@ export function getTxBuilder() {
         fetcher: blockchainProvider,
         submitter: blockchainProvider,
     });
-}
-
-async function getUtxoByTxHashAndAddress(blockchainProvider: BlockfrostProvider, txHash: string, address: string): Promise<UTxO> {
-    const utxos = await blockchainProvider.fetchUTxOs(txHash);
-
-    const matchingUtxos = utxos.filter((utxo) => utxo.output.address === address);
-
-    if (matchingUtxos.length === 0) {
-        throw new Error(`UTxO not found for address: ${address}`);
-    }
-
-    return matchingUtxos[0];
 }
 
 export const sponsorWallet = new MeshWallet({
