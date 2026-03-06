@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="All tests" type="CompoundRunConfigurationType">
+    <toRun name="Circuit tests" type="NodeJsTestRunner" />
+    <toRun name="Derive address tests" type="NodeJsTestRunner" />
+    <toRun name="Endpoint tests" type="NodeJsTestRunner" />
+    <toRun name="Generate proof endpoint tests (Fast)" type="NodeJsTestRunner" />
+    <toRun name="Generate proof endpoint tests (Slow)" type="NodeJsTestRunner" />
+    <toRun name="Generate proof tests (Fast)" type="NodeJsTestRunner" />
+    <method v="2" />
+  </configuration>
+</component>
