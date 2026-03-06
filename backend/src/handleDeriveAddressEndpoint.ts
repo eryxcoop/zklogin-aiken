@@ -4,14 +4,13 @@ export function handleDeriveAddressEndpoint(searchParams) {
     let responseObject;
     try {
         const zkLoginId = searchParams.get("zkLoginId");
-        const {derivedAddress, derivedAddressInHex} = deriveAddress(BigInt(zkLoginId));
+        const derivedAddress = deriveAddress(BigInt(zkLoginId));
         console.log("Derivation of address succeeded");
         responseObject = {
             message: 'Wallet created successfully.',
             execution_result_code: 0,
             status: 'success',
-            walletAddress: derivedAddress,
-            walletAddressInHex: derivedAddressInHex
+            walletAddress: derivedAddress
         };
         return {
             status: 200,
