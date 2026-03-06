@@ -35,18 +35,6 @@ export function getTxBuilder() {
     });
 }
 
-async function getUtxoByTxHashAndAddress(blockchainProvider: BlockfrostProvider, txHash: string, address: string): Promise<UTxO> {
-    const utxos = await blockchainProvider.fetchUTxOs(txHash);
-
-    const matchingUtxos = utxos.filter((utxo) => utxo.output.address === address);
-
-    if (matchingUtxos.length === 0) {
-        throw new Error(`UTxO not found for address: ${address}`);
-    }
-
-    return matchingUtxos[0];
-}
-
 export const sponsorWallet = new MeshWallet({
     networkId: 0,
     fetcher: blockchainProvider,
