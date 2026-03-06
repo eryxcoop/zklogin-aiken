@@ -44,7 +44,6 @@ export async function transfer(
         throw Error("No UTxOs with datum found");
     }
 
-    debugger
     const inputScriptUTxOWithDatum = pickSourceUTxO(scriptUtxosWithDatum, amount_to_spend);
 
     let collaterals = await sponsorWallet.getCollateral();
@@ -143,9 +142,8 @@ function pickSourceUTxO(scriptUtxosWithDatum: UTxO[], amount: number) {
     if (base === undefined) {
         throw Error("There isn't a single UTxO with enough funds to spend this much ADA");
     }
-
     return scriptUtxosWithDatum.reduce((min: UTxO, current: UTxO) => {
         return (reminder(current, amount) >= 0 && (reminder(current, amount) < reminder(min, amount))) ? current : min
-    });
+    }, base);
 }
 

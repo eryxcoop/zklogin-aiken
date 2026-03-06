@@ -1,8 +1,7 @@
+import type {Network, UTxO} from "@meshsdk/core";
 import {BlockfrostProvider, MeshTxBuilder, MeshWallet, serializePlutusScript} from "@meshsdk/core";
-import type {UTxO, Network} from "@meshsdk/core";
 import {applyParamsToScript} from "@meshsdk/core-csl";
-import blueprint from "../plutus.json" with { type: "json" };
-import { ZKLOGIN_ID } from "./transactionData.ts";
+import blueprint from "../plutus.json" with {type: "json"};
 import "dotenv/config";
 import {SPONSOR_WALLET_SK} from "./sponsorWalletCredentials.ts";
 
@@ -20,19 +19,6 @@ export function getScriptBackend(zkLoginId: bigint) {
     const scriptCbor = applyParamsToScript(
         blueprint.validators[0].compiledCode,
         [zkLoginId]
-    );
-
-    const scriptAddr = serializePlutusScript(
-        {code: scriptCbor, version: "V3"},
-    ).address;
-
-    return {scriptCbor, scriptAddr};
-}
-
-export function getScript() {
-    const scriptCbor = applyParamsToScript(
-        blueprint.validators[0].compiledCode,
-        [ZKLOGIN_ID]
     );
 
     const scriptAddr = serializePlutusScript(
