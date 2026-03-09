@@ -21,7 +21,7 @@ Note: all of this has been tested on the preview network.
 * Install ```aiken-zk``` (listed in dependencies) if you haven't already.
 * Run ```aiken build```. This should create a ```plutus.json``` file in the backend directory. 
 * Create a ```.env``` file in the ```backend``` directory based on the ```.env.example``` and set your own Blockfrost key for the ```preview``` network. 
-* Run ```node --watch --trace-uncaught --trace-warnings src/server.ts``` to start the backend server (most likely in http://localhost:8000/).
+* Run ```npm run dev``` to start the backend server (most likely in http://localhost:8000/).
 * Follow the steps 1-5 for generating the temporal credentials for the zkLogin Access and your zkLogin address. At this point you will have your own zkLogin address! You can retrieve it anytime as long as you store the salt from step 4. 
 * If at any point you want to reset the flow, just click the red button in the top right corner that says "Reset LocalState".
 * Moving on to **step 6**, press the "Generate ZK Proof" button to request the backend to generate the proof. This task is expensive and may take some time (no more than 2 minutes). When it's done, you can see the resulting proof on the screen and move to the next step. This proof will be useful to sign all the transactions in the current zkLogin session (until the expiration time is reached). 
