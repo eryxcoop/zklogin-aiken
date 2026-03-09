@@ -6,7 +6,8 @@
   "license": "ISC",
   "type": "module",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "dev": "tsx --watch --trace-uncaught --trace-warnings src/server.ts"
   },
   "dependencies": {
     "@emurgo/cardano-serialization-lib-nodejs": "^15.0.3",
