@@ -15,6 +15,7 @@ import {
     Stepper,
     TextField,
     Typography,
+    Link
 } from "@mui/material";
 import {fromB64} from "@mysten/bcs";
 import {SuiClient} from "@mysten/sui.js/client";
@@ -1361,7 +1362,14 @@ address = H(aiken_validator)
                           Transfer
                       </LoadingButton>
                       {lastTransactionHash && <Typography>
-                          Last Tx hash: {lastTransactionHash}
+                          Last Tx hash: {''}
+                          <Link
+                              href={`https://preview.cardanoscan.io/transaction/${lastTransactionHash}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                          >
+                            {lastTransactionHash}
+                          </Link>
                       </Typography>}
                   </Stack>
               </Box>
