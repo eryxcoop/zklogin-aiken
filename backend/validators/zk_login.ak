@@ -85,9 +85,9 @@ fn zk_verify_or_fail(
 
 test test_example() {
   let proof: Proof = Proof {
-                     	piA: #"970b9588e1946f41b9e15880ed4b505e1222cd5243368676f32029f73d912ba49ae728ab77468742e47e6e0cd6cceb04",
-                     	piB: #"b39e3dea0463e6aefeadd74498462807b14bb045f54332f598d5498b938e1e344113b7cfbe1c8705b4d3b59243b3178b198662587205f2874b6b39e22f6e6a172d7a0459eeadb66e686ad0b07fbb39ce7d590bf5a5a6a465e245fabf07bd7fe2",
-                     	piC: #"93d79dc4fd3629c52ac125e8164c07d7bcf128cf73d7bcdd36e4d4ee1e5295a15d0cc052814abda89150bda2315c5fd0",
+                     	piA: #"96b7e34a3418f3c5f0504a062b94b1901e7a5a7c7d58c71832c8949dc57f4accb5bfd04ba24c3fc17d9e9f252c05d081",
+                     	piB: #"806b5dc799f4e691826781d1071d4c20101cdb2acddb35a6f2a5074410136cdba3ba07c878c31f58aaa8f3fe863dfeb5082097cf3e09351d3ddd6a38a7f5b5cd008ae3c2838b971b82886dd2eba8e6e23b09623472bdaa1b695142a963ac42a3",
+                     	piC: #"8ebc3dbdceddf187f81e2bacbbfe4c30b2bd3abbf441c592319c8c204f8bc30d26167cc59b1c764b3b47d31dcba68582",
                      }
 
   test_proof_is_valid(proof)
@@ -95,9 +95,9 @@ test test_example() {
 
 fn test_proof_is_valid(proof: Proof) -> Bool {
     // ---- REPLACE THESE VALUES ---- //
-    let zkLoginId = 14148750501214927097030011212605728027483349936086135333593501826084812421527
-    let max_epoch = 1769542273000
-    let ephemeral_public_key = #"fbc4d2a26e628fa073c1dc4dee4b9934baee20ce18503ebf48a2610e77673f08"
+    let zkLoginId = 51494094427672739461613002722322509891295132526275668950929699073883077957783
+    let max_epoch = 1773682160000
+    let ephemeral_public_key = #"fb6f79e1239c9f2db1c7a35ad06d72a4993971c90bc8d0d68c063cdbd9213c05"
     // ------------------------------ //
 
     let zklogin_redeemer = ZkLoginRedeemer {
