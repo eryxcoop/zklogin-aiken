@@ -20,7 +20,7 @@ Note: all of this has been tested on the preview network.
 * Go to the ```backend``` directory and run ```npm install```.
 * Install ```aiken-zk``` (listed in dependencies) if you haven't already.
 * Run ```aiken build```. This should create a ```plutus.json``` file in the backend directory. 
-* Create a ```.env``` file in the ```backend``` directory based on the ```.env.example``` and set your own Blockfrost key for the ```preview``` network. 
+* Create a ```.env``` file in the ```backend``` directory based on the ```.env.example``` and set your own Blockfrost key.
 * Run ```npm run dev``` to start the backend server (most likely in http://localhost:8000/).
 * Follow the steps 1-5 for generating the temporal credentials for the zkLogin Access and your zkLogin address. At this point you will have your own zkLogin address! You can retrieve it anytime as long as you store the salt from step 4. 
 * If at any point you want to reset the flow, just click the red button in the top right corner that says "Reset LocalState".

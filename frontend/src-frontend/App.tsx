@@ -1203,6 +1203,7 @@ address = H(aiken_validator)
         {/* Step 7 */}
         {activeStep === 6 && (
           <Box>
+            <Alert severity="warning">{t('STEP_7_WARNING')}</Alert>
             <Typography
               sx={{
                 fontSize: "1.25rem",
@@ -1210,10 +1211,24 @@ address = H(aiken_validator)
                 mb: "12px !important",
               }}
             >
-              {t("acf1b947")}
+              {t('STEP_7_TITLE')}
             </Typography>
-            <Alert severity="warning">{t("d58c9e1e")}</Alert>
-            <Typography sx={{ mt: "12px" }}>{t("6591b962")}</Typography>
+            {zkLoginUserAddress && (
+              <Typography>
+                  <code>
+                      <Typography
+                          component="span"
+                          sx={{
+                              fontFamily: "'Noto Sans Mono', monospace;",
+                              fontWeight: 600,
+                          }}
+                      >
+                          {zkLoginUserAddress}
+                      </Typography>
+                  </code>
+              </Typography>
+            )}
+            <Typography sx={{ mt: "12px" }}>{t("STEP_7_EXPLANATION", {amountOfAda: '50'})}</Typography>
             <SyntaxHighlighter
               wrapLongLines
               language="typescript"

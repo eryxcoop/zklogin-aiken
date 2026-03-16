@@ -52,9 +52,9 @@ export const resources = {
       '71c429d2': 'Generate the extended ephemeral public key',
       '16ebd660': 'Use the generated extended ephemeral public key (extendedEphemeralPublicKey) to generate ZK Proof. We provide a backend service (or you can run a Docker).',
       'GENERATE_PROOF_BUTTON': 'Generate ZK Proof',
-      acf1b947: 'Step 7: Send funds to zkLogin address',
-      d58c9e1e: 'Each ZK Proof is associated with an ephemeral key pair. Stored in the appropriate location, it can be reused as proof to sign any number of transactions until the ephemeral key pair expires.',
-      '6591b962': 'Before executing the transaction, please recharge zkLogin with a small amount of ADA as the gas fee for initiating the transaction.'
+      'STEP_7_TITLE': 'Step 7: Send funds to your zkLogin address',
+      'STEP_7_WARNING': 'Each ZK Proof is associated with an ephemeral key pair. Stored in the appropriate location, it can be reused as proof to sign any number of transactions until the ephemeral key pair expires.',
+      'STEP_7_EXPLANATION': 'Before transferring funds from your address we need to recharge it with some amount of ADA. The code below will send {{ amountOfAda }} ADA to your address from the sponsor wallet.'
     },
   },
 };
