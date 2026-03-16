@@ -6,11 +6,9 @@ on:
 jobs:
   backend-tests:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
     env:
       BLOCKFROST_PROJECT_ID: preview_ci_dummy_key
+      REAL_PROOF: "true"
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -22,8 +20,33 @@ jobs:
           cache: npm
           cache-dependency-path: backend/package-lock.json
 
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Set up Aiken
+        uses: aiken-lang/setup-aiken@v1
+        with:
+          version: v1.1.17
+
+      - name: Install snarkjs
+        run: npm install -g snarkjs@^0.7.5
+
+      - name: Install circom
+        run: cargo install --locked --git https://github.com/iden3/circom.git --tag v2.2.3 circom
+
+      - name: Install aiken-zk
+        run: |
+          git clone --depth 1 https://github.com/eryxcoop/cardano-zk-aiken.git /tmp/cardano-zk-aiken
+          cargo install --locked --path /tmp/cardano-zk-aiken/aiken-zk
+
       - name: Install backend dependencies
         run: npm ci
+        working-directory: backend
+
+      - name: Build Aiken contracts
+        run: aiken build
+        working-directory: backend
 
       - name: Run backend tests
         run: npm run test
+        working-directory: backend
