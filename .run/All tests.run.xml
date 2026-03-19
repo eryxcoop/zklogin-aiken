@@ -6,6 +6,7 @@
     <toRun name="Generate proof endpoint tests (Fast)" type="NodeJsTestRunner" />
     <toRun name="Generate proof endpoint tests (Slow)" type="NodeJsTestRunner" />
     <toRun name="Generate proof tests (Fast)" type="NodeJsTestRunner" />
+    <toRun name="Generate proof tests (Slow)" type="NodeJsTestRunner" />
     <method v="2" />
   </configuration>
 </component>
