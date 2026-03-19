@@ -2,6 +2,7 @@
 This repo contains an implementation of the zkLogin protocol in the cardano blockchain. The key contributions are the Aiken source code that regulates the fund spending of the zkLogin addresses and the Circom circuits that verify the autenticity of the owner, but this repo also contains a frontend that allows any user with a Google account to easily test the implementation. 
 
 ## Dependencies
+* ```node >= 22.22.1```
 * ```npm```
 * ```aiken-zk``` (https://github.com/eryxcoop/cardano-zk-aiken). Clone the repo and follow the steps in https://github.com/eryxcoop/cardano-zk-aiken/tree/main/aiken-zk (Prerequisites and Installation sections).
 * ```aiken```
