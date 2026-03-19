@@ -17,7 +17,7 @@ async function assertProofFileExists(proofFileToCheck) {
 
 async function assertProofFileIsValid(proofFileToValidatePath: string) {
     await assertProofFileExists(proofFileToValidatePath);
-    const expectedProof = /\{"piA":"[0-9a-f]{96}","piB":"[0-9a-f]{192}","piC":"[0-9a-f]{96}"}/;
+    const expectedProof = /\{\s*"piA":\s*"[0-9a-f]{96}",\s*"piB":\s*"[0-9a-f]{192}",\s*"piC":\s*"[0-9a-f]{96}"\s*}/;
     const proofContent = await fs.readFile(proofFileToValidatePath, 'utf8');
     assert.match(proofContent, expectedProof);
 }
