@@ -1,20 +1,50 @@
-import {mConStr0, resolveSlotNo} from "@meshsdk/core";
-import type {UTxO} from "@meshsdk/core";
-
 import {
-    PrivateKey,
-    PublicKey,
-    Transaction,
-    Vkey,
-    Vkeywitness,
-    Vkeywitnesses,
-} from "@emurgo/cardano-serialization-lib-nodejs";
-import "dotenv/config";
+    Lucid, Blockfrost, Constr, Data, CML,
+} from "@lucid-evolution/lucid";
+import type {LucidEvolution, SpendingValidator, UTxO} from "@lucid-evolution/lucid";
 import {blake2b} from "blakejs";
-import {mZKRedeemer} from "./zk_redeemer.ts";
-import {blockchainProvider, getScriptBackend, getTxBuilder, networkFromBlockfrostKey, sponsorWallet} from "./common.ts"
+import {getScriptBackend} from "./common.ts";
+import {SPONSOR_WALLET_SK, SPONSOR_WALLET_ADDR} from "./sponsorWalletCredentials.ts";
+import "dotenv/config";
 
-const MAXIMUM_ASSUMED_FEE = 2000000
+// Derive sponsor payment signing key (ed25519) from xprv root key
+function deriveSponsorSigningKey(): string {
+    const rootKey = CML.Bip32PrivateKey.from_bech32(SPONSOR_WALLET_SK);
+    const accountKey = rootKey
+        .derive(0x80000000 + 1852)
+        .derive(0x80000000 + 1815)
+        .derive(0x80000000 + 0);
+    return accountKey.derive(0).derive(0).to_raw_key().to_bech32();
+}
+
+const sponsorSigningKey = deriveSponsorSigningKey();
+
+let lucidInstance: LucidEvolution | null = null;
+
+async function getLucid(): Promise<LucidEvolution> {
+    if (!lucidInstance) {
+        const blockfrostKey = process.env.BLOCKFROST_PROJECT_ID;
+        if (!blockfrostKey) throw new Error("BLOCKFROST_PROJECT_ID is not set");
+        lucidInstance = await Lucid(
+            new Blockfrost("https://cardano-preview.blockfrost.io/api/v0", blockfrostKey),
+            "Preview"
+        );
+        lucidInstance.selectWallet.fromAddress(SPONSOR_WALLET_ADDR, []);
+    }
+    return lucidInstance;
+}
+
+function getScriptBackendLucid(zkLoginId: bigint) {
+    // Reuse MeshJS's script parameterization to ensure the same CBOR/address
+    const {scriptCbor, scriptAddr} = getScriptBackend(zkLoginId);
+
+    const validator: SpendingValidator = {
+        type: "PlutusV3",
+        script: scriptCbor,
+    };
+
+    return {validator, scriptAddr};
+}
 
 export async function transfer(
     destinationAddress,
@@ -25,125 +55,75 @@ export async function transfer(
     maxEpoch,
     zkProof
 ) {
+    const lucid = await getLucid();
+    const {validator, scriptAddr} = getScriptBackendLucid(zkLoginId);
 
-    const {scriptCbor, scriptAddr} = getScriptBackend(zkLoginId);
-    console.log("Sending ADA to address ", destinationAddress, " from address ", scriptAddr)
+    console.log("Sending ADA to address ", destinationAddress, " from address ", scriptAddr);
 
-    // --- Obtain public and private keys --- //
-
-    const eph_private_key = PrivateKey.from_normal_bytes(Buffer.from(ephemeralPrivateKey, "hex"));
-
-    const eph_public_key_bytes = Uint8Array.from(Buffer.from(ephemeralPublicKey, "hex"));
-    const eph_public_key = PublicKey.from_bytes(eph_public_key_bytes)
-
-    const scriptUtxos = (await blockchainProvider.fetchAddressUTxOs(scriptAddr));
-    const scriptUtxosWithDatum  = scriptUtxos.filter(
-        (utxo)=> utxo.output.plutusData !== undefined && utxo.output.dataHash !== undefined );
-
-    if (scriptUtxosWithDatum.length === 0) {
-        throw Error("No UTxOs with datum found");
+    // --- Fetch ALL UTxOs at script address (no datum filter needed with V3!) --- //
+    const scriptUtxos = await lucid.utxosAt(scriptAddr);
+    if (scriptUtxos.length === 0) {
+        throw Error("No UTxOs found at script address");
     }
 
-    const inputScriptUTxOWithDatum = pickSourceUTxO(scriptUtxosWithDatum, amount_to_spend);
+    const inputUtxo = pickSourceUTxO(scriptUtxos, BigInt(amount_to_spend));
 
-    let collaterals = await sponsorWallet.getCollateral();
-    const collateral = collaterals[0];
+    // --- Ephemeral key handling --- //
+    const ephPubKeyBytes = Uint8Array.from(Buffer.from(ephemeralPublicKey, "hex"));
+    const ephPubKeyHash = Buffer.from(blake2b(ephPubKeyBytes, undefined, 28)).toString("hex");
 
-    let max_epoch_POSIX_time = new Date(maxEpoch);
-    const max_epoch_slot = resolveSlotNo(networkFromBlockfrostKey(), max_epoch_POSIX_time.getTime());
+    const ephPrivKey = CML.PrivateKey.from_normal_bytes(Buffer.from(ephemeralPrivateKey, "hex"));
+    const ephPrivKeyBech32 = ephPrivKey.to_bech32();
 
-    let redeemer = mConStr0([maxEpoch, Buffer.from(eph_public_key_bytes).toString("hex")]);
-    let zk_redeemer = mZKRedeemer(redeemer, zkProof);
+    // --- Build redeemer (same structure as before: Constr0[Constr0[maxEpoch, pubKeyHex], [Constr0[piA, piB, piC]]]) --- //
+    const innerRedeemer = new Constr(0, [BigInt(maxEpoch), ephemeralPublicKey]);
+    const proof = new Constr(0, [zkProof.piA, zkProof.piB, zkProof.piC]);
+    const zkRedeemer = new Constr(0, [innerRedeemer, [proof]]);
+    const redeemer = Data.to(zkRedeemer);
 
-    let return_quantity = (Number(inputScriptUTxOWithDatum.output.amount[0].quantity) - amount_to_spend - MAXIMUM_ASSUMED_FEE).toString();
+    // --- Max epoch to POSIX time for transaction validity --- //
+    const maxEpochPosixTime = new Date(maxEpoch).getTime();
 
-    const txBuilder = getTxBuilder();
-    await txBuilder
-        .spendingPlutusScript("V3")
-        .txIn(
-            inputScriptUTxOWithDatum.input.txHash,
-            inputScriptUTxOWithDatum.input.outputIndex,
-            inputScriptUTxOWithDatum.output.amount,
-            inputScriptUTxOWithDatum.output.address
+    // --- Build transaction --- //
+    const tx = await lucid
+        .newTx()
+        .collectFrom([inputUtxo], redeemer)
+        .attach.SpendingValidator(validator)
+        .addSignerKey(ephPubKeyHash)
+        .pay.ToAddress(
+            destinationAddress,
+            {lovelace: BigInt(amount_to_spend)}
         )
-        .txInScript(scriptCbor)
-        .txInRedeemerValue(zk_redeemer)
-        .txInInlineDatumPresent()
-        .requiredSignerHash(
-            Buffer.from(blake2b(eph_public_key_bytes, undefined, 28)).toString("hex")
-        )
-        .changeAddress(scriptAddr)
-        .txInCollateral(
-            collateral.input.txHash,
-            collateral.input.outputIndex,
-            collateral.output.amount,
-            collateral.output.address
-        )
-        .invalidHereafter(Number(max_epoch_slot))
-        .txOut(destinationAddress, [{
-            unit: "lovelace",
-            quantity: amount_to_spend.toString()
-        }])
-        .txOutInlineDatumValue(mConStr0([]))
-        .txOut(scriptAddr, [{
-            unit: "lovelace",
-            quantity: return_quantity,
+        .validTo(maxEpochPosixTime)
+        .complete({changeAddress: scriptAddr});
 
-        }])
-        .txOutInlineDatumValue(mConStr0([]))
+    // --- Sign with sponsor wallet (collateral) and ephemeral key (required signer) --- //
+    const signedTx = await tx
+        .sign.withPrivateKey(sponsorSigningKey)
+        .sign.withPrivateKey(ephPrivKeyBech32)
         .complete();
 
-    // --- Sign transaction with dummy wallet for collateral --- //
-    const partiallySigned = await sponsorWallet.signTx(txBuilder.txHex, true);
-
-    // --- Sign transaction with ephemeral private key --- //
-    const unsignedTx = Transaction.from_bytes(
-        Buffer.from(partiallySigned, "hex")
-    );
-
-    let txBody = unsignedTx.body();
-    const bodyBytes = txBody.to_bytes();
-    const txHash = blake2b(bodyBytes, undefined, 32);
-
-    const signature = eph_private_key.sign(txHash);
-    const vkey = Vkey.new(eph_public_key);
-    const vkeyWitness = Vkeywitness.new(vkey, signature);
-
-    const witnesses = unsignedTx.witness_set();
-    const vkeys = witnesses.vkeys() ?? Vkeywitnesses.new();
-
-    vkeys.add(vkeyWitness);
-
-    witnesses.set_vkeys(vkeys);
-
-    const signedTx = Transaction.new(
-        txBody,
-        witnesses,
-        unsignedTx.auxiliary_data()
-    );
-
     // --- Submit transaction --- //
-    console.log("The transaction is being submited")
-    const signedTxHex = signedTx.to_hex();
-    const response = await sponsorWallet.submitTx(signedTxHex);
-    console.log("Tx hash:", response);
+    console.log("The transaction is being submitted");
+    const txHash = await signedTx.submit();
+    console.log("Tx hash:", txHash);
 
-    return response;
+    return txHash;
 }
 
-const reminder = (utxo: UTxO, amountToSpend: number) => {
-    return Number(utxo.output.amount[0].quantity) - amountToSpend - MAXIMUM_ASSUMED_FEE
+// --- UTxO selection helpers --- //
+
+function remainder(utxo: UTxO, amountToSpend: bigint): bigint {
+    return utxo.assets["lovelace"] - amountToSpend;
 }
 
-// This utxo picking algorithm chooses the utxo with just enough funds to fulfill the transaction.
-// If none exists, throws an error
-function pickSourceUTxO(scriptUtxosWithDatum: UTxO[], amount: number) {
-    const base = scriptUtxosWithDatum.find(utxo => reminder(utxo, amount) >= 0);
+function pickSourceUTxO(utxos: UTxO[], amountToSpend: bigint): UTxO {
+    const base = utxos.find(utxo => remainder(utxo, amountToSpend) >= 0n);
     if (base === undefined) {
         throw Error("There isn't a single UTxO with enough funds to spend this much ADA");
     }
-    return scriptUtxosWithDatum.reduce((min: UTxO, current: UTxO) => {
-        return (reminder(current, amount) >= 0 && (reminder(current, amount) < reminder(min, amount))) ? current : min
+    return utxos.reduce((min: UTxO, current: UTxO) => {
+        return (remainder(current, amountToSpend) >= 0n && remainder(current, amountToSpend) < remainder(min, amountToSpend))
+            ? current : min;
     }, base);
 }
-
