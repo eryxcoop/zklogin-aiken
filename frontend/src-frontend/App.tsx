@@ -180,7 +180,7 @@ function App() {
       case 0:
         return !ephemeralKeyPair;
       case 1:
-        return !currentEpoch || !randomness;
+        return false;
       case 2:
         return !jwtString;
       case 3:
