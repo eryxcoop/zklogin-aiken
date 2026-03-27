@@ -9,21 +9,17 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
+    Link,
     Stack,
     Step,
     StepLabel,
     Stepper,
     TextField,
-    Typography,
-    Link
+    Typography
 } from "@mui/material";
 import {fromB64} from "@mysten/bcs";
-import {SuiClient} from "@mysten/sui.js/client";
-import {SerializedSignature} from "@mysten/sui.js/cryptography";
 import {Ed25519Keypair} from "@mysten/sui.js/keypairs/ed25519";
-import {TransactionBlock} from "@mysten/sui.js/transactions";
-import {MIST_PER_SUI} from "@mysten/sui.js/utils";
-import {genAddressSeed, generateRandomness, getZkLoginSignature,} from "@mysten/zklogin";
+import {generateRandomness,} from "@mysten/zklogin";
 import axios from "axios";
 import {jwtDecode, JwtPayload} from "jwt-decode";
 import {enqueueSnackbar} from "notistack";
@@ -37,25 +33,27 @@ import "./App.css";
 import GoogleLogo from "./assets/google.svg";
 import {FAUCET_SCRIPT, GENERATE_NONCE,} from "./code_example";
 import {
-    CLIENT_ID, EPH_PRIVATE_KEY_LOCAL_STORAGE_KEY, EPH_PUBLIC_KEY_LOCAL_STORAGE_KEY,
-    FULLNODE_URL, FUNDING_ENDPOINT,
+    CLIENT_ID,
+    EPH_PRIVATE_KEY_LOCAL_STORAGE_KEY,
+    EPH_PUBLIC_KEY_LOCAL_STORAGE_KEY,
+    FUNDING_ENDPOINT,
     KEY_PAIR_SESSION_STORAGE_KEY,
     MAX_EPOCH_LOCAL_STORAGE_KEY,
     PROVER_ENDPOINT,
     RANDOMNESS_SESSION_STORAGE_KEY,
     REDIRECT_URI,
-    STEPS_LABELS_TRANS_KEY, TRANSFER_ENDPOINT,
-    USER_SALT_LOCAL_STORAGE_KEY, ZK_LOGIN_ID_LOCAL_STORAGE_KEY,
+    STEPS_LABELS_TRANS_KEY,
+    TRANSFER_ENDPOINT,
+    USER_SALT_LOCAL_STORAGE_KEY,
+    ZK_LOGIN_ID_LOCAL_STORAGE_KEY,
     ZK_SESSION_PROOF_LOCAL_STORAGE_KEY,
 } from "./constant";
-import {base, gray} from "./theme/colors";
 import {generateNonce, toBigIntBE} from "./aux/nonce.ts";
 import {computeZkLoginId} from "./aux/zkLoginId.ts";
 import {base64url} from "jose";
 import SignatureData from "./aux/signatureData.ts";
 import {base64ToBigInt} from "./aux/base64toBigInt.ts";
 
-const suiClient = new SuiClient({ url: FULLNODE_URL });
 
 function App() {
   // Others
@@ -207,9 +205,6 @@ function App() {
     userSalt,
   ]);
 
-  // TODO: query address balance for cardano address
-  const addressBalance = undefined;
-
   const resetState = () => {
     setCurrentEpoch("");
     setNonce("");
@@ -246,32 +241,6 @@ function App() {
     }
   };
 
-  const [requestingFaucet, setRequestingFaucet] = useState(false);
-  const requestFaucet = async () => {
-    console.log("Comunicación con Cardano: https://docs.cardano.org/cardano-testnets/tools/faucet")
-    setRequestingFaucet(true);
-    /*if (!zkLoginUserAddress) {
-      return;
-    }
-    try {
-      setRequestingFaucet(true);
-      await axios.post(SUI_DEVNET_FAUCET, {
-        FixedAmountRequest: {
-          recipient: zkLoginUserAddress,
-        },
-      });
-      enqueueSnackbar("Success!", {
-        variant: "success",
-      });
-    } catch (error) {
-      enqueueSnackbar(String(error), {
-        variant: "error",
-      });
-    } finally {
-      setRequestingFaucet(false);
-    }*/
-  };
-
   function base64toAscii(base64Text: string): number[] {
       return base64Text.split("").map(char => char.charCodeAt(0))
   }
@@ -294,7 +263,7 @@ function App() {
       const aud_ascii = base64toAscii(jwtDecoded.aud)
       const sub_ascii = base64toAscii(jwtDecoded.sub)
 
-      let signatureData = await (new SignatureData(jwtString)).verifySignatureCircuitInputs()
+      const signatureData = await (new SignatureData(jwtString)).verifySignatureCircuitInputs()
 
       const inputZkLogin = {
           "nonce": base64ToBigInt(nonce),
@@ -338,154 +307,160 @@ function App() {
     };
 
   return (
-    <Box>
+    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#f0f5ff" }}>
+      {/* Left Sidebar */}
       <Box
         sx={{
-          mb: "36px",
+          width: "260px",
+          minWidth: "260px",
+          bgcolor: "#ffffff",
+          borderRight: "1px solid #e0e0e0",
+          display: "flex",
+          flexDirection: "column",
+          p: "24px 16px",
+          position: "fixed",
+          height: "100vh",
+          top: 0,
+          left: 0,
+          boxSizing: "border-box",
+          overflowY: "auto",
         }}
       >
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <Typography
+        <Box sx={{ flex: 1, overflowY: "auto" }}>
+          <Stepper
+            activeStep={activeStep}
+            orientation="vertical"
             sx={{
-              fontSize: "2rem",
-              fontWeight: 600,
-              display: "flex",
-              alignItems: "center",
-              columnGap: "16px",
+              "& .MuiStepLabel-label": { color: "rgba(0,0,0,0.5)", fontSize: "0.8rem" },
+              "& .MuiStepLabel-label.Mui-active": { color: "#000", fontWeight: 600 },
+              "& .MuiStepLabel-label.Mui-completed": { color: "rgba(0,0,0,0.7)" },
+              "& .MuiStepIcon-root": { color: "rgba(0,0,0,0.2)" },
+              "& .MuiStepIcon-root.Mui-active": { color: "#0033AD" },
+              "& .MuiStepIcon-root.Mui-completed": { color: "#0033AD" },
+              "& .MuiStepConnector-line": { borderColor: "rgba(0,0,0,0.15)" },
+              "& .MuiStepIcon-text": { fill: "#ffffff" },
             }}
           >
-            Cardano zkLogin Demo{" "}
-            <ButtonGroup
-              variant="outlined"
-              aria-label="Disabled elevation buttons"
-            >
-              <Button
-                size="small"
-                variant={lang === "en" ? "contained" : "outlined"}
-                onClick={() => {
-                  setLang("en");
-                }}
-              >
-                ENG
-              </Button>
-            </ButtonGroup>
-            <Typography
-              sx={{
-                color: base.white,
-                background: gray[900],
-                p: "4px 8px",
-                fontWeight: 400,
-                fontSize: "0.75rem",
-                borderRadius: "4px",
-              }}
-            >
-              Preview TestNet
-            </Typography>
-          </Typography>
-          <Button
-            variant="contained"
-            color="error"
-            size="small"
-            onClick={() => {
-              setShowResetDialog(true);
-            }}
-          >
-            Reset LocalState
-          </Button>
-          <Dialog
-            open={showResetDialog}
-            onClose={() => {
-              setShowResetDialog(false);
-            }}
-          >
-            <DialogTitle>
-              Please confirm if you want to reset the local state?
-            </DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-                Resetting the local state{" "}
-                <span
-                  style={{
-                    fontWeight: 600,
-                  }}
-                >
-                  will clear the Salt value
-                </span>{" "}
-                stored in local storage, rendering previously generated
-                addresses irretrievable.
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button
-                onClick={() => {
-                  setShowResetDialog(false);
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={() => {
-                  resetLocalState();
-                }}
-              >
-                Confirm
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </Stack>
-      </Box>
-      <Box
-        sx={{
-          width: "100%",
-          overflowX: "hidden",
-        }}
-      >
-        <Stepper activeStep={activeStep}>
-          {STEPS_LABELS_TRANS_KEY.map((stepLabel, index) => (
-            <Step key={index}>
-              <StepLabel>{t(stepLabel)}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-      </Box>
-
-      <Box sx={{ mt: "24px" }}>
+            {STEPS_LABELS_TRANS_KEY.map((stepLabel, index) => (
+              <Step key={index}>
+                <StepLabel>{t(stepLabel)}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+        </Box>
         <Button
-          variant="outlined"
-          disabled={activeStep === 0}
+          variant="contained"
+          color="error"
+          size="small"
           onClick={() => {
-            setActiveStep(activeStep - 1);
+            setShowResetDialog(true);
+          }}
+          sx={{ mt: 2 }}
+        >
+          Reset LocalState
+        </Button>
+        <Dialog
+          open={showResetDialog}
+          onClose={() => {
+            setShowResetDialog(false);
           }}
         >
-          Back
-        </Button>
-        {activeStep !== 7 && (
-          <Button
-            sx={{
-              ml: "12px",
-            }}
-            variant="outlined"
-            disabled={nextButtonDisabled}
-            onClick={() => {
-              setActiveStep(activeStep + 1);
-            }}
-          >
-            Next
-          </Button>
-        )}
+          <DialogTitle>
+            Please confirm if you want to reset the local state?
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Resetting the local state{" "}
+              <span
+                style={{
+                  fontWeight: 600,
+                }}
+              >
+                will clear the Salt value
+              </span>{" "}
+              stored in local storage, rendering previously generated
+              addresses irretrievable.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => {
+                setShowResetDialog(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                resetLocalState();
+              }}
+            >
+              Confirm
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
 
-      <Box
-        sx={{
-          mt: "24px",
-          p: "12px",
-        }}
-        className="border border-slate-300 rounded-xl"
-      >
+      {/* Main Content */}
+      <Box sx={{ ml: "260px", flex: 1, height: "100vh", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <Box sx={{ px: "2rem", pt: "2rem", pb: "24px", flexShrink: 0 }}>
+          <Stack
+            direction="row"
+            alignItems="center"
+          >
+            <Typography
+              sx={{
+                fontSize: "2rem",
+                fontWeight: 700,
+                color: "#000000",
+                display: "flex",
+                alignItems: "center",
+                columnGap: "16px",
+              }}
+            >
+              Cardano zkLogin Demo{" "}
+              <ButtonGroup
+                variant="outlined"
+                aria-label="Disabled elevation buttons"
+                sx={{ opacity: 0.4, pointerEvents: "none" }}
+              >
+                <Button
+                  size="small"
+                  variant="outlined"
+                  sx={{
+                    fontSize: "0.7rem",
+                    borderColor: "#999",
+                    color: "#999",
+                    height: "24px",
+                  }}
+                >
+                  ENG
+                </Button>
+              </ButtonGroup>
+              <Typography
+                sx={{
+                  color: "#999",
+                  border: "1px solid #ccc",
+                  p: "2px 8px",
+                  fontWeight: 400,
+                  fontSize: "0.7rem",
+                  borderRadius: "4px",
+                  letterSpacing: "0.5px",
+                }}
+              >
+                Preview TestNet
+              </Typography>
+            </Typography>
+          </Stack>
+        </Box>
+
+        <Box sx={{ flex: 1, overflow: "auto", px: "2rem", pb: "24px" }}>
+          <Box
+            sx={{
+              p: "12px",
+            }}
+            className="border border-slate-300 rounded-xl"
+          >
         {/* Step 1 */}
         {activeStep === 0 && (
           <Stack spacing={2}>
@@ -535,11 +510,11 @@ function App() {
               </Button>
             </Stack>
             <Typography>
-              <SyntaxHighlighter wrapLongLines language="json" style={oneDark}>
+              <SyntaxHighlighter wrapLongLines language="json" style={oneDark} customStyle={{ maxHeight: "200px", overflow: "auto" }}>
                 {`// PrivateKey
 ${JSON.stringify(ephemeralKeyPair?.export())}`}
               </SyntaxHighlighter>
-              <SyntaxHighlighter wrapLongLines language="json" style={oneDark}>
+              <SyntaxHighlighter wrapLongLines language="json" style={oneDark} customStyle={{ maxHeight: "200px", overflow: "auto" }}>
                 {`// PublicKey:
 ${JSON.stringify(ephemeralKeyPair?.getPublicKey().toBase64())}`}
               </SyntaxHighlighter>
@@ -639,9 +614,10 @@ ${JSON.stringify(ephemeralKeyPair?.getPublicKey().toBase64())}`}
                 wrapLongLines
                 language="typescript"
                 style={oneDark}
+                customStyle={{ maxHeight: "200px", overflow: "auto" }}
               >
                 {`import { generateRandomness } from '@mysten/zklogin';
-                
+
  // randomness
  const randomness = generateRandomness();`}
               </SyntaxHighlighter>
@@ -670,6 +646,7 @@ ${JSON.stringify(ephemeralKeyPair?.getPublicKey().toBase64())}`}
                 wrapLongLines
                 language="typescript"
                 style={oneDark}
+                customStyle={{ maxHeight: "200px", overflow: "auto" }}
               >
                 {GENERATE_NONCE}
               </SyntaxHighlighter>
@@ -764,6 +741,7 @@ ${JSON.stringify(ephemeralKeyPair?.getPublicKey().toBase64())}`}
               wrapLines
               language="typescript"
               style={oneDark}
+              customStyle={{ maxHeight: "200px", overflow: "auto" }}
             >
               {`// id_token Header.Payload.Signature
 ${JSON.stringify(jwtString)}
@@ -773,7 +751,7 @@ import { JwtPayload, jwtDecode } from "jwt-decode";
 const jwtPayload = jwtDecode(id_token);
 const decodedJwt = jwt_decode(jwtPayload) as JwtPayload;`}
             </SyntaxHighlighter>
-            <SyntaxHighlighter wrapLongLines language="json" style={oneDark}>
+            <SyntaxHighlighter wrapLongLines language="json" style={oneDark} customStyle={{ maxHeight: "300px", overflow: "auto" }}>
               {`// JWT Payload
 ${JSON.stringify(decodedJwt, null, 2)}`}
             </SyntaxHighlighter>
@@ -1065,17 +1043,10 @@ ${JSON.stringify(decodedJwt, null, 2)}`}
                                       throw new Error(`HTTP error! status: ${response.status}`);
                                   }
                                   const result = await response.json(); // Parse the JSON response
-                                  // setData(result); // Store the result in the 'data' state variable
-                                  // setError(null);
                                   console.log("Request successful:", result)
                                   setZkLoginUserAddress(result.walletAddress)
                               } catch (err) {
-                                  // setError(err.message);
-                                  // setData(null);
                                   console.log("Error: ", err.message)
-                              } finally {
-                                  // setLoading(false); // Stop loading regardless of success or failure
-                                  console.log("Set loading false")
                               }
                           };
 
@@ -1194,6 +1165,7 @@ address = H(aiken_validator)
                 wrapLongLines
                 language="typescript"
                 style={oneDark}
+                customStyle={{ maxHeight: "300px", overflow: "auto" }}
               >
                 {JSON.stringify(zkProof, null, 2)}
               </SyntaxHighlighter>
@@ -1233,6 +1205,7 @@ address = H(aiken_validator)
               wrapLongLines
               language="typescript"
               style={oneDark}
+              customStyle={{ maxHeight: "250px", overflow: "auto" }}
             >
               {FAUCET_SCRIPT}
             </SyntaxHighlighter>
@@ -1251,7 +1224,7 @@ address = H(aiken_validator)
                     );
 
                       setSendingFundsToAddress(true);
-                      const response = await axios.post(
+                      await axios.post(
                           FUNDING_ENDPOINT,
                           JSON.stringify({'zkLoginAddress': zkLoginUserAddress}, null, 2),
                           {
@@ -1263,7 +1236,7 @@ address = H(aiken_validator)
                       enqueueSnackbar("Finished giving funds to zk login address", {
                           variant: "success",
                       });
-                  } catch (error: any) {
+                  } catch (error) {
                       console.error(error);
                       enqueueSnackbar(
                           String(error?.response?.data?.message || error),
@@ -1361,7 +1334,7 @@ address = H(aiken_validator)
                                         });
                                         setLastTransactionHash(response.data["transactionHash"]);
                                     }
-                              } catch (error: any) {
+                              } catch (error) {
                                   console.error(error);
                                   enqueueSnackbar(
                                       String(error?.message || error),
@@ -1389,6 +1362,60 @@ address = H(aiken_validator)
                   </Stack>
               </Box>
           )}
+          </Box>
+        </Box>
+        <Box
+          sx={{
+            flexShrink: 0,
+            borderTop: "1px solid #e0e0e0",
+            py: "16px",
+            px: "2rem",
+            display: "flex",
+            justifyContent: "center",
+            gap: "16px",
+          }}
+        >
+          <Button
+            variant="outlined"
+            disabled={activeStep === 0}
+            onClick={() => {
+              setActiveStep(activeStep - 1);
+            }}
+            sx={{
+              borderColor: "#0033AD",
+              color: "#0033AD",
+              fontWeight: 600,
+              px: "28px",
+              py: "10px",
+              fontSize: "0.95rem",
+              borderWidth: "2px",
+              "&:hover": { borderWidth: "2px", bgcolor: "#e8eeff" },
+              "&.Mui-disabled": { borderWidth: "2px" },
+            }}
+          >
+            ← Back
+          </Button>
+          {activeStep !== 7 && (
+            <Button
+              variant="contained"
+              disabled={nextButtonDisabled}
+              onClick={() => {
+                setActiveStep(activeStep + 1);
+              }}
+              sx={{
+                bgcolor: "#0033AD",
+                fontWeight: 700,
+                px: "36px",
+                py: "10px",
+                fontSize: "0.95rem",
+                boxShadow: "0 4px 14px rgba(0,51,173,0.35)",
+                "&:hover": { bgcolor: "#001F6B", boxShadow: "0 6px 20px rgba(0,51,173,0.45)" },
+              }}
+            >
+              Next →
+            </Button>
+          )}
+        </Box>
       </Box>
     </Box>
   );

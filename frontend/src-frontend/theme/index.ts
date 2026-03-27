@@ -1,12 +1,18 @@
 import { ThemeOptions } from '@mui/material';
-import { gray } from './colors/index';
 
 const fontFamily = `"Montserrat", sans-serif`;
 const ThemeConfig = {
   palette: {
     mode: 'light',
     primary: {
-      main: gray[900],
+      main: '#0033AD',
+      light: '#4D77C9',
+      dark: '#001F6B',
+      contrastText: '#ffffff',
+    },
+    background: {
+      default: '#f0f5ff',
+      paper: '#ffffff',
     },
   },
   shape: {
@@ -15,7 +21,7 @@ const ThemeConfig = {
   typography: {
     allVariants: {
       fontFamily: fontFamily,
-      color: 'rgb(2, 6, 23)',
+      color: '#1a2a4a',
     },
     button: {
       textTransform: 'none',

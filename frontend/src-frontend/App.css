@@ -1,8 +1,8 @@
 #root {
-  margin: 0 auto;
-  padding: 2rem;
+  margin: 0;
+  padding: 0;
   text-align: left;
   font-family: "Montserrat", sans-serif;
   width: 100vw;
-  max-width: 1440px
+  min-height: 100vh;
 }
