@@ -6,7 +6,6 @@ export const FAUCET_SCRIPT = `async function lockTxWithDatum() {
             unit: "lovelace",
             quantity: LOVELACE_TO_SEND_TO_SCRIPT
         }])
-        .txOutInlineDatumValue(mConStr0([]))
         .changeAddress(SPONSOR_WALLET_ADDR)
         .selectUtxosFrom(await sponsorWallet.getUtxos())
         .complete();
