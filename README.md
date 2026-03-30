@@ -6,7 +6,6 @@ This repo contains an implementation of the zkLogin protocol in the cardano bloc
 * ```npm```
 * ```aiken-zk``` (https://github.com/eryxcoop/cardano-zk-aiken). Clone the repo and follow the steps in https://github.com/eryxcoop/cardano-zk-aiken/tree/main/aiken-zk (Prerequisites and Installation sections).
 * ```aiken```
-* ```git lfs``` (https://git-lfs.com/)
 * ```snarkjs``` **globally** (also a dependency of aiken-zk)
 
 
@@ -15,7 +14,7 @@ To try the new features introduced in the milestone 3 of the Catalyst proposal (
 
 Note: all of this has been tested on the preview network. 
 
-* Run ```git lfs pull```, if it fails, install git lfs (listed in the dependencies).
+* Give permission to execute and run  ```./fetch_vk.sh``` to fetch the Verification Key needed for proof generation (890MB).
 * Go to the ```frontend``` directory and run ```npm install```.
 * Run ```npm run dev```. This will start a server that will let you enter the application flow (most likely in http://localhost:5173/).
 * Go to the ```backend``` directory and run ```npm install```.

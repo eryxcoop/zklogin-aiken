@@ -10,3 +10,4 @@ circuit_inputs/input_zkLogin.json
 deployment/test_data/**
 !deployment/test_data/.gitkeep
 **/generated_proofs/**
+backend/verification_key.zkey
