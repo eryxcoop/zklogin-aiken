@@ -16,6 +16,9 @@ jobs:
       - name: Download Verification Key
         run: ./fetch_vk.sh
 
+      - name: Check Verification Key
+        run: ./test_vk.sh
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
