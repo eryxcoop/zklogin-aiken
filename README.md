@@ -9,7 +9,7 @@ This repo contains an implementation of the zkLogin protocol in the cardano bloc
 * ```snarkjs``` **globally** (also a dependency of aiken-zk)
 
 
-## User flow for the 3rd milestone 
+## User flow 
 To try the new features introduced in the milestone 3 of the Catalyst proposal (https://milestones.projectcatalyst.io/projects/1400130/milestones/3) you should follow the next steps:
 
 Note: all of this has been tested on the preview network. 
@@ -33,9 +33,24 @@ Note: all of this has been tested on the preview network.
 * Go to the `backend` directory and run `npm run test`
 
 
-## For developers only: generating a new verification key
+## For developers only 
+### Generating a new verification key
 * Download `pot23_final_21.ptau` from https://github.com/p0tion-tools/cardano-ppot. Move the file to `backend/ceremony.ptau`.
 * Go to `backend/circuits`. Run `./compile-proof-verify.sh -c zk_login.circom unused_parameter ../backend/ceremony.ptau`.
 * Go to `backend/curve_compress` and run `node compressedVerificationKey.cjs ../circuits/build/verification_key.json`.
 * Manually copy each value of the output into `zk_login.ak` (under `SnarkVerificationKey`).
 * Replace `backend/verification_key.zkey` with the new one found in `circuits/build/zk_login_final.zkey`.
+
+### Contribution guidelines
+You can find out how to contribute by reading [this document](https://github.com/eryxcoop/zklogin-aiken/blob/main/Developer%20documentation.pdf).
+
+## Example transactions
+Here we can see an example of a successful transaction using a zkLogin account in the `preview` network:
+* zkLogin address: `addr_test1wq8lpz2a3g84nhtxk5svp7d4k7gcjm89q3tyc8de3xk5urq5fdvqx`
+* Destination address: `addr_test1wq8lpz2a3g84nhtxk5svp7d4k7gcjm89q3tyc8de3xk5urq5fdvqx` (same one)
+* Tx hash: `c398b2c063a1db62324e41e671331eacac1fec10b4edf1b6c33ffef84c3202f7`
+* CardanoScan: https://preview.cardanoscan.io/transaction/c398b2c063a1db62324e41e671331eacac1fec10b4edf1b6c33ffef84c3202f7
+
+## Integration support
+If you just want to use zkLogin as an individual, follow the steps listed in User Flow.
+If you want to integrate zkLogin protocol to a wallet, dApp or another system, contact us at crypto-racoons@eryxsoluciones.com.ar
