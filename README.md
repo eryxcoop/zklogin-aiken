@@ -53,4 +53,7 @@ Here we can see an example of a successful transaction using a zkLogin account i
 
 ## Integration support
 If you just want to use zkLogin as an individual, follow the steps listed in User Flow.
-If you want to integrate zkLogin protocol to a wallet, dApp or another system, contact us at crypto-racoons@eryxsoluciones.com.ar
+If you want to integrate zkLogin protocol to a wallet, dApp or another system, contact us at `crypto-racoons@eryxsoluciones.com.ar`.
+
+## Current limitations
+Right now the biggest limitation zkLogin faces is the absence of an oracle for Google public keys, which is the way of dealing with Google's key rotation. Until that matter is solved there must be manual migrations before each change in the provider's credentials. If you want to know more, contact us at contact us at `crypto-racoons@eryxsoluciones.com.ar`. 
