@@ -10,7 +10,7 @@ This repo contains an implementation of the zkLogin protocol in the cardano bloc
 
 
 ## User flow 
-To try the new features introduced in the milestone 3 of the Catalyst proposal (https://milestones.projectcatalyst.io/projects/1400130/milestones/3) you should follow the next steps:
+To try a full zkLogin protocol flow, you should follow the next steps:
 
 Note: all of this has been tested on the preview network. 
 
@@ -42,9 +42,9 @@ Note: all of this has been tested on the preview network.
 * Replace `backend/verification_key.zkey` with the new one found in `circuits/build/zk_login_final.zkey`.
 
 ### Contribution guidelines
-You can find out how to contribute by reading [this document](https://github.com/eryxcoop/zklogin-aiken/blob/main/Developer%20documentation.pdf).
+You can find out how to contribute to the project by reading [this document](https://github.com/eryxcoop/zklogin-aiken/blob/main/Developer%20documentation.pdf).
 
-## Example transactions
+## Example transaction
 Here we can see an example of a successful transaction using a zkLogin account in the `preview` network:
 * zkLogin address: `addr_test1wq8lpz2a3g84nhtxk5svp7d4k7gcjm89q3tyc8de3xk5urq5fdvqx`
 * Destination address: `addr_test1wq8lpz2a3g84nhtxk5svp7d4k7gcjm89q3tyc8de3xk5urq5fdvqx` (same one)
