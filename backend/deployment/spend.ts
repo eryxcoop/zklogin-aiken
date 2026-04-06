@@ -66,8 +66,6 @@ export async function transfer(
         throw Error("No UTxOs found at script address");
     }
 
-    const inputUtxo = pickSourceUTxO(scriptUtxos, BigInt(amount_to_spend));
-
     // --- Ephemeral key handling --- //
     const ephPubKeyBytes = Uint8Array.from(Buffer.from(ephemeralPublicKey, "hex"));
     const ephPubKeyHash = Buffer.from(blake2b(ephPubKeyBytes, undefined, 28)).toString("hex");
@@ -87,7 +85,7 @@ export async function transfer(
     // --- Build transaction --- //
     const tx = await lucid
         .newTx()
-        .collectFrom([inputUtxo], redeemer)
+        .collectFrom(scriptUtxos, redeemer)
         .attach.SpendingValidator(validator)
         .addSignerKey(ephPubKeyHash)
         .pay.ToAddress(
@@ -109,21 +107,4 @@ export async function transfer(
     console.log("Tx hash:", txHash);
 
     return txHash;
-}
-
-// --- UTxO selection helpers --- //
-
-function remainder(utxo: UTxO, amountToSpend: bigint): bigint {
-    return utxo.assets["lovelace"] - amountToSpend;
-}
-
-function pickSourceUTxO(utxos: UTxO[], amountToSpend: bigint): UTxO {
-    const base = utxos.find(utxo => remainder(utxo, amountToSpend) >= 0n);
-    if (base === undefined) {
-        throw Error("There isn't a single UTxO with enough funds to spend this much ADA");
-    }
-    return utxos.reduce((min: UTxO, current: UTxO) => {
-        return (remainder(current, amountToSpend) >= 0n && remainder(current, amountToSpend) < remainder(min, amountToSpend))
-            ? current : min;
-    }, base);
 }
