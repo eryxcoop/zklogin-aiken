@@ -1,4 +1,4 @@
-import {lockTxWithDatum} from "../deployment/lockWithDatum.ts";
+import {fundZkLoginAddress} from "../deployment/fundZkLoginAddress.ts";
 
 export async function handleFundAddressEndpoint(request, alternativeEndpointLogic: any = null) {
     try {
@@ -8,7 +8,7 @@ export async function handleFundAddressEndpoint(request, alternativeEndpointLogi
         if (alternativeEndpointLogic !== null) {
             transactionHash = alternativeEndpointLogic(scriptAddr);
         } else {
-            transactionHash = await lockTxWithDatum(scriptAddr);
+            transactionHash = await fundZkLoginAddress(scriptAddr);
         }
 
         return {

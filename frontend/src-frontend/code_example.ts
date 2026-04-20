@@ -1,4 +1,4 @@
-export const FAUCET_SCRIPT = `async function lockTxWithDatum() {
+export const FAUCET_SCRIPT = `async function fundZkLoginAddress() {
     const {scriptAddr} = getScript();
     const lockTxBuilder = getTxBuilder();
     const unsignedTx = await lockTxBuilder

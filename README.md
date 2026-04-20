@@ -25,7 +25,7 @@ Note: all of this has been tested on the preview network.
 * Follow the steps 1-5 for generating the temporal credentials for the zkLogin Access and your zkLogin address. At this point you will have your own zkLogin address! You can retrieve it anytime as long as you store the salt from step 4. 
 * If at any point you want to reset the flow, just click the red button in the top right corner that says "Reset LocalState".
 * Moving on to **step 6**, press the "Generate ZK Proof" button to request the backend to generate the proof. This task is expensive and may take some time (no more than 2 minutes). When it's done, you can see the resulting proof on the screen and move to the next step. This proof will be useful to sign all the transactions in the current zkLogin session (until the expiration time is reached). 
-* The **step 7** is a "custom faucet" created specifically for zkLogin due to a mesh.js limitation: the UTxOs that a zkLogin address spend must have a datum. This is not a Cardano limitation, but for now it's important that any UTxO sent to a zkLogin address has a datum, even if it's empty. By pressing "Execute Transaction Block" you will receive 50 ADA in the zkLogin address. Check it out in CardanoScan before moving to the next step. 
+* The **step 7** is a faucet. By pressing "Execute Transaction Block" you will receive 50 ADA in the zkLogin address. Check it out in CardanoScan before moving to the next step. 
 * Finally, **step 8** lets you send ADA to any address from your zkLogin address. After you've done it, you should see the hash of the last transaction.
 
 

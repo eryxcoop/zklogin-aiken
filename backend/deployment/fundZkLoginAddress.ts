@@ -3,7 +3,7 @@ import {getTxBuilder, sponsorWallet} from "./common.ts"
 import "dotenv/config";
 import {SPONSOR_WALLET_ADDR} from "./sponsorWalletCredentials.ts";
 
-export async function lockTxWithDatum(scriptAddr) {
+export async function fundZkLoginAddress(scriptAddr) {
     const lockTxBuilder = getTxBuilder();
     const unsignedTx = await lockTxBuilder
         .txOut(scriptAddr, [{
