@@ -1,7 +1,7 @@
 import {
     Lucid, Blockfrost, Constr, Data, CML,
 } from "@lucid-evolution/lucid";
-import type {LucidEvolution, SpendingValidator, UTxO} from "@lucid-evolution/lucid";
+import type {LucidEvolution, SpendingValidator} from "@lucid-evolution/lucid";
 import {blake2b} from "blakejs";
 import {getScriptBackend} from "./common.ts";
 import {SPONSOR_WALLET_SK, SPONSOR_WALLET_ADDR} from "./sponsorWalletCredentials.ts";
@@ -65,6 +65,10 @@ export async function transfer(
     if (scriptUtxos.length === 0) {
         throw Error("No UTxOs found at script address");
     }
+    const sponsorUtxos = await lucid.utxosAt(SPONSOR_WALLET_ADDR);
+    if (sponsorUtxos.length === 0) {
+        throw Error("No UTxOs found at sponsor wallet address");
+    }
 
     // --- Ephemeral key handling --- //
     const ephPubKeyBytes = Uint8Array.from(Buffer.from(ephemeralPublicKey, "hex"));
@@ -93,7 +97,11 @@ export async function transfer(
             {lovelace: BigInt(amount_to_spend)}
         )
         .validTo(maxEpochPosixTime)
-        .complete({changeAddress: scriptAddr});
+        .complete({
+            coinSelection: false,
+            changeAddress: scriptAddr,
+            presetWalletInputs: sponsorUtxos,
+        });
 
     // --- Sign with sponsor wallet (collateral) and ephemeral key (required signer) --- //
     const signedTx = await tx
