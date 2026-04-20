@@ -316,6 +316,35 @@ If you choose the second option, a compromised or corrupted third party could ha
 
 The downside of using zkLogin is that your address is linked to a specific OpenID provider and wallet/dApp, since the address is derived from the \texttt{sub}, \texttt{aud} and \texttt{iss} fields of the JWT. Some variants of the protocol prevent the dependency on the wallet by using only the \texttt{sub} and \texttt{iss} fields to compute the \texttt{zkLoginId}, but that is not explored in this project.
 
+\subsection{The Sponsor address}
+An important aspect of zkLogin mentioned earlier was the nature of the address: it's derived from an Aiken validator, parameterized with the `zkLoginId` particular to each `salt` + `google credentials`. Now, Cardano itself presents some limitations with the usage of scripts and script addresses. The main ones are:
+
+\begin{itemize}
+    \item script addresses cannot sign transactions since they're not controlled by a private key.
+    \item UTxOs owned by a script address do not work as collateral.
+\end{itemize}
+
+These two points have a obvious conclusion: there must be another address present to use a zkLogin address, a sk controlled address. Let's call it a Sponsor address. Now, let's see what the properties of this sponsor address must be:
+
+\begin{itemize}
+    \item It has to be a key-controlled address.
+    \item It has to be controlled by some entity that wants to perform a zkLogin transaction.
+    \item it has to have minimum ADA to provide collateral, at least $1.5$ times the transaction fees.
+\end{itemize}
+
+These are very soft restrictions, and some properties we can see are:
+
+\begin{itemize}
+    \item There is no relation needed between the sponsor address and the zkLoginAddress.
+    \item The sponsor address can be different for each transaction.
+    \item The sponsor address doesn't need many ADA.
+    \item In case of a successful transaction, the sponsor address doesn't loose any funds, since the transaction fees as well as the transaction inputs are covered by the zkLogin address.
+    \item In case of a failed transaction (for example, a faulty zk proof in the redeemer) the sponsor address looses the cost of the executed on-chain code so far.
+\end{itemize}
+
+When taking this protocol to the real world, we need to consider 2 main scenarios: either the zkLogin address and the sponsor address are controlled by the same entity, or they're not. It's worth noticing that in the first case, a self-managed zkLogin address, the protocol is still useful: an individual or organization might want to have most of their ADA in a zkLogin address and use a secondary address to control it. The second case can happen if there's a wallet or dApp managing zkLogin addresses. In this case the wallet can opt for have one or many addresses to work as sponsors for their users or manage some secondary sponsor address for their users.
+
+
 \section{Technical Details}
 \subsection{Validator overview}
 Let's see the data that should be present in the redeemer for the protocol to work:
@@ -488,5 +517,6 @@ In the current zkLogin design, user identities are bound to script-based payment
 \end{itemize}
 
 Enabling staking compatibility would significantly improve capital efficiency and user experience, while preserving the security guarantees of zkLogin-based authentication.
+
 
 \end{document}
