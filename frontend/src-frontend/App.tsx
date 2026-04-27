@@ -63,7 +63,7 @@ function App() {
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
   const [lang, setLang] = useState<"zh" | "en">("en");
-  const [network, setNetwork] = useState<"preview" | "preprod">("preview");
+  const [network, setNetwork] = useState<"preview" | "preprod">("preprod");
   const location = useLocation();
   const navigate = useNavigate();
 
