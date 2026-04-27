@@ -1,5 +1,6 @@
 import {ADA_TO_SEND_TO_SCRIPT, LOVELACE_TO_SEND_TO_SCRIPT} from "./transactionData.ts";
-import {getTxBuilder, getSponsorWallet, Network} from "./common.ts"
+import {getTxBuilder, getSponsorWallet} from "./common.ts"
+import type {Network} from "./common.ts"
 import "dotenv/config";
 import {SPONSOR_WALLET_ADDR} from "./sponsorWalletCredentials.ts";
 

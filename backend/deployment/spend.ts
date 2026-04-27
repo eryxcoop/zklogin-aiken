@@ -3,7 +3,8 @@ import {
 } from "@lucid-evolution/lucid";
 import type {LucidEvolution, SpendingValidator} from "@lucid-evolution/lucid";
 import {blake2b} from "blakejs";
-import {getScriptBackend, getBlockfrostKey, Network} from "./common.ts";
+import {getScriptBackend, getBlockfrostKey} from "./common.ts";
+import type {Network} from "./common.ts";
 import {SPONSOR_WALLET_SK, SPONSOR_WALLET_ADDR} from "./sponsorWalletCredentials.ts";
 import "dotenv/config";
 
