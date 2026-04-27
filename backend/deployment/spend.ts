@@ -3,9 +3,19 @@ import {
 } from "@lucid-evolution/lucid";
 import type {LucidEvolution, SpendingValidator} from "@lucid-evolution/lucid";
 import {blake2b} from "blakejs";
-import {getScriptBackend} from "./common.ts";
+import {getScriptBackend, getBlockfrostKey, Network} from "./common.ts";
 import {SPONSOR_WALLET_SK, SPONSOR_WALLET_ADDR} from "./sponsorWalletCredentials.ts";
 import "dotenv/config";
+
+const BLOCKFROST_URLS: Record<Network, string> = {
+    preview: "https://cardano-preview.blockfrost.io/api/v0",
+    preprod: "https://cardano-preprod.blockfrost.io/api/v0",
+};
+
+const LUCID_NETWORKS: Record<Network, string> = {
+    preview: "Preview",
+    preprod: "Preprod",
+};
 
 // Derive sponsor payment signing key (ed25519) from xprv root key
 function deriveSponsorSigningKey(): string {
@@ -19,19 +29,18 @@ function deriveSponsorSigningKey(): string {
 
 const sponsorSigningKey = deriveSponsorSigningKey();
 
-let lucidInstance: LucidEvolution | null = null;
+const lucidInstances: Partial<Record<Network, LucidEvolution>> = {};
 
-async function getLucid(): Promise<LucidEvolution> {
-    if (!lucidInstance) {
-        const blockfrostKey = process.env.BLOCKFROST_PROJECT_ID;
-        if (!blockfrostKey) throw new Error("BLOCKFROST_PROJECT_ID is not set");
-        lucidInstance = await Lucid(
-            new Blockfrost("https://cardano-preview.blockfrost.io/api/v0", blockfrostKey),
-            "Preview"
+async function getLucid(network: Network): Promise<LucidEvolution> {
+    if (!lucidInstances[network]) {
+        const blockfrostKey = getBlockfrostKey(network);
+        lucidInstances[network] = await Lucid(
+            new Blockfrost(BLOCKFROST_URLS[network], blockfrostKey),
+            LUCID_NETWORKS[network] as any
         );
-        lucidInstance.selectWallet.fromAddress(SPONSOR_WALLET_ADDR, []);
+        lucidInstances[network].selectWallet.fromAddress(SPONSOR_WALLET_ADDR, []);
     }
-    return lucidInstance;
+    return lucidInstances[network];
 }
 
 function getScriptBackendLucid(zkLoginId: bigint) {
@@ -53,9 +62,10 @@ export async function transfer(
     ephemeralPublicKey,
     ephemeralPrivateKey,
     maxEpoch,
-    zkProof
+    zkProof,
+    network: Network
 ) {
-    const lucid = await getLucid();
+    const lucid = await getLucid(network);
     const {validator, scriptAddr} = getScriptBackendLucid(zkLoginId);
 
     console.log("Sending ADA to address ", destinationAddress, " from address ", scriptAddr);

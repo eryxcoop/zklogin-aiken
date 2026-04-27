@@ -10,6 +10,8 @@ import {
     DialogContentText,
     DialogTitle,
     Link,
+    MenuItem,
+    Select,
     Stack,
     Step,
     StepLabel,
@@ -61,6 +63,7 @@ function App() {
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
   const [lang, setLang] = useState<"zh" | "en">("en");
+  const [network, setNetwork] = useState<"preview" | "preprod">("preview");
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -437,19 +440,20 @@ function App() {
                   ENG
                 </Button>
               </ButtonGroup>
-              <Typography
+              <Select
+                value={network}
+                onChange={(e) => setNetwork(e.target.value as "preview" | "preprod")}
+                size="small"
                 sx={{
                   color: "#999",
-                  border: "1px solid #ccc",
-                  p: "2px 8px",
-                  fontWeight: 400,
                   fontSize: "0.7rem",
-                  borderRadius: "4px",
-                  letterSpacing: "0.5px",
+                  height: "24px",
+                  ".MuiOutlinedInput-notchedOutline": { borderColor: "#ccc" },
                 }}
               >
-                Preview TestNet
-              </Typography>
+                <MenuItem value="preview" sx={{ fontSize: "0.7rem" }}>Preview TestNet</MenuItem>
+                <MenuItem value="preprod" sx={{ fontSize: "0.7rem" }}>Preprod TestNet</MenuItem>
+              </Select>
             </Typography>
           </Stack>
         </Box>
@@ -1226,7 +1230,7 @@ address = H(aiken_validator)
                       setSendingFundsToAddress(true);
                       await axios.post(
                           FUNDING_ENDPOINT,
-                          JSON.stringify({'zkLoginAddress': zkLoginUserAddress}, null, 2),
+                          JSON.stringify({'zkLoginAddress': zkLoginUserAddress, network}, null, 2),
                           {
                               headers: {
                                   "Content-Type": "application/json",
@@ -1319,7 +1323,8 @@ address = H(aiken_validator)
                                           ephemeralPublicKey,
                                           ephemeralPrivateKey,
                                           maxEpoch,
-                                          zkProof
+                                          zkProof,
+                                          network
                                       }),
                                       {
                                           headers: {
@@ -1352,7 +1357,7 @@ address = H(aiken_validator)
                       {lastTransactionHash && <Typography>
                           Last Tx hash: {''}
                           <Link
-                              href={`https://preview.cardanoscan.io/transaction/${lastTransactionHash}`}
+                              href={`https://${network}.cardanoscan.io/transaction/${lastTransactionHash}`}
                               target="_blank"
                               rel="noopener noreferrer"
                           >

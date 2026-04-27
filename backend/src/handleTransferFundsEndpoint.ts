@@ -9,6 +9,7 @@ export async function handleTransferFundsEndpoint(request) {
         const ephemeralPrivateKey = request.body['ephemeralPrivateKey'];
         const maxEpoch = request.body['maxEpoch'];
         const zkProof = request.body['zkProof'];
+        const network = request.body['network'];
 
         const transactionHash = await transfer(
             destinationAddress,
@@ -17,7 +18,8 @@ export async function handleTransferFundsEndpoint(request) {
             ephemeralPublicKey,
             ephemeralPrivateKey,
             maxEpoch,
-            zkProof
+            zkProof,
+            network
         );
 
         process.stdout.write("done.\n");

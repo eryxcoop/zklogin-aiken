@@ -1,18 +1,16 @@
-import type {Network, UTxO} from "@meshsdk/core";
 import {BlockfrostProvider, MeshTxBuilder, MeshWallet, serializePlutusScript} from "@meshsdk/core";
 import {applyParamsToScript} from "@meshsdk/core-csl";
 import blueprint from "../plutus.json" with {type: "json"};
 import "dotenv/config";
 import {SPONSOR_WALLET_SK} from "./sponsorWalletCredentials.ts";
 
-const blockfrostKey = process.env.BLOCKFROST_PROJECT_ID;
-if (!blockfrostKey) throw new Error("BLOCKFROST_PROJECT_ID is not set. Check that you have set it in your .env file");
-export const blockchainProvider = new BlockfrostProvider(blockfrostKey);
+export type Network = 'preview' | 'preprod';
 
-export function networkFromBlockfrostKey(): Network{
-    if (blockfrostKey.startsWith("mainnet")) return "mainnet";
-    if (blockfrostKey.startsWith("preprod")) return "preprod";
-    if (blockfrostKey.startsWith("preview")) return "preview";
+export function getBlockfrostKey(network: Network): string {
+    const envVar = network === 'preview' ? 'BLOCKFROST_PROJECT_ID_PREVIEW' : 'BLOCKFROST_PROJECT_ID_PREPROD';
+    const key = process.env[envVar];
+    if (!key) throw new Error(`${envVar} is not set. Check that you have set it in your .env file`);
+    return key;
 }
 
 export function getScriptBackend(zkLoginId: bigint) {
@@ -28,19 +26,23 @@ export function getScriptBackend(zkLoginId: bigint) {
     return {scriptCbor, scriptAddr};
 }
 
-export function getTxBuilder() {
+export function getTxBuilder(network: Network) {
+    const provider = new BlockfrostProvider(getBlockfrostKey(network));
     return new MeshTxBuilder({
-        fetcher: blockchainProvider,
-        submitter: blockchainProvider,
+        fetcher: provider,
+        submitter: provider,
     });
 }
 
-export const sponsorWallet = new MeshWallet({
-    networkId: 0,
-    fetcher: blockchainProvider,
-    submitter: blockchainProvider,
-    key: {
-        type: "root",
-        bech32: SPONSOR_WALLET_SK
-    },
-});
+export function getSponsorWallet(network: Network) {
+    const provider = new BlockfrostProvider(getBlockfrostKey(network));
+    return new MeshWallet({
+        networkId: 0,
+        fetcher: provider,
+        submitter: provider,
+        key: {
+            type: "root",
+            bech32: SPONSOR_WALLET_SK
+        },
+    });
+}
